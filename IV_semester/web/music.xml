@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Requirements:
+  Author : Tumas Bajoras PS3
+
+  10 different tags   + 
+  3 different attributes + 
+  Data types:
+    String  +
+    Integer + 
+    Float   +
+    Date    +
+  Namespaces:
+    for a part of data use default namespace +
+    for a part of data use explicit namespace notation +
+-->
+
+<music_database xmlns="http://github.com/Tumas">
+  <album label="R&amp;S">
+    <release_date>
+      2002-02-12
+    </release_date>
+    <title>Selected Ambient Works 85-92</title>
+
+    <file format="mp3" bitrate="320">
+      <title>Heliosphan</title>
+      <author>Aphex Twin</author>
+      <length>473</length>
+      <genre>idm</genre>
+      <rating>4.2</rating>
+    </file>
+
+    <file format="mp3" bitrate="320">
+      <title>Xtal</title>
+      <author>Aphex Twin</author>
+      <length>294</length>
+      <genre>idm</genre>
+      <rating>3.2</rating>
+    </file>
+
+    <file format="mp3" bitrate="320">
+      <title>Ptolemy</title>
+      <author>Aphex Twin</author>
+      <length>434</length>
+      <genre>idm</genre>
+      <rating>5.0</rating>
+    </file>
+  </album>
+
+  <album label="Midium">
+    <release_date>
+      2006-11-11
+    </release_date>
+    <title>Solace</title>
+
+    <file format="ogg" bitrate="500">
+      <title>Malachite</title>
+      <author>Jakob</author>
+      <length>392</length>
+      <genre>post-rock, instrumental</genre>
+      <rating>4.7</rating>
+    </file>
+
+    <file format="ogg" bitrate="500">
+      <title>Lonesome</title>
+      <author>Jakob</author>
+      <length>479</length>
+      <genre>post-rock, instrumental</genre>
+      <rating>4.1</rating>
+    </file>
+  </album>
+
+  <album label="Quadra">
+    <release_date>
+      1996-07-31
+    </release_date>
+    <title>VA Jungle Jazz Vol. 1</title>
+
+    <file format="FLAC" bitrate="1411">
+      <title>Pulp fiction</title>
+      <author>Alex Reece</author>
+      <length>320</length>
+      <genre>jungle, jungle jazz, atmospheric drum'n'bass</genre>
+      <rating>4.0</rating>
+    </file>
+
+    <file format="FLAC" bitrate="1411">
+      <title>This time</title>
+      <author>Johny L</author>
+      <length>337</length>
+      <genre>jungle, atmospheric drum'n'bass</genre>
+      <rating>4.4</rating>
+    </file>
+  </album>
+
+  <pod:file format="mp3" bitrate="192" xmlns:pod="http://github.com/Tumas/labs/">
+    <pod:title>Podcast Season 2 Episode 2</pod:title>
+    <pod:host>Tux Radar</pod:host>
+    <pod:length></pod:length>
+    <pod:genre>podcast</pod:genre>
+    <pod:rating>4.4</pod:rating>
+    <pod:topics>GNU/Linux, FOSS, Open Source</pod:topics>
+  </pod:file>
+</music_database>
