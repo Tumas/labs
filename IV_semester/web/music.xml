@@ -1,21 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- Requirements:
+<!--
   Author : Tumas Bajoras PS3
 
-  10 different tags   + 
-  3 different attributes + 
-  Data types:
-    String  +
-    Integer + 
-    Float   +
-    Date    +
-  Namespaces:
-    for a part of data use default namespace +
-    for a part of data use explicit namespace notation +
+  XPath queries:
+
+    //file/ancestor::*
+    /music_database/album[1]/following-sibling::album
+    /music_database/album[last()]/preceding-sibling::album
+    //file[title="Xtal"]/following::album
+    //file[title="Lonesome"]/preceding::album
+    //file/attribute::bitrate
+
+    //file[@format=(//file)[1]/@format]/title/text()
+
+    (//file)[1]/length + 1
+
+    music_database/album[1]/file[1]/title = music_database/album[1]/file[2]/title
+
+    count(//album)
+    sum(//file/length)
+
+    music_database/album[1] = music_database/album[2] 
+    /music_database/album[1]/file/length = /music_database/album[2]/file/length
+
+    sum(//file[@format=(//file)[1]/@format]/length) > (count(//file[@format="FLAC"]) + //file[@format="ogg"][1]/length)
 -->
 
-<music_database xmlns="http://github.com/Tumas">
+<music_database xmlns="http://github.com/Tumas"> 
   <album label="R&amp;S">
     <release_date>
       2002-02-12
@@ -96,7 +108,7 @@
   <pod:file format="mp3" bitrate="192" xmlns:pod="http://github.com/Tumas/labs/">
     <pod:title>Podcast Season 2 Episode 2</pod:title>
     <pod:host>Tux Radar</pod:host>
-    <pod:length></pod:length>
+    <pod:length>1812</pod:length>
     <pod:genre>podcast</pod:genre>
     <pod:rating>4.4</pod:rating>
     <pod:topics>GNU/Linux, FOSS, Open Source</pod:topics>
