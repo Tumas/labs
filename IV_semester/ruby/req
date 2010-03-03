@@ -1,0 +1,13 @@
+1.
+   Use ruby idioms
+   at least 50 rSpec tests : 40 for specific domain + 10 for common components
+   5 matchers used
+   2 custom matchers 
+   Entity classes must be 100% covered with tests
+   user interface must be decoupled from business logic
+   No Rails :(
+   Persistent state
+
+http://wiki.github.com/dchelimsky/rspec
+
+2. 
