@@ -1,8 +1,19 @@
 module LearningSystem
   class UserHandler
-    def register
+
+    def initialize
+      @users = []
     end
-    def complete_registration(user)
+
+    def register(user)
+      raise "Nothing to register" unless user
+
+      unless user.valid?
+        raise "Username or password are not correct"
+      else
+        return "User #{user.name} has been succesfully registered!"
+      end
     end
+
   end
 end
