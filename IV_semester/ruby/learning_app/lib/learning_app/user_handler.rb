@@ -1,19 +1,28 @@
 module LearningSystem
   class UserHandler
 
-    def initialize
-      @users = []
-    end
+   @@users = [] 
 
     def register(user)
       raise "Nothing to register" unless user
+      raise "Username or password are not correct" unless user.valid?
+      raise "User name #{user.name} is already taken" if user_name_taken?(user.name)
 
-      unless user.valid?
-        raise "Username or password are not correct"
-      else
-        return "User #{user.name} has been succesfully registered!"
-      end
+      @@users.push(user)
+      "User #{user.name} has been succesfully registered!"
     end
 
+    def user_name_taken?(username)
+      @@users.each {|user| return true if user.name == username }
+      false
+    end
+
+    #def self.registered?(user)
+    #  @@users.include?(user)
+    #end
+
+    def self.delete_users
+      @@users = []
+    end
   end
 end

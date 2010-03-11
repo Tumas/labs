@@ -3,38 +3,59 @@ require File.join(File.dirname(__FILE__), '/../spec_helper')
 module LearningSystem
 
   describe UserHandler do
+
     context "Registration" do 
       before(:each) do
-        @user1 = User.new('Tom', 'NotS3cure')
-        @user2 = User.new('Pete', 'PeteMachalkin')
-        @user3 = User.new('Pete', '')
-        @user4 = User.new('', '')
-        @user5 = User.new('', 'b43')
+      @good_users = [ 
+        User.new("tom", "b4dp4ss"),
+        User.new('Tomm', 'NotS3cure'),
+      ]
+
+      @bad_users = [
+        User.new('Pete', ''),
+        User.new('', ''),
+        User.new('', 'b43'),
+        User.new('Timothy', 'Withwaytolooooooooooongpassword'),
+        nil,
+      ]
+      end
+
+      after(:each) do
+        UserHandler.delete_users
       end
 
       context "registering correct users" do
         it "should register users" do
-          lambda { UserHandler.new.register(@user1) }.should_not raise_error
-          lambda { UserHandler.new.register(@user2) }.should_not raise_error
+          @good_users.each do |good_user|
+            lambda { UserHandler.new.register(good_user) }.should_not raise_error
+          end
+
         end
 
         it "should provide a meaningful string after succesfull registration" do
-          message = UserHandler.new.register(@user1)
-          message.should =~ /User (.*) has been succesfully registered!/
-          message = UserHandler.new.register(@user2)
-          message.should =~ /User (.*) has been succesfully registered!/
+          @good_users.each do |good_user|
+            message = UserHandler.new.register(good_user)
+            message.should =~ /User (.*) has been succesfully registered!/
+          end
         end
       end
 
       context "registering incorrect users" do
          it "should raise an exception" do
-          lambda { UserHandler.new.register(@user3) }.should raise_error
-          lambda { UserHandler.new.register(@user4) }.should raise_error
-          lambda { UserHandler.new.register(@user5) }.should raise_error
-          lambda { UserHandler.new.register(nil) }.should raise_error
+          @bad_users.each do |bad_user|
+            lambda { UserHandler.new.register(bad_user) }.should raise_error
+          end
         end
       end
 
+      context "registering duplicate users" do
+        it "should raise an exception with specific message" do
+          UserHandler.new.register(@good_users[0]) 
+          lambda { UserHandler.new.register(@good_users[0]) }.should raise_error (
+            /User name (.*) is already taken/
+          )
+        end
+      end
     end
   end
 end

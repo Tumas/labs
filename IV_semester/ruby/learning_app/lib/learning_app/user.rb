@@ -8,7 +8,7 @@ module LearningSystem
     end
 
     def valid?
-      if @name.nil? || @pass.nil? || @name.length < 3 || @pass.length < 6
+      if @name.nil? || @pass.nil? || @name.length < 3 || @pass.length < 6 || @pass.length > 14
         false
       else
         true
