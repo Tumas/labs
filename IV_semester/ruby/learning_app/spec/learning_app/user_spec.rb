@@ -22,11 +22,6 @@ module LearningSystem
         @bad_users.each {|bad_user| bad_user.should_not be_valid }
       end
 
-      #it "should validate itself correctly" do
-      #  validate = lambda {|user| user.name && user.pass && user.name.length >= 3 && user.pass.length >= 6 && user.pass.length < 15 }
-      #  @good_users.concat(@bad_users).each { |user| user.valid?.should == validate.call(user) }
-      #end
-
     end
   end
 end
