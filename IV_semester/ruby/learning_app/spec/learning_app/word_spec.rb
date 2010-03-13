@@ -4,13 +4,13 @@ module LearningSystem
   describe Word do
     context "creating" do
       before(:each) do
-        @good_words = [
+        @good_word_samples = [
           { :value => "spouse", :translation => "a person's partner in marriage" },
           { :value => "audacity", :translation => "fearless daring" },
           { :value => "harness", :translation => "exploit the power of", :hint => "exploit something"}
         ]
 
-        @bad_words = [
+        @bad_word_samples = [
           { :value => "", :translation => "" },
           { :value => "facet", :translation => nil, :hint => "" },
           { :translation => "a distinct feature" },
@@ -20,20 +20,19 @@ module LearningSystem
 
       context "creating valid words" do
         it "should create valid words smoothly" do
-          @good_words.each do |word|
-            lambda { Word.new(word[:value], word[:translation], word[:hint])}.should_not raise_error
+          @good_word_samples.each do |sample|
+            lambda { Word.new(sample[:value], sample[:translation], sample[:hint])}.should_not raise_error
           end
         end
       end
 
       context "creating invalid words" do
         it "should raise an exception when invalid parameters are specified" do
-          @bad_words.each do |word|
-            lambda { Word.new(word[:value], word[:translation], word[:hint])}.should raise_error
+          @bad_word_samples.each do |sample|
+            lambda { Word.new(sample[:value], sample[:translation], sample[:hint])}.should raise_error
           end
         end
       end
-
     end
   end
 end

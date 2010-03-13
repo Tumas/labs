@@ -7,7 +7,9 @@ module LearningSystem
       @name = name
       @pass = pass
       @logged_in = false
+
       @words = []
+      @tests = {}
     end
 
     def valid?
@@ -18,8 +20,13 @@ module LearningSystem
       end
     end
 
-    def register_word(word)
-      @words << word
+    # refactor those methods to two create(), delete() + method_missing()
+    def create_word(value, translation, hint = nil)
+      @words << Word.new(value, translation, hint) 
+    end
+
+    def delete_word(word)
+      @words.delete(word)
     end
 
     def login
@@ -32,6 +39,14 @@ module LearningSystem
 
     def logged_in?
       @logged_in
+    end
+
+    def create_test(name)
+      @tests[name.to_sym] = Test.new(name)
+    end
+
+    def test(name)
+      @tests[name.to_sym]
     end
   end
 end

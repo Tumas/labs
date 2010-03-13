@@ -7,19 +7,19 @@ module LearningSystem
     #   translation
     #   hint
     #   examples NY
-    #
+    attr_accessor :value, :translation, :hint
 
-    def valid?(word, translation)
-      if word == nil or translation == nil or word.size == 0 or translation.size == 0
+    def valid?(value, translation)
+      if value.nil? or translation.nil? or value.empty? or translation.empty?
         false
       else
         true
       end
     end
 
-    def initialize(word, translation, hint = nil)
-      raise "Word and translation must be not empty" unless valid?(word, translation)
-      @word = word
+    def initialize(value, translation, hint = nil)
+      raise "Word and translation must be not empty" unless valid?(value, translation)
+      @value = value
       @translation = translation
       @hint = hint
     end

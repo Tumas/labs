@@ -25,7 +25,7 @@ module LearningSystem
 
     context "registering word" do
       before(:each) do
-        @good_words = [
+        @good_word_samples = [
           { :value => "spouse", :translation => "a person's partner in marriage" },
           { :value => "audacity", :translation => "fearless daring" },
           { :value => "harness", :translation => "exploit the power of", :hint => "exploit something"}
@@ -34,9 +34,27 @@ module LearningSystem
 
       it "should be able to register a new word" do
         @good_users.each do |user|
-          @good_words.each {|word| user.register_word(word) }
-          user.should have(@good_words.size).words
+          @good_word_samples.each do |sample|
+            user.create_word(sample[:value], sample[:translation], sample[:hint])
+          end
+          user.should have(@good_word_samples.size).words
         end
+      end
+    end
+
+    context "deleting words" do
+      before(:each) do
+        @good_word_samples = [
+          { :value => "spouse", :translation => "a person's partner in marriage" },
+          { :value => "audacity", :translation => "fearless daring" },
+          { :value => "harness", :translation => "exploit the power of", :hint => "exploit something"}
+        ]
+      end
+
+      it "should be able to remove words" do
+        @good_word_samples.each { |sample| @good_users[0].create_word(sample[:value], sample[:translation], sample[:hint]) }
+        @good_users[0].delete_word(@good_users[0].words[0])
+        @good_users[0].should have(@good_word_samples.size - 1).words
       end
     end
   end
