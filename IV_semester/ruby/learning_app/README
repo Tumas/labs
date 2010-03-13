@@ -72,8 +72,6 @@ Testas - pateikimas zodis ir keletas galimu vertimu/apibrezimu
 Gramatikos mokymasis - parodomas pavadinimas, jei reikia hintas. Vartotojas paspaudzia 'gauti atsakyma' ar kazka panasaus ir parodomas atsakymas. Vartotojas pats isivertina savo spejima. Gramatikos mokymasis skiriasi nuo testo ir nuo quiz'o nes sistema negali ivertinti atsakymo korektiskumo. 
 
 # TODO
-1. Desribe s, s  VS Context
-2. Separate testing data
-3. word.to_sym should == word.value.to_sym
-4. method_missing magic
 
+1. Desribe s, s  VS Context
+4. method_missing magic

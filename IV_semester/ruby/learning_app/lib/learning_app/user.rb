@@ -8,7 +8,7 @@ module LearningSystem
       @pass = pass
       @logged_in = false
 
-      @words = []
+      @words = {}
       @tests = {}
     end
 
@@ -20,13 +20,16 @@ module LearningSystem
       end
     end
 
-    # refactor those methods to two create(), delete() + method_missing()
-    def create_word(value, translation, hint = nil)
-      @words << Word.new(value, translation, hint) 
+    def add_word(word)
+      @words[word.to_sym] = word
     end
 
-    def delete_word(word)
-      @words.delete(word)
+    def add_test(test)
+      @tests[test.to_sym] = test
+    end
+
+    def remove_word(word)
+      @words.delete(word.to_sym)
     end
 
     def login
@@ -41,12 +44,16 @@ module LearningSystem
       @logged_in
     end
 
-    def create_test(name)
-      @tests[name.to_sym] = Test.new(name)
-    end
-
     def test(name)
       @tests[name.to_sym]
+    end
+
+    def each_word(&block)
+      @words.each_value(&block)
+    end
+
+    def each_test(&block)
+      @tests.each_value(&block)
     end
   end
 end

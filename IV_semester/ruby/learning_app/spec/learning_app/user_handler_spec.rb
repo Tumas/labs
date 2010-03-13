@@ -3,21 +3,12 @@ require File.join(File.dirname(__FILE__), '/../spec_helper')
 module LearningSystem
 
   describe UserHandler do
+    include UserSamples
 
     before(:each) do
-    @good_users = [ 
-      User.new("tom", "b4dp4ss"),
-      User.new('Tomm', 'NotS3cure'),
-    ]
-
-    @bad_users = [
-      User.new('Pete', ''),
-      User.new('', ''),
-      User.new('', 'b43'),
-      User.new('Timothy', 'Withwaytolooooooooooongpassword'),
-    ]
-
-    @user_handler = UserHandler.new
+      @good_users = good_users
+      @bad_users = bad_users
+      @user_handler = UserHandler.new
     end
 
     after(:each) do
@@ -52,7 +43,7 @@ module LearningSystem
       context "registering duplicate users" do
         it "should raise an exception with specific message" do
           @user_handler.register(@good_users[0]) 
-          lambda { @user_handler.register(@good_users[0]) }.should raise_error (
+          lambda { @user_handler.register(@good_users[0]) }.should raise_error(
             /User name (.*) is already taken/
           )
         end
@@ -83,11 +74,11 @@ module LearningSystem
     context "Logout" do
       before(:each) do
         @good_users.each {|good_user| @user_handler.register(good_user) }
-        @good_users = @good_users.map {|good_user| @user_handler.login(good_user) }
+        @good_users_v2 = @good_users.map {|good_user| @user_handler.login(good_user) }
       end
 
       it "should let users to logout" do
-        @good_users.each do |good_user|
+        @good_users_v2.each do |good_user|
           good_user.should be_logged_in
 
           @user_handler.logout(good_user)
@@ -96,7 +87,7 @@ module LearningSystem
       end
 
       it "should notify users with a string after logout" do
-        @good_users.each do |good_user|
+        @good_users_v2.each do |good_user|
           message = @user_handler.logout(good_user)
           message.should =~ /User (.*) has been successfully logged out/
         end

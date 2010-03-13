@@ -1,12 +1,5 @@
 module LearningSystem
   class Word
-    #attr_reader :word, :translation, :hint
-
-    # Word
-    #   value
-    #   translation
-    #   hint
-    #   examples NY
     attr_accessor :value, :translation, :hint
 
     def valid?(value, translation)
@@ -22,6 +15,10 @@ module LearningSystem
       @value = value
       @translation = translation
       @hint = hint
+    end
+
+    def to_sym
+      @value.to_sym
     end
   end
 end

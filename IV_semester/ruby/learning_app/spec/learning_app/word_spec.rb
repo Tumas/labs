@@ -2,20 +2,11 @@ require File.join(File.dirname(__FILE__), '/../spec_helper')
 
 module LearningSystem
   describe Word do
+    include WordSamples
     context "creating" do
       before(:each) do
-        @good_word_samples = [
-          { :value => "spouse", :translation => "a person's partner in marriage" },
-          { :value => "audacity", :translation => "fearless daring" },
-          { :value => "harness", :translation => "exploit the power of", :hint => "exploit something"}
-        ]
-
-        @bad_word_samples = [
-          { :value => "", :translation => "" },
-          { :value => "facet", :translation => nil, :hint => "" },
-          { :translation => "a distinct feature" },
-          { :hint => "unknown" }
-        ]
+        @good_word_samples = good_word_samples
+        @bad_word_samples = bad_word_samples
       end
 
       context "creating valid words" do
@@ -33,6 +24,7 @@ module LearningSystem
           end
         end
       end
+
     end
   end
 end

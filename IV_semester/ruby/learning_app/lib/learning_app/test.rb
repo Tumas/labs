@@ -10,12 +10,15 @@ module LearningSystem
     end
 
     def add_word(word)
-      @words[word.value.to_sym] = word
+      @words[word.to_sym] = word
     end
 
-    # should be refactored into word.to_sym
-    def delete_word(word)
-      @words.delete(word.value.to_sym)
+    def remove_word(word)
+      @words.delete(word.to_sym)
+    end
+
+    def to_sym
+      @name.to_sym
     end
   end
 end
