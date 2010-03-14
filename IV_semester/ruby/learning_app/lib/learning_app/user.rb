@@ -56,9 +56,9 @@ module LearningSystem
       @words.each_value(&block)
     end
 
-    def each_test(&block)
-      @tests.each_value(&block)
-    end
+    #def each_test(&block)
+    #  @tests.each_value(&block)
+    #end
 
     def reset_tests
       @tests = {}

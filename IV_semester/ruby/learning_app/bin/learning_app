@@ -1,2 +1,86 @@
 #!/usr/bin/ruby
 $: << File.join(File.dirname(__FILE__), "/../lib")
+
+require 'learning_app'
+
+class LearningSystemShoesScript < Shoes
+  include LearningSystem
+
+  TITLE = "Learning system"
+
+  # pages
+  url '/', :index
+  url '/register', :register
+  url '/user', :user
+
+  # Pages
+  def index
+    @@user = User.new("username", "password") 
+    @@user_manager = UserHandler.new
+
+    stack :margin_top => 10 do
+      subtitle TITLE, :align => "center" 
+
+      @content = stack :margin => 30 do
+        unless @@user.logged_in?
+          @@username_field = edit_line :text => @@user.name, :width => 150
+          @@password_field = edit_line :text => @@user.pass, :width => 150
+        
+          button("login") do
+            @@user = User.new(@@username_field.text, @@password_field.text)
+            begin
+              @@user_manager.login(@@user)
+              visit '/user'
+            rescue 
+              @content.append do
+                para "Whoops! BadaBoom!", :stroke => red
+              end
+            end
+          end
+        end
+        para("First time here? " ,
+             link("Sign up", :click => "/register"))
+      end
+    end
+  end
+
+  def register
+    stack :margin_top => 10 do
+      subtitle TITLE, :align => "center" 
+
+      stack :margin => 30 do
+        @@username_field = edit_line :text => @@user.name, :width => 150
+        @@password_field = edit_line :text => @@user.pass, :width => 150
+        button("register me") do
+          @@user_manager.register(User.new(@@username_field.text, @@password_field.text))
+          visit "/user"
+        end
+
+        para("Naah.. I want to ",
+          link("go back", :click => "/"))
+      end
+    end
+  end
+
+  def user
+    flow :margin => 5 do
+      @left = stack :width => 120 do
+        para @@user.name, :stroke => blue, :margin_top => 0
+        para "Statistics: ", :stroke => red 
+        para "Words:\t#{@@user.words.size}\n",
+             "Tests:\t#{@@user.tests.size}\n",
+             "Quizzes:\t0", 
+               :margin => 0
+        para "Actions: ", :stroke => red 
+        para(
+          link("Add word\n", :click => '/add_word'),
+          link("Add test\n", :click => '/add_test'))
+      end
+      @right = stack :width => -120 do
+      end
+    end
+  end
+
+end
+
+Shoes.app :width => 512 

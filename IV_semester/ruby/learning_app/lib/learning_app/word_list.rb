@@ -18,12 +18,12 @@ module LearningSystem
       @words.delete(word.to_sym)
     end
 
-    def take
-      @times_taken += 1
-    end
-
     def to_sym
       @name.to_sym
+    end
+
+    def each_word(&block)
+      @words.each_value(&block)
     end
   end
 end

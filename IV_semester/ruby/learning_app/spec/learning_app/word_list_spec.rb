@@ -4,9 +4,6 @@ module LearningSystem
   describe WordList do
     include WordSamples
 
-    before(:each) do
-    end
-
     context "creating" do
       it "should not be created with empty name" do
         [nil, "  ", ""].each do |bad_name|
@@ -39,13 +36,5 @@ module LearningSystem
         wl.should have(good_word_samples.size - 1).words
       end
     end
-
-    context "taking quizzes" do
-      it "should know how many times it was taken" do
-        wl = WordList.new("Name")
-        lambda { 3.times { wl.take } }.should change{ wl.times_taken }.from(0).to(3)
-      end
-    end
-
   end
 end
