@@ -3,6 +3,7 @@ require File.join(File.dirname(__FILE__), '/../spec_helper')
 module LearningSystem
   describe Word do
     include WordSamples
+
     context "creating" do
       before(:each) do
         @good_word_samples = good_word_samples

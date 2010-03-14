@@ -12,6 +12,7 @@ module LearningSystem
 
     def initialize(value, translation, hint = nil)
       raise "Word and translation must be not empty" unless valid?(value, translation)
+
       @value = value
       @translation = translation
       @hint = hint

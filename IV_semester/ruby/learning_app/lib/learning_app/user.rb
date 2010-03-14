@@ -1,6 +1,6 @@
 module LearningSystem
   class User
-    attr_reader :name, :words
+    attr_reader :name, :words, :tests
     attr_accessor :pass
 
     def initialize(name, pass)
@@ -32,6 +32,10 @@ module LearningSystem
       @words.delete(word.to_sym)
     end
 
+    def remove_test(test)
+      @tests.delete(test.to_sym)
+    end
+
     def login
       @logged_in = true
     end
@@ -55,5 +59,14 @@ module LearningSystem
     def each_test(&block)
       @tests.each_value(&block)
     end
+
+    def reset_tests
+      @tests = {}
+    end
+
+    def take_test(test)
+      test.take
+    end
+
   end
 end

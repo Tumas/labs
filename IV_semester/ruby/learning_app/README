@@ -75,3 +75,5 @@ Gramatikos mokymasis - parodomas pavadinimas, jei reikia hintas. Vartotojas pasp
 
 1. Desribe s, s  VS Context
 4. method_missing magic
+11. Module testing and mixins
+2. Callbacks with testtaking
