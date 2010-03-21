@@ -54,7 +54,7 @@ module LearningSystem
       it "should create tests" do
         @user.should have(0).tests
         @user.add_test(Test.new("New Test"))
-        @user.add_test(Test.new("New Test Other"))
+        @user.add_test(Test.new("New other test"))
         @user.should have(2).tests
       end
 
@@ -68,16 +68,40 @@ module LearningSystem
         @user.remove_test("New Test")
         @user.should have(0).tests
       end
+    end
 
-      it "should take tests" do
-        @user.add_test(Test.new("All words test"))
-        @user.take_test(@user.test("All words test"))
-        @user.test("All words test").times_taken.should == 1
+    context "Managing quizzes" do
+      before(:each) do
+        @good_word_smaples = good_word_samples
+        @user = User.new("Tumas", "S3cr3tpass")
+
+        @user.reset_quizzes
+      end
+
+      it "should create quizzes" do
+        @user.should have(0).quizzes
+        @user.add_quiz(Quiz.new("New Quiz"))
+        @user.add_quiz(Quiz.new("New other quiz"))
+        @user.should have(2).quizzes
+      end
+      
+      it "should reference quizzes" do
+        @user.add_quiz(Quiz.new("New Quiz"))
+        @user.quiz("New Quiz").should be_instance_of(Quiz)
+      end
+
+      it "should remove quizzes" do
+        @user.add_quiz(Quiz.new("New Quiz"))
+        @user.remove_quiz("New Quiz")
+        @user.should have(0).quizzes
       end
     end
 
-    context "Managing Quizzes" do
+    context "Taking tests and quizes" do
+      context "taking quizzes" do
+      end
     end
+
 
   end
 end

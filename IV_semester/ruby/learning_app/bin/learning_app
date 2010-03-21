@@ -80,7 +80,6 @@ class LearningSystemShoesScript < Shoes
       end
     end
   end
-
 end
 
 Shoes.app :width => 512 

@@ -1,6 +1,6 @@
 module LearningSystem
   class User
-    attr_reader :name, :words, :tests
+    attr_reader :name, :words, :tests, :quizzes
     attr_accessor :pass
 
     def initialize(name, pass)
@@ -10,6 +10,7 @@ module LearningSystem
 
       @words = {}
       @tests = {}
+      @quizzes = {}
     end
 
     def valid?
@@ -20,6 +21,7 @@ module LearningSystem
       end
     end
 
+    # Adding items
     def add_word(word)
       @words[word.to_sym] = word
     end
@@ -28,14 +30,24 @@ module LearningSystem
       @tests[test.to_sym] = test
     end
 
+    def add_quiz(quiz)
+      @quizzes[quiz.to_sym] = quiz
+    end
+
+    # removing invidual items
     def remove_word(word)
       @words.delete(word.to_sym)
+    end
+
+    def remove_quiz(quiz)
+      @quizzes.delete(quiz.to_sym)
     end
 
     def remove_test(test)
       @tests.delete(test.to_sym)
     end
 
+    # Logging 
     def login
       @logged_in = true
     end
@@ -48,10 +60,16 @@ module LearningSystem
       @logged_in
     end
 
+    # Referencing items
     def test(name)
       @tests[name.to_sym]
     end
 
+    def quiz(name)
+      @quizzes[name.to_sym]
+    end
+
+    # Iterating over items 
     def each_word(&block)
       @words.each_value(&block)
     end
@@ -59,14 +77,13 @@ module LearningSystem
     #def each_test(&block)
     #  @tests.each_value(&block)
     #end
-
+  
     def reset_tests
       @tests = {}
     end
 
-    def take_test(test)
-      test.take
+    def reset_quizzes
+      @quiz = {}
     end
-
   end
 end

@@ -41,7 +41,7 @@ ZINIU PATIKRINIMAS
   19  vartotojas gali pasirinkti atlikti test'a pagal zymes
   20  vartotojas gali pasirinkti atlikti test'a pagal sudetinguma (sunkiu zodziu testas, lengvu zodziu testas, sudetingumas priklauso nuo teisingu atsakymu)
   21  vartotojas gali atlikti sistemos siulomus testus/quiz'us (testai, kuriuose yra seniai kartoti zodziai)
-  22  vartotojas gali atlikti testa/quiz'a globaliasias zymes (visu sistemos vartotoju zodziai pazymeti ta pacia zyme) 
+  22  vartotojas gali atlikti testa/quiz'a pagal globaliasias zymes (visu sistemos vartotoju zodziai pazymeti ta pacia zyme) 
 
 STATISTIKA
 
@@ -70,10 +70,3 @@ Quizas - pateikiamas vertimas/apibrezimas -> vartotojas turi parasyti tikslu zod
 Testas - pateikimas zodis ir keletas galimu vertimu/apibrezimu 
 
 Gramatikos mokymasis - parodomas pavadinimas, jei reikia hintas. Vartotojas paspaudzia 'gauti atsakyma' ar kazka panasaus ir parodomas atsakymas. Vartotojas pats isivertina savo spejima. Gramatikos mokymasis skiriasi nuo testo ir nuo quiz'o nes sistema negali ivertinti atsakymo korektiskumo. 
-
-# TODO
-
-1. Desribe s, s  VS Context
-4. method_missing magic
-11. Module testing and mixins
-2. Callbacks with testtaking
