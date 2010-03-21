@@ -34,7 +34,7 @@ module LearningSystem
 
         it "should return true if guess was correct" do
           @correct_guesses.each do |answer|
-            word.guess_value(answer).should == true
+            @word.guess_value(answer).should == true
           end
         end
 
@@ -42,19 +42,19 @@ module LearningSystem
           @word.guess_value("quiz").should == false
         end
 
-        # #{correct_guesses} does not work
+        # #{correct_guesses.size} does not work
         it "should be guessed and answerred ? times" do
           @correct_guesses.each do |answer|
-            word.guess_value(answer)
+            @word.guess_value(answer)
           end
-          word.times_guessed.should == @correct_guesses.size
-          word.times_answered.should == @correct_guesses.size 
+          @word.times_guessed.should == @correct_guesses.size
+          @word.times_answered.should == @correct_guesses.size 
         end
 
         it "should be guessed 2 times and answerred 0 times" do
           2.times { @word.guess_value("quiz") }
-          word.times_guessed.should == 2
-          word.times_answered.should == 0
+          @word.times_guessed.should == 2
+          @word.times_answered.should == 0
         end
       end
     end
