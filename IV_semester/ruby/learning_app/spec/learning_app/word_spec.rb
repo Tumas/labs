@@ -42,13 +42,15 @@ module LearningSystem
           @word.guess_value("quiz").should == false
         end
 
-        # #{correct_guesses.size} does not work
-        it "should be guessed and answerred ? times" do
-          @correct_guesses.each do |answer|
-            @word.guess_value(answer)
+        context "correct guessing"
+          it "should be guessed and answerred equally" do
+            @correct_guesses.each do |answer|
+              @word.guess_value(answer)
+            end
+
+            @word.times_guessed.should == @correct_guesses.size
+            @word.times_answered.should == @correct_guesses.size 
           end
-          @word.times_guessed.should == @correct_guesses.size
-          @word.times_answered.should == @correct_guesses.size 
         end
 
         it "should be guessed 2 times and answerred 0 times" do
