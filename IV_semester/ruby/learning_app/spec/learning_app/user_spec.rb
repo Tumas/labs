@@ -90,23 +90,5 @@ module LearningSystem
         @user.should have(0).quizzes
       end
     end
-
-    context "Taking tests and quizes" do
-      before(:each) do
-        @user = User.new("Tumas", "S3cr3tpass")
-        @good_word_smaples = good_word_samples
-      end
-
-      context "taking quizzes" do
-        before(:each) do
-          @quiz_name = "Test quiz"
-          @user.add_quiz(@quiz_name)
-          @good_word_samples.each do |word_sample|
-            @user.quiz(@quiz_name).add_word(Word.new(word_sample[:word], word_sample[:translation], word_sample[:hint]))
-          end
-        end
-      end
-    end
-
   end
 end

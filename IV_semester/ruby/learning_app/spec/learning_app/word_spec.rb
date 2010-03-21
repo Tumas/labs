@@ -42,7 +42,7 @@ module LearningSystem
           @word.guess_value("quiz").should == false
         end
 
-        context "correct guessing"
+        context "correct guessing" do
           it "should be guessed and answerred equally" do
             @correct_guesses.each do |answer|
               @word.guess_value(answer)

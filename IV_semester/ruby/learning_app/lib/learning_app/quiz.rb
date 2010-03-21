@@ -1,4 +1,4 @@
 module LearningSystem
-  class Quiz < WordList
+  class Quiz < Exam
   end
 end
