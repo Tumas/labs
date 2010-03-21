@@ -77,13 +77,5 @@ module LearningSystem
     #def each_test(&block)
     #  @tests.each_value(&block)
     #end
-  
-    def reset_tests
-      @tests = {}
-    end
-
-    def reset_quizzes
-      @quiz = {}
-    end
   end
 end

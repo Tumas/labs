@@ -45,10 +45,7 @@ module LearningSystem
 
     context "Managing Tests" do
       before(:each) do
-        @good_word_samples = good_word_samples
         @user = User.new("Tumas", "Secr3tpass")
-
-        @user.reset_tests
       end
 
       it "should create tests" do
@@ -72,10 +69,7 @@ module LearningSystem
 
     context "Managing quizzes" do
       before(:each) do
-        @good_word_smaples = good_word_samples
         @user = User.new("Tumas", "S3cr3tpass")
-
-        @user.reset_quizzes
       end
 
       it "should create quizzes" do
@@ -98,10 +92,21 @@ module LearningSystem
     end
 
     context "Taking tests and quizes" do
+      before(:each) do
+        @user = User.new("Tumas", "S3cr3tpass")
+        @good_word_smaples = good_word_samples
+      end
+
       context "taking quizzes" do
+        before(:each) do
+          @quiz_name = "Test quiz"
+          @user.add_quiz(@quiz_name)
+          @good_word_samples.each do |word_sample|
+            @user.quiz(@quiz_name).add_word(Word.new(word_sample[:word], word_sample[:translation], word_sample[:hint]))
+          end
+        end
       end
     end
-
 
   end
 end
