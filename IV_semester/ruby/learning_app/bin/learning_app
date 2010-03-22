@@ -13,7 +13,6 @@ class LearningSystemShoesScript < Shoes
   url '/register', :register
   url '/user', :user
 
-  # Pages
   def index
     @@user = User.new("username", "password") 
     @@user_manager = UserHandler.new
@@ -33,7 +32,7 @@ class LearningSystemShoesScript < Shoes
               visit '/user'
             rescue 
               @content.append do
-                para "Whoops! BadaBoom!", :stroke => red
+                alert "Whoops! BadaBoom!"
               end
             end
           end
@@ -65,21 +64,28 @@ class LearningSystemShoesScript < Shoes
   def user
     flow :margin => 5 do
       @left = stack :width => 120 do
-        para @@user.name, :stroke => blue, :margin_top => 0
+        para @@user.name, :margin_top => 5, :margin_left => 14, :size => 20
         para "Statistics: ", :stroke => red 
         para "Words:\t#{@@user.words.size}\n",
              "Tests:\t#{@@user.tests.size}\n",
              "Quizzes:\t0", 
-               :margin => 0
+               :margin_left => 20, :size => 8 
         para "Actions: ", :stroke => red 
         para(
           link("Add word\n", :click => '/add_word'),
-          link("Add test\n", :click => '/add_test'))
+          link("Add quiz\n", :click => '/add_test'),
+          link("Take quiz\n", :click => '/take_quiz'),
+            :margin_left => 20, :size => 8)
       end
       @right = stack :width => -120 do
+        para(
+          link(" Words ", :click => '/user', :margin_right => 10),
+          link(" Quizzes ", :click => '/user', :margin_right => 10),
+          link(" Tests ", :click => '/user', :margin_right => 10),
+            :size => 12)
       end
     end
   end
 end
 
-Shoes.app :width => 512 
+Shoes.app :width => 512, :title => 'FL Learning system'

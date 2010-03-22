@@ -1,11 +1,13 @@
 module LearningSystem
 
 require 'digest/sha1'
+require 'yaml'
 
   class UserHandler
 
-  # list of registered users
-   @@users = [] 
+    # list of registered users
+    USERS = File.join(File.dirname(__FILE__), '/../../users.yaml')
+    @@users = YAML.load_file(USERS)
 
     def register(user)
       raise "Nothing to register" unless user
@@ -13,6 +15,11 @@ require 'digest/sha1'
       raise "User name #{user.name} is already taken" if user_name_taken?(user.name)
 
       @@users.push(User.new(user.name, Digest::SHA1.hexdigest(user.pass)))
+
+      # save state after registration
+      File.open(USERS, 'w') do |out|
+        YAML.dump(@@users, out)
+      end
       "User #{user.name} has been succesfully registered!"
     end
 
@@ -40,6 +47,5 @@ require 'digest/sha1'
       user.logout
       "User #{user.name} has been successfully logged out"
     end
-
   end
 end

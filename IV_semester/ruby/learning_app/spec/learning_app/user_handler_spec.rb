@@ -9,9 +9,7 @@ module LearningSystem
       @good_users = good_users
       @bad_users = bad_users
       @user_handler = UserHandler.new
-    end
-
-    after(:each) do
+      
       UserHandler.delete_users
     end
 

@@ -35,6 +35,5 @@ module LearningSystem
       end
       local_score / @words.size
     end
-
   end
 end
