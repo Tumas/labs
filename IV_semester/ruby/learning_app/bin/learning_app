@@ -12,6 +12,7 @@ class LearningSystemShoesScript < Shoes
   url '/', :index
   url '/register', :register
   url '/user', :user
+  url '/add_word', :add_word
 
   def index
     @@user = User.new("username", "password") 
@@ -31,9 +32,7 @@ class LearningSystemShoesScript < Shoes
               @@user_manager.login(@@user)
               visit '/user'
             rescue 
-              @content.append do
-                alert "Whoops! BadaBoom!"
-              end
+              alert "Whoops! BadaBoom!"
             end
           end
         end
@@ -82,8 +81,29 @@ class LearningSystemShoesScript < Shoes
           link(" Words ", :click => '/user', :margin_right => 10),
           link(" Quizzes ", :click => '/user', :margin_right => 10),
           link(" Tests ", :click => '/user', :margin_right => 10),
-            :size => 12)
+            :size => 12
+        )
+        # showing user's words
+        words = []
+        @@user.each_word do |w|
+           words.push "#{words.size / 4}\t", link(w.value, :click => '/user', :size => 10, :margin => 0), "\t#{w.times_answered}", "\t#{w.times_guessed}\n"
+        end
+        para( words.each {|w| strong w }, :size => 10)
       end
+    end
+  end
+
+  def add_word
+    stack :margin => 30 do
+        subtitle "Add a new word, #{@@user.name}"
+        @value = edit_line :width => 400, :text => 'words value'
+        @translation = edit_line :width => 400, :text => 'meaning or translation'
+        @hint = edit_line :width => 400, :text => 'hint (not required)'
+        button "add word" do
+          #@hint.text = nil if @hind.text =~ /^hint \((.)*\)&/
+          @@user.add_word(Word.new(@value.text, @translation.text, @hint.text))
+          visit '/user'
+        end
     end
   end
 end
