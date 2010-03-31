@@ -1,6 +1,7 @@
 #!/usr/bin/ruby
 $: << File.join(File.dirname(__FILE__), "/../lib")
 
+require 'yaml'
 require 'learning_app'
 
 class LearningSystemShoesScript < Shoes
@@ -14,26 +15,26 @@ class LearningSystemShoesScript < Shoes
   url '/user', :user
   url '/add_word', :add_word
 
+  USERS_DB = File.join(File.dirname(__FILE__), '/../users.yaml')
+
   def index
     @@user = User.new("username", "password") 
-    @@user_manager = UserHandler.new
+    @@user_manager = UserHandler.new(YAML.load_file(USERS_DB))
 
     stack :margin_top => 10 do
       subtitle TITLE, :align => "center" 
 
       @content = stack :margin => 30 do
-        unless @@user.logged_in?
-          @@username_field = edit_line :text => @@user.name, :width => 150
-          @@password_field = edit_line :text => @@user.pass, :width => 150
-        
-          button("login") do
-            @@user = User.new(@@username_field.text, @@password_field.text)
-            begin
-              @@user_manager.login(@@user)
-              visit '/user'
-            rescue 
-              alert "Whoops! BadaBoom!"
-            end
+        @@username_field = edit_line :text => @@user.name, :width => 150
+        @@password_field = edit_line :text => @@user.pass, :width => 150
+      
+        button("login") do
+          @@user = User.new(@@username_field.text, @@password_field.text)
+          begin
+            @@user = @@user_manager.login(@@user)
+            visit '/user'
+          rescue 
+            alert "Whoops! BadaBoom!"
           end
         end
         para("First time here? " ,
@@ -50,8 +51,19 @@ class LearningSystemShoesScript < Shoes
         @@username_field = edit_line :text => @@user.name, :width => 150
         @@password_field = edit_line :text => @@user.pass, :width => 150
         button("register me") do
-          @@user_manager.register(User.new(@@username_field.text, @@password_field.text))
-          visit "/user"
+          begin
+            @@user_manager.register(User.new(@@username_field.text, @@password_field.text))
+
+            # save state after registration
+            File.open(USERS_DB, 'w') do |out|
+              YAML.dump(@@user_manager.users, out)
+            end
+
+            alert "User #{@@username_field.text} was succesfully registered"
+            visit "/user"
+          rescue 
+            alert "Whoops!"
+          end
         end
 
         para("Naah.. I want to ",

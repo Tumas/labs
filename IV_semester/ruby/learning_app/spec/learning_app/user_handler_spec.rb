@@ -8,9 +8,7 @@ module LearningSystem
     before(:each) do
       @good_users = good_users
       @bad_users = bad_users
-      @user_handler = UserHandler.new
-      
-      UserHandler.delete_users
+      @user_handler = UserHandler.new([])
     end
 
     context "Registration" do 
