@@ -39,6 +39,12 @@ module LearningSystem
         lambda { @user.add_word(Word.new(sample[:value], sample[:translation], sample[:hint])) }.should raise_error
       end
 
+      it "should not raise an exception if we add word with the same value when we say so (overwrite = true)" do
+        sample =  @good_word_samples[0]  
+        @user.add_word(Word.new(sample[:value], sample[:translation], sample[:hint]))
+        lambda { @user.add_word(Word.new(sample[:value], sample[:translation], sample[:hint]), true) }.should_not raise_error
+      end
+
       it "should remove words" do
         @good_word_samples.each do |sample|
           @user.add_word(Word.new(sample[:value], sample[:translation], sample[:hint])) 

@@ -22,8 +22,9 @@ module LearningSystem
     end
 
     # Adding items
-    def add_word(word)
-      raise "Word is already there!" if not @words[word.to_sym].nil?
+    def add_word(word, overwrite = false)
+      raise "Word is already there!" if not overwrite and not @words[word.to_sym].nil? 
+
       @words[word.to_sym] = word
     end
 
