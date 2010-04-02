@@ -23,6 +23,7 @@ module LearningSystem
 
     # Adding items
     def add_word(word)
+      raise "Word is already there!" if not @words[word.to_sym].nil?
       @words[word.to_sym] = word
     end
 
@@ -60,13 +61,23 @@ module LearningSystem
       @logged_in
     end
 
-    # Referencing items
+    # referencing/finding items
     def test(name)
       @tests[name.to_sym]
     end
 
     def quiz(name)
       @quizzes[name.to_sym]
+    end
+
+    def word(info)
+      return nil if info[:value].nil? and info[:translation].nil?
+
+      each_word do |w|
+        return w if (info[:value].nil? or info[:value] == w.value) and (info[:translation].nil? or info[:translation] == w.translation)
+      end
+
+      nil
     end
 
     # Iterating over items 
