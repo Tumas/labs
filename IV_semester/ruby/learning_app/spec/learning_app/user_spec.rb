@@ -33,6 +33,12 @@ module LearningSystem
           @user.should have(@good_word_samples.size).words
       end
 
+      it "should raise an exception if we add word with the same value" do
+        sample =  @good_word_samples[0]  
+        @user.add_word(Word.new(sample[:value], sample[:translation], sample[:hint]))
+        lambda { @user.add_word(Word.new(sample[:value], sample[:translation], sample[:hint])) }.should raise_error
+      end
+
       it "should remove words" do
         @good_word_samples.each do |sample|
           @user.add_word(Word.new(sample[:value], sample[:translation], sample[:hint])) 
@@ -40,6 +46,34 @@ module LearningSystem
 
         @user.each_word {|word| @user.remove_word(word)}
         @user.should have(0).words
+      end
+
+      context "finding words" do
+        before(:each) do
+          @good_word_samples.each do |sample|
+            @user.add_word(Word.new(sample[:value], sample[:translation], sample[:hint])) 
+          end
+        end
+
+        it "should find words by value" do
+          @user.find_word({ :value => @user.words[0].value }).should === @user.words[0]
+        end
+
+        it "should find words by translation" do
+          @user.find_word({ :translation => @user.words[0].translation }).should === @user.words[0]
+        end
+
+        it "should find words by value and by translation" do
+          @user.find_word({ :value => @user.words[0].value, :translation => @user.words[0].translation }).should === @user.words[0]
+        end
+
+        it "should return nil if word was not found" do
+          sample =  @bad_word_samples[0]  
+
+          @user.find_word({ :value => sample[:value]}).should be_nil
+          @user.find_word({ :translation => sample[:translation]}).should be_nil
+          @user.find_word({ :value => sample[:value], :translation => sample[:translation]}).should be_nil
+        end
       end
     end
 
