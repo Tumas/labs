@@ -26,14 +26,16 @@ module LearningSystem
       @words.each_value(&block)
     end
 
-    def take
+    def take(p)
       local_score = 0.0
       if block_given?
         each_word do |w|
-          local_score += 1.0 if w.guess_value(yield w) 
+          answer = yield w
+          local_score += 1.0 if p.call(w, answer)
         end
       end
       local_score / @words.size
     end
+
   end
 end

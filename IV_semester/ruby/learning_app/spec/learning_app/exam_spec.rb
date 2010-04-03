@@ -43,12 +43,15 @@ module LearningSystem
       end
 
       it "should return score 1 if all answers are correct" do
-        @e.take {|w| w.value }.should == 1
+        @e.take( Proc.new {|word, answer| word.value == answer } ) { |w| w.value }.should == 1
+        @e.take( Proc.new {|word, answer| word.translation == answer } ) { |w| w.translation }.should == 1
       end
 
       it "should return score 0 if all answers are incorrect" do
-        @e.take {|w| "wrong answer" }.should == 0
+        @e.take(Proc.new {|word, answer| word.translation == answer }) {|w| w.value }.should == 0
+        @e.take(Proc.new {|word, answer| word.value == answer }) {|w| w.translation }.should == 0
       end
+
     end
   end
 end
