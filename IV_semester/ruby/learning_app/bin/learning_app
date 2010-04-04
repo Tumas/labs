@@ -4,6 +4,7 @@ $: << File.join(File.dirname(__FILE__), "/../lib")
 require 'yaml'
 require 'learning_app'
 require 'table_widget'
+require 'add_quiz_widget'
 
 class LearningSystemShoesScript < Shoes
   include LearningSystem
@@ -18,6 +19,8 @@ class LearningSystemShoesScript < Shoes
   url '/tests', :tests
   url '/quizzes', :quizzes
   url '/add_word/(\w+)', :add_word
+  url '/add_quiz', :add_quiz
+  url '/edit_quiz', :edit_quiz
 
   # other global variables => regexp segfaults 
   @@form_words_value = 'words value'
@@ -27,7 +30,7 @@ class LearningSystemShoesScript < Shoes
   USERS_DB = File.join(File.dirname(__FILE__), '/../users.yaml')
 
   # save state
-  def save_state
+  def self.save_state
     File.open(USERS_DB, 'w') do |out|
       YAML.dump(@@user_manager.users, out)
     end
@@ -62,7 +65,6 @@ class LearningSystemShoesScript < Shoes
     end
   end
 
-
   def register
     background "#333"
     stack :margin_top => 10 do
@@ -76,7 +78,7 @@ class LearningSystemShoesScript < Shoes
             @@user_manager.register(User.new(@@username_field.text, @@password_field.text))
 
             # save state
-            save_state
+            LearningSystemShoesScript.save_state
 
             alert "User #{@@username_field.text} was succesfully registered"
             visit "/menu"
@@ -97,7 +99,6 @@ class LearningSystemShoesScript < Shoes
    @upper_stack = stack :height => 55 do
       para("Hello, #{@@user.name}. What do you want to do?", :stroke => white, :top => 20, :align => "center", :font => "Arial 26px" )
    end
-
 
    flow  do
       stack do
@@ -147,12 +148,84 @@ class LearningSystemShoesScript < Shoes
     end
   end
 
+  def tests
+    background "#333"
+    flow do
+      stack :top => 10, :left => 10 do
+        if @@user.words.size == 1
+          @title = "TEST" 
+        else
+          @title = "TESTS"
+        end
+        para "      #{@@user.tests.size}\n #{@title}", :stroke => white, :font => "32px"
+        stack :top => 100, :left => 20 do
+          para link("Add new quiz", :click => '/add_test'), :margin => 0
+          para link("Go back", :click => '/menu'), :margin => 0
+        end
+      end
+    end
+  end
+
+  def quizzes
+    background "#333"
+
+    flow do
+      stack :top => 10, :left => 10 do
+        if @@user.words.size == 1
+          @title = "QUIZ" 
+        else
+          @title = "QUIZZES"
+        end
+
+        para "      #{@@user.quizzes.size}\n #{@title}", :stroke => white, :font => "32px"
+        stack :top => 100, :left => 20 do
+          para link("Add new quiz", :click => '/add_quiz'), :margin => 0
+          para link("Go back", :click => '/menu'), :margin => 0
+        end
+      end
+      stack do
+        quizzes = []
+        @@user.each_quiz {|q| quizzes << [ q.name, q.times_taken ] }
+
+        if @@user.quizzes.size > 10
+          @size = 10
+        else
+          @size = @@user.quizzes.size
+        end
+
+        @wq = table(:top=>-120, :left=>300, :rows=> @size, :headers=>[["Name", 250], ["TT", 75]], :items=> quizzes, :blk=> nil)   
+
+        button "edit selected", :margin_top => 40, :margin_left => 20 do
+          unless @wq.selected.nil?
+            @@quiz_to_edit = @@user.quiz(quizzes[@wq.selected][0]) 
+            visit '/edit_quiz'
+          end
+        end
+
+        button "remove selected", :margin_top => 1, :margin_left => 10 do
+          @@user.remove_quiz( @@user.quiz(quizzes[@wq.selected][0]) )
+
+          LearningSystemShoesScript.save_state
+          visit '/quizzes'
+        end
+      end
+    end
+  end
+
+  def edit_quiz
+    background "#333"
+    quizzer(:title => "Edit this quiz, #{@@user.name}", :user => @@user, :quiz => @@quiz_to_edit, :mode => 'edit')
+  end
+
+  def add_quiz
+    background "#333"
+    quizzer(:title => "Add a new quiz, #{@@user.name}", :user => @@user, :mode => 'add')
+  end
 
   def words
     background "#333"
 
     flow do
-
       stack :top => 10, :left => 100 do
         items = []
         @@user.each_word {|w| items << [w.value, w.translation, w.hint, w.times_answered, w.times_guessed] }
@@ -163,13 +236,12 @@ class LearningSystemShoesScript < Shoes
           @size = @@user.words.size
         end
 
-        @t = table(:top=>20, :left=>80, :rows=> @size, :headers=>[["Value", 150], ["Translation", 150], ["Hint", 150], ["TA", 35], ["TG", 55]],
-                  :items=> items, :blk=> nil)   
+        @t = table(:top=>20, :left=>80, :rows=> @size, :headers=>[["Value", 150], ["Translation", 150], ["Hint", 150], ["TA", 35], ["TG", 55]], :items=> items, :blk=> nil)   
 
         button "remove selected", :top => 300, :left => -85 do
           word_to_delete = items.delete_at(@t.selected)
           @@user.remove_word( @@user.word({ :value => word_to_delete[0] }))
-          save_state
+          LearningSystemShoesScript.save_state
           visit '/words'
         end
 
@@ -182,7 +254,6 @@ class LearningSystemShoesScript < Shoes
 
           visit '/add_word/true'
         end
-
       end
 
       stack :top => 10, :left => 10 do
@@ -191,6 +262,7 @@ class LearningSystemShoesScript < Shoes
         else
           @title = "WORDS"
         end
+
         para "      #{@@user.words.size}\n #{@title}", :stroke => white, :font => "32px"
         stack :top => 100, :left => 20 do
           para link("Add new word", :click => '/add_word/false'), :margin => 0
@@ -213,7 +285,6 @@ class LearningSystemShoesScript < Shoes
       subtitle "Add a new word, #{@@user.name}", :stroke => white, :align => "center"
 
       stack :top => 80, :left => 160, :align => "center" do
-
         @value = edit_line :width => 400, :text => @@form_words_value 
         @translation = edit_line :width => 400, :text => @@form_translation
         @hint = edit_line :width => 400, :text => @@form_hint 
@@ -222,10 +293,10 @@ class LearningSystemShoesScript < Shoes
           begin
             @hint.text = nil if @hint.text =~ /^hint (.*)$/
             @@user.add_word(Word.new(@value.text, @translation.text, @hint.text), state)
-            save_state
+            LearningSystemShoesScript.save_state
             visit '/words'
-          rescue Exception => boom
-            alert boom
+          rescue Exception => msg
+            alert msg
           end
         end
         para(link("oh, nervermind..", :click => "/words"), :margin_left => 150)
