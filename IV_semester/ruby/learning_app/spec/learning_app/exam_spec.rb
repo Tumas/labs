@@ -21,6 +21,22 @@ module LearningSystem
         wl.should have(good_word_samples.size).words
       end
 
+      it "should raise exception when adding word with the same value" do
+        wl = Exam.new("Name")
+        good_word_samples.each do |sample| 
+          wl.add_word(Word.new(sample[:value], sample[:translation], sample[:hint]))
+          lambda { wl.add_word(Word.new(sample[:value], sample[:translation], sample[:hint])) }.should raise_error
+        end
+      end
+
+      it "should not raise exception when adding word with the same value if we specify parameter not to do so" do
+        wl = Exam.new("Name")
+        good_word_samples.each do |sample| 
+          wl.add_word(Word.new(sample[:value], sample[:translation], sample[:hint]))
+          lambda { wl.add_word(Word.new(sample[:value], sample[:translation], sample[:hint]), true) }.should_not raise_error
+        end
+      end
+
       it "should let remove words" do
         wl = Exam.new("Name")
         words = []

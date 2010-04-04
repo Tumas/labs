@@ -24,7 +24,6 @@ module LearningSystem
     # Adding items
     def add_word(word, overwrite = false)
       raise "Word is already there!" if not overwrite and not @words[word.to_sym].nil? 
-
       @words[word.to_sym] = word
     end
 
@@ -32,7 +31,9 @@ module LearningSystem
       @tests[test.to_sym] = test
     end
 
-    def add_quiz(quiz)
+    def add_quiz(quiz, overwrite = false)
+      raise "Quiz is already there!" if not overwrite and not @quizzes[quiz.to_sym].nil?
+
       @quizzes[quiz.to_sym] = quiz
     end
 
@@ -84,6 +85,10 @@ module LearningSystem
     # Iterating over items 
     def each_word(&block)
       @words.each_value(&block)
+    end
+
+    def each_quiz(&block)
+      @quizzes.each_value(&block)
     end
 
     #def each_test(&block)

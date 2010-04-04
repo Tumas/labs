@@ -1,6 +1,7 @@
 module LearningSystem
   class Exam
     attr_reader :words, :times_taken
+    attr_accessor :name
 
     def initialize(name)
       raise "#{self.class} must have a name" if name.nil? or name =~ /^( )*$/
@@ -10,7 +11,8 @@ module LearningSystem
       @words = {}
     end
 
-    def add_word(word)
+    def add_word(word, overwrite = false)
+      raise "Word is already there!" if not overwrite and not @words[word.to_sym].nil? 
       @words[word.to_sym] = word
     end
 
@@ -36,6 +38,5 @@ module LearningSystem
       end
       local_score / @words.size
     end
-
   end
 end

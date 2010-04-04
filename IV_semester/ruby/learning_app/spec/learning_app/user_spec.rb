@@ -128,6 +128,16 @@ module LearningSystem
         @user.add_quiz(Quiz.new("New other quiz"))
         @user.should have(2).quizzes
       end
+
+      it "should raise error when adding quiz with the same name" do
+        @user.add_quiz(Quiz.new("Test quiz"))
+        lambda { @user.add_quiz(Quiz.new("Test quiz")) }.should raise_error
+      end
+
+      it "should not raise an exception if we add quiz with the same name when we say so (overwrite = true)" do
+        @user.add_quiz(Quiz.new("Test quiz"))
+        lambda { @user.add_quiz(Quiz.new("Test quiz"), true) }.should_not raise_error
+      end
       
       it "should reference quizzes" do
         @user.add_quiz(Quiz.new("New Quiz"))
