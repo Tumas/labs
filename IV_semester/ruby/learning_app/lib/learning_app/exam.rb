@@ -36,6 +36,8 @@ module LearningSystem
           local_score += 1.0 if p.call(w, answer)
         end
       end
+
+      @times_taken += 1
       local_score / @words.size
     end
   end

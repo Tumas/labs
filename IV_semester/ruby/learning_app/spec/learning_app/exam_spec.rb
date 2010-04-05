@@ -68,6 +68,11 @@ module LearningSystem
         @e.take(Proc.new {|word, answer| word.value == answer }) {|w| w.translation }.should == 0
       end
 
+      it "should increment its number of times taken" do
+        @e.times_taken.should == 0 
+        @e.take( Proc.new {|w, a| w.guess( :value => a)}) {|w| w.value }
+        @e.times_taken.should == 1
+      end
     end
   end
 end
