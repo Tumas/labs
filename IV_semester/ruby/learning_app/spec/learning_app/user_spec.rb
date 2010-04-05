@@ -39,7 +39,7 @@ module LearningSystem
         lambda { @user.add_word(Word.new(sample[:value], sample[:translation], sample[:hint])) }.should raise_error
       end
 
-      it "should not raise an exception if we add word with the same value when we say so (overwrite = true)" do
+      it "should not raise an exception if we add word with the same value when we specify an option" do
         sample =  @good_word_samples[0]  
         @user.add_word(Word.new(sample[:value], sample[:translation], sample[:hint]))
         lambda { @user.add_word(Word.new(sample[:value], sample[:translation], sample[:hint]), true) }.should_not raise_error
@@ -93,6 +93,56 @@ module LearningSystem
       end
     end
 
+    context "Managing exams" do
+      before(:each) do
+        @user = User.new("Tumas", "Secr3tpass")
+      end
+
+      it "should create exams" do
+        @user.should have(0).exams
+        @user.add_exam(Exam.new("Sample exam"))
+        @user.add_exam(Exam.new("Sample exam 2"))
+        @user.should have(2).exams
+      end
+
+      it "should not create exams with the same name by default" do
+        @user.add_exam(Exam.new("Sample exam"))
+        lambda { @user.add_exam(Exam.new("Sample exam")) }.should raise_error
+      end
+
+      it "should create exams with the same name on purpose" do
+        @user.add_exam(Exam.new("Sample exam"))
+        lambda { @user.add_exam(Exam.new("Sample exam"), :overwrite => true ) }.should_not raise_error
+      end
+
+      it "should remove exams" do
+        @user.add_exam(Exam.new("Sample exam"))
+        @user.should have(1).exams
+        @user.remove_exam("Sample exam")
+        @user.should have(0).exams
+      end
+
+      context "Finding one exam" do
+        it "should find exam by name" do
+          test_exam = Exam.new("Sample exam")
+          @user.add_exam(test_exam)
+          @user.exam("Sample exam").should === test_exam
+        end
+
+        it "should get nil if exam was not found " do
+          @user.add_exam(Exam.new("Sample exam"))
+          @user.exam("Some random exam").should be_nil
+        end
+      end
+
+      context "Finding more than one exam" do
+        it "should find exams by specific word"
+        it "should find exams by word count"
+        it "should get empty array if exams were not found"
+      end
+    end
+
+=begin
     context "Managing Tests" do
       before(:each) do
         @user = User.new("Tumas", "Secr3tpass")
@@ -160,5 +210,6 @@ module LearningSystem
         @user.should have(0).quizzes
       end
     end
+=end
   end
 end
