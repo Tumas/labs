@@ -1,6 +1,6 @@
 module LearningSystem
   class User
-    attr_reader :name, :words, :tests, :quizzes, :exams
+    attr_reader :name, :words, :exams
     attr_accessor :pass
 
     def initialize(name, pass)
@@ -9,9 +9,6 @@ module LearningSystem
       @logged_in = false
 
       @words = {}
-      @tests = {}
-      @quizzes = {}
-
       @exams = {}
     end
 
@@ -36,18 +33,6 @@ module LearningSystem
       @exams[exam.to_sym] = exam
     end
 
-    def add_test(test, overwrite = false)
-      raise "Test is already there!" if not overwrite and not @tests[test.to_sym].nil?
-      
-      @tests[test.to_sym] = test
-    end
-
-    def add_quiz(quiz, overwrite = false)
-      raise "Quiz is already there!" if not overwrite and not @quizzes[quiz.to_sym].nil?
-
-      @quizzes[quiz.to_sym] = quiz
-    end
-
     # removing invidual items
     def remove_exam(exam_name)
       @exams.delete(exam_name.to_sym)
@@ -55,14 +40,6 @@ module LearningSystem
 
     def remove_word(word)
       @words.delete(word.to_sym)
-    end
-
-    def remove_quiz(quiz)
-      @quizzes.delete(quiz.to_sym)
-    end
-
-    def remove_test(test)
-      @tests.delete(test.to_sym)
     end
 
     # Logging 
@@ -79,14 +56,6 @@ module LearningSystem
     end
 
     # referencing/finding items
-    def test(name)
-      @tests[name.to_sym]
-    end
-
-    def quiz(name)
-      @quizzes[name.to_sym]
-    end
-
     def exam(name) 
       @exams[name.to_sym]
     end
@@ -106,12 +75,8 @@ module LearningSystem
       @words.each_value(&block)
     end
 
-    def each_quiz(&block)
-      @quizzes.each_value(&block)
-    end
-
-    def each_test(&block)
-      @tests.each_value(&block)
+    def each_exam(&block)
+      @exams.each_value(&block)
     end
   end
 end
