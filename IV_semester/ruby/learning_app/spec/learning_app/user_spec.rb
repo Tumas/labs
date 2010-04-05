@@ -105,6 +105,16 @@ module LearningSystem
         @user.should have(2).tests
       end
 
+      it "should raise an exception when adding tests with the same name" do
+        @user.add_test(Test.new("Sample test"))
+        lambda { @user.add_test(Test.new("Sample test")) }.should raise_error
+      end
+      
+      it "should not raise an exception when adding tests with the same name when special options is set" do
+        @user.add_test(Test.new("Sample test"))
+        lambda { @user.add_test(Test.new("Sample test"), true) }.should_not raise_error
+      end
+
       it "should reference tests" do
         @user.add_test(Test.new("Sample test"))
         @user.test("Sample test").should be_instance_of(Test)

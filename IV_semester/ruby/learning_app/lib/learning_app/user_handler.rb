@@ -26,7 +26,7 @@ require 'digest/sha1'
 
     def login(user)
       @users.each do |r_user|
-        if r_user.name == user.name && r_user.pass == Digest::SHA1.hexdigest(user.pass)
+        if r_user.name == user.name and r_user.pass == Digest::SHA1.hexdigest(user.pass)
           r_user.login
           return r_user 
         end

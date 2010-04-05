@@ -27,7 +27,9 @@ module LearningSystem
       @words[word.to_sym] = word
     end
 
-    def add_test(test)
+    def add_test(test, overwrite = false)
+      raise "Test is already there!" if not overwrite and not @tests[test.to_sym].nil?
+      
       @tests[test.to_sym] = test
     end
 
@@ -91,8 +93,8 @@ module LearningSystem
       @quizzes.each_value(&block)
     end
 
-    #def each_test(&block)
-    #  @tests.each_value(&block)
-    #end
+    def each_test(&block)
+      @tests.each_value(&block)
+    end
   end
 end
