@@ -26,16 +26,18 @@ module LearningSystem
       @value.to_sym
     end
 
-    def guess_value(value)
+    def guess(opts)
+      vg = opts[:value].strip.downcase if opts[:value]
+      tg = opts[:translation].strip.downcase if opts[:translation]
+
       @times_guessed += 1
 
-      if @value.downcase == value.strip.downcase
+      if (@value.downcase == vg and @translation.downcase == tg) or (@value.downcase == vg and tg.nil?) or (@translation.downcase == tg and vg.nil?)
         @times_answered += 1
         true
       else
         false
       end
     end
-
   end
 end
