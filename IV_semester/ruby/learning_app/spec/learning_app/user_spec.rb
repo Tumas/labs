@@ -115,11 +115,24 @@ module LearningSystem
         lambda { @user.add_exam(Exam.new("Sample exam"), :overwrite => true ) }.should_not raise_error
       end
 
-      it "should remove exams" do
-        @user.add_exam(Exam.new("Sample exam"))
-        @user.should have(1).exams
-        @user.remove_exam("Sample exam")
-        @user.should have(0).exams
+      context "removing exams" do
+        before(:each) do
+          @user.add_exam(Exam.new("Sample exam"))
+        end
+
+        it "should remove exam by title" do
+          @user.should have(1).exams
+          @user.remove_exam("Sample exam")
+          @user.should have(0).exams
+        end
+
+        it "should get nil when trying to remove non existant exam" do
+          @user.remove_exam("Some random exam").should be_nil
+        end
+
+        it "should get exam object when it is removed" do
+          @user.remove_exam("Sample exam").should be_instance_of(Exam)
+        end
       end
 
       context "Finding one exam" do
@@ -136,80 +149,10 @@ module LearningSystem
       end
 
       context "Finding more than one exam" do
-        it "should find exams by specific word"
-        it "should find exams by word count"
+        it "should find exams by specific word" 
+        it "should find exams by word count" 
         it "should get empty array if exams were not found"
       end
     end
-
-=begin
-    context "Managing Tests" do
-      before(:each) do
-        @user = User.new("Tumas", "Secr3tpass")
-      end
-
-      it "should create tests" do
-        @user.should have(0).tests
-        @user.add_test(Test.new("New Test"))
-        @user.add_test(Test.new("New other test"))
-        @user.should have(2).tests
-      end
-
-      it "should raise an exception when adding tests with the same name" do
-        @user.add_test(Test.new("Sample test"))
-        lambda { @user.add_test(Test.new("Sample test")) }.should raise_error
-      end
-      
-      it "should not raise an exception when adding tests with the same name when special options is set" do
-        @user.add_test(Test.new("Sample test"))
-        lambda { @user.add_test(Test.new("Sample test"), true) }.should_not raise_error
-      end
-
-      it "should reference tests" do
-        @user.add_test(Test.new("Sample test"))
-        @user.test("Sample test").should be_instance_of(Test)
-      end
-
-      it "should remove tests" do
-        @user.add_test(Test.new("New Test"))
-        @user.remove_test("New Test")
-        @user.should have(0).tests
-      end
-    end
-
-    context "Managing quizzes" do
-      before(:each) do
-        @user = User.new("Tumas", "S3cr3tpass")
-      end
-
-      it "should create quizzes" do
-        @user.should have(0).quizzes
-        @user.add_quiz(Quiz.new("New Quiz"))
-        @user.add_quiz(Quiz.new("New other quiz"))
-        @user.should have(2).quizzes
-      end
-
-      it "should raise error when adding quiz with the same name" do
-        @user.add_quiz(Quiz.new("Test quiz"))
-        lambda { @user.add_quiz(Quiz.new("Test quiz")) }.should raise_error
-      end
-
-      it "should not raise an exception if we add quiz with the same name when we say so (overwrite = true)" do
-        @user.add_quiz(Quiz.new("Test quiz"))
-        lambda { @user.add_quiz(Quiz.new("Test quiz"), true) }.should_not raise_error
-      end
-      
-      it "should reference quizzes" do
-        @user.add_quiz(Quiz.new("New Quiz"))
-        @user.quiz("New Quiz").should be_instance_of(Quiz)
-      end
-
-      it "should remove quizzes" do
-        @user.add_quiz(Quiz.new("New Quiz"))
-        @user.remove_quiz("New Quiz")
-        @user.should have(0).quizzes
-      end
-    end
-=end
   end
 end
