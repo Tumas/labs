@@ -1,6 +1,6 @@
 module LearningSystem
   class User
-    attr_reader :name, :words, :tests, :quizzes
+    attr_reader :name, :words, :tests, :quizzes, :exams
     attr_accessor :pass
 
     def initialize(name, pass)
@@ -11,6 +11,8 @@ module LearningSystem
       @words = {}
       @tests = {}
       @quizzes = {}
+
+      @exams = {}
     end
 
     def valid?
@@ -27,6 +29,13 @@ module LearningSystem
       @words[word.to_sym] = word
     end
 
+    def add_exam(exam, opts = {})
+      opts[:overwrite] = false if opts[:overwrite].nil?
+
+      raise "Exam is already there!" if not opts[:overwrite] and not @exams[exam.to_sym].nil?
+      @exams[exam.to_sym] = exam
+    end
+
     def add_test(test, overwrite = false)
       raise "Test is already there!" if not overwrite and not @tests[test.to_sym].nil?
       
@@ -40,6 +49,10 @@ module LearningSystem
     end
 
     # removing invidual items
+    def remove_exam(exam_name)
+      @exams.delete(exam_name.to_sym)
+    end
+
     def remove_word(word)
       @words.delete(word.to_sym)
     end
@@ -72,6 +85,10 @@ module LearningSystem
 
     def quiz(name)
       @quizzes[name.to_sym]
+    end
+
+    def exam(name) 
+      @exams[name.to_sym]
     end
 
     def word(info)
