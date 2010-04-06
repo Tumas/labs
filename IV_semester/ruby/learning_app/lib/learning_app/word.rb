@@ -34,10 +34,13 @@ module LearningSystem
       vg = opts[:value].strip.downcase if opts[:value]
       tg = opts[:translation].strip.downcase if opts[:translation]
 
-      @times_guessed += 1
+      count = true
+      count = opts[:count] if not opts[:count].nil?
+
+      @times_guessed += 1 if count
 
       if (@value.downcase == vg and @translation.downcase == tg) or (@value.downcase == vg and tg.nil?) or (@translation.downcase == tg and vg.nil?)
-        @times_answered += 1
+        @times_answered += 1 if count
         true
       else
         false

@@ -129,6 +129,12 @@ module LearningSystem
           @word.times_guessed.should == 3
           @word.times_answered.should == 0
         end
+
+        it "should not count guessing statistics if we say so" do
+          2.times { @word.guess( :value => "quiz", :count => false )}
+          @word.times_guessed.should == 0
+          @word.times_answered.should == 0
+        end
       end
   end
 end
