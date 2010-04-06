@@ -16,13 +16,10 @@ class LearningSystemShoesScript < Shoes
   url '/register', :register
   url '/menu', :menu
   url '/words', :words
-  url '/tests', :tests
-  url '/quizzes', :quizzes
   url '/add_word/(\w+)', :add_word
-  url '/add_quiz', :add_quiz
-  url '/edit_quiz', :edit_quiz
-  url '/add_test', :add_test
-  url '/edit_test', :edit_test
+  url '/exams', :exams
+  url '/add_exam', :add_exam
+  url '/edit_exam', :edit_exam
 
   # other global variables => regexp segfaults 
   @@form_words_value = 'words value'
@@ -101,13 +98,13 @@ class LearningSystemShoesScript < Shoes
   def menu
     background "#333"
 
-   @upper_stack = stack :height => 55 do
-      para("Hello, #{@@user.name}. What do you want to do?", :stroke => white, :top => 20, :align => "center", :font => "Arial 26px" )
+   @upper_stack = stack :height => 65 do
+      para("Hello, #{@@user.name}. What do you want to do?", :stroke => white, :top => 30, :align => "center", :font => "Arial 26px" )
    end
 
    flow  do
       stack do
-        @m = image "/home/hanniph/Downloads/photos/study.jpg", :width => 225, :height => 175, :top => 80, :left => 20
+        @m = image "/home/hanniph/Downloads/photos/study.jpg", :width => 225, :height => 175, :top => 80, :left => 130
         @m.hover do
           fill rgb(0.0, 0.0, 0.0, 0.7)
           nostroke
@@ -122,154 +119,81 @@ class LearningSystemShoesScript < Shoes
       end
 
       stack do
-        @m2 = image "/home/hanniph/Downloads/photos/test.jpg", :width => 225, :height => 175, :top => 80, :left => 265
-        @m2.hover do
-          fill rgb(0.0, 0.0, 0.0, 0.7)
-          nostroke
-          @l2 = rect(@m2.left - 2, @m2.top-2 + @upper_stack.height , @m2.width + 3, @m2.height + 3)
-          @mes2 = para("TESTS", :font => "Arial 32px", :stroke => white, :top => @m2.top + @upper_stack.height + @m2.height / 2, :left => @m2.left)
-        end
-        @m2.leave do
-          @l2.hide
-          @mes2.hide
-        end
-         @m2.click { visit "/tests" }
-      end
-
-      stack do
-        @m3 = image "/home/hanniph/Downloads/photos/quiz.jpg", :width => 225, :height => 175, :top => 80, :left => 510
+        @m3 = image "/home/hanniph/Downloads/photos/quiz.jpg", :width => 225, :height => 175, :top => 80, :left => 370
         @m3.hover do
           fill rgb(0.0, 0.0, 0.0, 0.7)
           nostroke
           @l3 = rect(@m3.left - 2, @m3.top-2 + @upper_stack.height , @m3.width + 3, @m3.height + 3)
-          @mes3 = para("QUIZZES", :font => "Arial 32px", :stroke => white, :top => @m3.top + @upper_stack.height + @m3.height / 2, :left => @m3.left)
+          @mes3 = para("EXAMS", :font => "Arial 32px", :stroke => white, :top => @m3.top + @upper_stack.height + @m3.height / 2, :left => @m3.left)
         end
         @m3.leave do
           @l3.hide
           @mes3.hide
         end
-         @m3.click { visit "/quizzes" }
+         @m3.click { visit "/exams" }
       end
     end
   end
 
-  def tests
-    background "#333"
-    flow do
-      stack :top => 10, :left => 10 do
-        if @@user.words.size == 1
-          @title = "TEST" 
-        else
-          @title = "TESTS"
-        end
-        para "      #{@@user.tests.size}\n #{@title}", :stroke => white, :font => "32px"
-        stack :top => 100, :left => 20 do
-          para link("Add new test", :click => '/add_test'), :margin => 0
-          para link("Go back", :click => '/menu'), :margin => 0
-        end
-      stack do
-        tests = []
-        @@user.each_test {|t| tests << [ t.name, t.times_taken, t.words.size ] }
-
-        if @@user.tests.size > 10
-          @size = 10
-        else
-          @size = @@user.tests.size
-        end
-
-        @wq = table(:top=>-120, :left=>300, :rows=> @size, :headers=>[["Name", 250], ["TT", 75], ["Words", 100]], :items=> tests, :blk=> nil)   
-
-        button "edit selected", :margin_top => 40, :margin_left => 20 do
-          unless @wq.selected.nil?
-            @@test_to_edit = @@user.test(tests[@wq.selected][0])
-            visit '/edit_test'
-          end
-        end
-
-        button "remove selected", :margin_top => 1, :margin_left => 10 do
-          begin
-            @@user.remove_test( @@user.test(tests[@wq.selected][0]) )
-          rescue Exception => msg
-            alert msg
-          end
-
-          LearningSystemShoesScript.save_state
-          visit '/tests'
-        end
-      end
-      end
-    end
-  end
-
-
-  def quizzes
+  def exams
     background "#333"
 
     flow do
       stack :top => 10, :left => 10 do
         if @@user.words.size == 1
-          @title = "QUIZ" 
+          @title = "EXAM" 
         else
-          @title = "QUIZZES"
+          @title = "EXAMS"
         end
 
-        para "      #{@@user.quizzes.size}\n #{@title}", :stroke => white, :font => "32px"
+        para "      #{@@user.exams.size}\n #{@title}", :stroke => white, :font => "32px"
         stack :top => 100, :left => 20 do
-          para link("Add new quiz", :click => '/add_quiz'), :margin => 0
+          para link("Add new exams", :click => '/add_exam'), :margin => 0
           para link("Go back", :click => '/menu'), :margin => 0
         end
       end
       stack do
-        quizzes = []
-        @@user.each_quiz {|q| quizzes << [ q.name, q.times_taken, q.words.size ] }
+        exams = []
+        @@user.each_exam {|e| exams << [ e.name, e.times_taken, e.words.size ] }
 
-        if @@user.quizzes.size > 10
+        if @@user.exams.size > 10
           @size = 10
         else
-          @size = @@user.quizzes.size
+          @size = @@user.exams.size
         end
 
-        @wq = table(:top=>-120, :left=>300, :rows=> @size, :headers=>[["Name", 250], ["TT", 75], ["Words", 100]], :items=> quizzes, :blk=> nil)   
+        @wq = table(:top=>-120, :left=>300, :rows=> @size, :headers=>[["Name", 250], ["TT", 75], ["Words", 100]], :items=> exams, :blk=> nil)   
 
         button "edit selected", :margin_top => 40, :margin_left => 20 do
           unless @wq.selected.nil?
-            @@quiz_to_edit = @@user.quiz(quizzes[@wq.selected][0]) 
-            visit '/edit_quiz'
+            @@exam_to_edit = @@user.exam(exams[@wq.selected][0]) 
+            visit '/edit_exam'
           end
         end
 
         button "remove selected", :margin_top => 1, :margin_left => 10 do
           begin
-            @@user.remove_quiz( @@user.quiz(quizzes[@wq.selected][0]) )
+            @@user.remove_exam( @@user.exam(exams[@wq.selected][0]) )
           rescue Exception => msg
             alert msg
           end
 
           LearningSystemShoesScript.save_state
-          visit '/quizzes'
+          visit '/exams'
         end
       end
     end
   end
 
-  def edit_test
+
+  def edit_exam
     background "#333"
-    quizzer(:title => "Edit this test, #{@@user.name}", :user => @@user, :test => @@test_to_edit, :mode => 'edit', :subject => 'test')
+    quizzer(:title => "Edit this exam, #{@@user.name}", :user => @@user, :quiz => @@exam_to_edit, :mode => 'edit' )
   end
 
-  def edit_quiz
+  def add_exam
     background "#333"
-    quizzer(:title => "Edit this quiz, #{@@user.name}", :user => @@user, :quiz => @@quiz_to_edit, :mode => 'edit' )
-  end
-
-  def add_quiz
-    background "#333"
-    quizzer(:title => "Add a new quiz, #{@@user.name}", :user => @@user, :mode => 'add')
-  end
-
-  def add_test
-    background "#333"
-    quizzer(:title => "Add a new test, #{@@user.name}", :user => @@user, :mode => 'add', :subject => 'test')
+    quizzer(:title => "Add a new exam, #{@@user.name}", :user => @@user, :mode => 'add')
   end
 
   def words

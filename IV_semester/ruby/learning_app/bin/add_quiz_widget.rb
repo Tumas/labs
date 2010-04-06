@@ -11,23 +11,14 @@ class Quizzer < Shoes::Widget
     # subjects - plural or subject tests/quizzes
 
     @subject = opts[:subject]
-    @subject = 'quiz' if @subject.nil?
+    @subject = 'exam' if @subject.nil?
 
-    if @subject == 'quiz'
-      if opts[:quiz].nil?  
-        @subject_object = Quiz.new('name of the quiz') 
-      else
-        @subject_object = opts[:quiz]
-      end
-      @subjects = 'quizzes'
+    if opts[:exam].nil?  
+      @subject_object = Exam.new('name of the exam') 
     else
-      if opts[:test].nil?
-        @subject_object = Test.new('name of the test')
-      else
-        @subject_object = opts[:test]
-      end
-      @subjects = 'tests'
+      @subject_object = opts[:exam]
     end
+    @subjects = 'exams'
 
     @final_text = if @mode == 'add'
       "add #{@subject}"
@@ -76,17 +67,11 @@ class Quizzer < Shoes::Widget
           begin
             @subject_object.name = @name.text
             if @mode == 'edit'
-              if @subject == 'quiz' 
-                @user.add_quiz(@subject_object, true) 
-              else
-                @user.add_test(@subject_object, true)
+              if @subject == 'exam' 
+                @user.add_exam(@subject_object, true) 
               end
             else
-              if @subject == 'quiz' 
-                @user.add_quiz(@subject_object) 
-              else
-                @user.add_test(@subject_object)
-              end
+                @user.add_exam(@subject_object)
             end
 
             LearningSystemShoesScript.save_state
