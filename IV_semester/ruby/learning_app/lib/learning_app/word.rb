@@ -1,15 +1,11 @@
+require File.join(File.dirname(__FILE__), '/taggable') 
+
 module LearningSystem
   class Word
-    attr_reader :times_guessed, :times_answered, :tags
-    attr_accessor :value, :translation, :hint
+    include Taggable 
 
-    def valid?(value, translation)
-      if value.nil? or translation.nil? or value.empty? or translation.empty?
-        false
-      else
-        true
-      end
-    end
+    attr_reader :times_guessed, :times_answered
+    attr_accessor :value, :translation, :hint
 
     def initialize(value, translation, hint = nil)
       raise "Word and translation must be not empty" unless valid?(value, translation)
@@ -20,23 +16,18 @@ module LearningSystem
 
       @times_guessed = 0
       @times_answered = 0
-      @tags = {}
+    end
+
+    def valid?(value, translation)
+      if value.nil? or translation.nil? or value.empty? or translation.empty?
+        false
+      else
+        true
+      end
     end
 
     def to_sym
       @value.to_sym
-    end
-
-    def add_tags(tags)
-      tags.each {|t| @tags[t.strip.to_sym] = t if not t.nil? and not t.strip.empty? }
-    end
-
-    def tag(tag)
-      @tags[tag.strip.to_sym]
-    end
-
-    def remove_tag(tag)
-      @tags.delete(tag.strip.to_sym)
     end
 
     def guess(opts)

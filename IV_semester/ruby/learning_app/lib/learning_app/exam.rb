@@ -1,5 +1,9 @@
+require File.join(File.dirname(__FILE__), '/taggable') 
+
 module LearningSystem
   class Exam
+    include Taggable
+
     attr_reader :words, :times_taken
     attr_accessor :name
 
