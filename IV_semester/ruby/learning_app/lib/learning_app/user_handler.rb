@@ -39,5 +39,9 @@ require 'digest/sha1'
       user.logout
       "User #{user.name} has been successfully logged out"
     end
+
+    def delete(user)
+      @users.each {|u| @users.delete(u) if u.name == user.name and Digest::SHA1.hexdigest(user.pass) == u.pass }
+    end
   end
 end
