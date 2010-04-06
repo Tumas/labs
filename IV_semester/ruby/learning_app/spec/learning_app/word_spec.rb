@@ -29,41 +29,47 @@ module LearningSystem
 
     context "tagging" do
       before(:each) do
-        a = Word.new("Clojure", "functional programming language", "LISP dialect")
+        @a = Word.new("Clojure", "functional programming language", "LISP dialect")
       end
 
       it "should be tagged" do
         tags = ["programming language", "lisp-like", "jvm"]
-        a.add_tags(tags)
-        a.should have(tags.size).tags
+        @a.add_tags(tags)
+        @a.should have(tags.size).tags
       end
 
       it "should not be tagged with illogic tags" do
-        wrong_tags = [nil, ' ', false, true]
+        wrong_tags = [nil, ' ']
 
-        a.should have(0).tags
-        a.add_tags(wrong_tags)
-        a.should have(0).tags
+        @a.should have(0).tags
+        @a.add_tags(wrong_tags)
+        @a.should have(0).tags
       end
 
       it "should reference tag" do
-        a.add_tags(["sample tag"])
-        a.tag("sample tag").should_not be_nil
+        @a.add_tags(["sample tag"])
+        @a.tag("sample tag").should_not be_nil
       end
 
       it "should strip preceding and succeeding white space" do
         tags = [' one ', ' two', 'three ']
-        a.add_tags(tags)
+        @a.add_tags(tags)
 
-        tags.each {|t| a.tag(t.strip).should_not be_nil }
+        tags.each do |t|
+          @a.tag(t.strip).should_not be_nil 
+          @a.tag(t).should_not be_nil 
+        end
       end
 
       it "should have its tag removed" do
+        tags = [' one ', ' two', 'three ']
+        @a.add_tags(tags)
+
         tags.each do |t|
-          a.remove_tag(t)
+          @a.remove_tag(t)
         end
 
-        a.should have(0).tags
+        @a.should have(0).tags
       end
     end
 

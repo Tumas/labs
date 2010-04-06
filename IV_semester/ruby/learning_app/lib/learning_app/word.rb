@@ -1,6 +1,6 @@
 module LearningSystem
   class Word
-    attr_reader :times_guessed, :times_answered
+    attr_reader :times_guessed, :times_answered, :tags
     attr_accessor :value, :translation, :hint
 
     def valid?(value, translation)
@@ -20,10 +20,23 @@ module LearningSystem
 
       @times_guessed = 0
       @times_answered = 0
+      @tags = {}
     end
 
     def to_sym
       @value.to_sym
+    end
+
+    def add_tags(tags)
+      tags.each {|t| @tags[t.strip.to_sym] = t if not t.nil? and not t.strip.empty? }
+    end
+
+    def tag(tag)
+      @tags[tag.strip.to_sym]
+    end
+
+    def remove_tag(tag)
+      @tags.delete(tag.strip.to_sym)
     end
 
     def guess(opts)
