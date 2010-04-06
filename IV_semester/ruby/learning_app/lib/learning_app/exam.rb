@@ -1,10 +1,12 @@
 require File.join(File.dirname(__FILE__), '/taggable') 
+require File.join(File.dirname(__FILE__), '/word_list') 
 
 module LearningSystem
   class Exam
     include Taggable
+    include WordList
 
-    attr_reader :words, :times_taken
+    attr_reader :times_taken
     attr_accessor :name
 
     def initialize(name)
@@ -12,24 +14,10 @@ module LearningSystem
 
       @name = name
       @times_taken = 0
-      @words = {}
-    end
-
-    def add_word(word, overwrite = false)
-      raise "Word is already there!" if not overwrite and not @words[word.to_sym].nil? 
-      @words[word.to_sym] = word
-    end
-
-    def remove_word(word)
-      @words.delete(word.to_sym)
     end
 
     def to_sym
       @name.to_sym
-    end
-
-    def each_word(&block)
-      @words.each_value(&block)
     end
 
     def take(p)

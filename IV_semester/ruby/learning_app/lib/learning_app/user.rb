@@ -1,6 +1,10 @@
+require File.join(File.dirname(__FILE__), '/word_list') 
+
 module LearningSystem
   class User
-    attr_reader :name, :words, :exams
+    include WordList
+
+    attr_reader :name, :exams
     attr_accessor :pass
 
     def initialize(name, pass)
@@ -8,7 +12,6 @@ module LearningSystem
       @pass = pass
       @logged_in = false
 
-      @words = {}
       @exams = {}
     end
 
@@ -21,11 +24,6 @@ module LearningSystem
     end
 
     # Adding items
-    def add_word(word, overwrite = false)
-      raise "Word is already there!" if not overwrite and not @words[word.to_sym].nil? 
-      @words[word.to_sym] = word
-    end
-
     def add_exam(exam, opts = {})
       opts[:overwrite] = false if opts[:overwrite].nil?
 
@@ -36,10 +34,6 @@ module LearningSystem
     # removing invidual items
     def remove_exam(exam_name)
       @exams.delete(exam_name.to_sym)
-    end
-
-    def remove_word(word)
-      @words.delete(word.to_sym)
     end
 
     # Logging 
@@ -60,21 +54,7 @@ module LearningSystem
       @exams[name.to_sym]
     end
 
-    def word(info)
-      return nil if info[:value].nil? and info[:translation].nil?
-
-      each_word do |w|
-        return w if (info[:value].nil? or info[:value] == w.value) and (info[:translation].nil? or info[:translation] == w.translation)
-      end
-
-      nil
-    end
-
     # Iterating over items 
-    def each_word(&block)
-      @words.each_value(&block)
-    end
-
     def each_exam(&block)
       @exams.each_value(&block)
     end
