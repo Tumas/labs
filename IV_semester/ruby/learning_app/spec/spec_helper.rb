@@ -20,10 +20,10 @@ Spec::Matchers.define :return_valid_format do
   end
 
   failure_message_for_should do |value|
-    "expected #{value} to floating point number between 0 and 1 with at most 2 decimal places"
+    "expected #{value} to be floating point number between 0 and 1 with at most 2 decimal places"
   end
 
   failure_message_for_should do |value|
-    "expected #{value} not to floating point number between 0 and 1 with at most 2 decimal places"
+    "expected #{value} not to be floating point number between 0 and 1 with at most 2 decimal places"
   end
 end
