@@ -48,9 +48,10 @@ module LearningSystem
       context "deleting accounts" do
         it "should delete user accounts" do
           @good_users.each do |good_user|
-            message = @user_handler.register(good_user)
+            @user_handler.register(good_user)
           end
 
+          @good_users[0].pass = Digest::SHA1.hexdigest(@good_users[0].pass)
           lambda {
             @user_handler.delete(@good_users[0])
           }.should change{ @user_handler.users.size }.from(@good_users.size).to(@good_users.size - 1)

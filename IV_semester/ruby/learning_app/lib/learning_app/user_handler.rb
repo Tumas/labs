@@ -41,7 +41,7 @@ require 'digest/sha1'
     end
 
     def delete(user)
-      @users.each {|u| @users.delete(u) if u.name == user.name and Digest::SHA1.hexdigest(user.pass) == u.pass }
+     @users.each {|u| @users.delete(u) if u.name == user.name and user.pass == u.pass }
     end
   end
 end
