@@ -147,10 +147,6 @@ module LearningSystem
           @user.exam("Some random exam").should be_nil
         end
       end
-
-      context "Finding more than one exam" do
-        it "should find exams by specific word" 
-      end
     end
   end
 end

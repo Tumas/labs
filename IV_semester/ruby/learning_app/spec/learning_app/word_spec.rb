@@ -112,6 +112,20 @@ module LearningSystem
         @word.guess( :translation => "quiz", :value => "quiz" ).should == false
       end
 
+      # we can specify the limit showing how many % of guess matching the answer is considered correct 
+      # testing only translation for now
+      it "should be guessed with correctness percentage" do
+        pending
+        #@word = Word.new("Test", "form of examination", "similar to quiz")
+        @word.guess( :translation => "examination", :percent => 30).should == true
+        @word.guess( :translation => "examination form", :percent => 60).should == true
+        
+        # more complex example
+        @word = Word.new("conjecture", "a hypothesis that has been formed by speculating")
+        @word.guess( :translation => "hypothesis", :percent => 30).should == false
+        @word.guess( :translation => "a hypothesis formed speculating", :percent => 50).should == true
+      end
+
       context "counting guessing statistics" do
         it "should be guessed and answerred equally" do
           @correct_value_guesses.each do |answer|
@@ -135,6 +149,8 @@ module LearningSystem
           @word.times_guessed.should == 0
           @word.times_answered.should == 0
         end
+
+        it "should know its wrong guesses"
       end
   end
 end
