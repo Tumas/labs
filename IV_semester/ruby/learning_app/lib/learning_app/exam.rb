@@ -6,7 +6,7 @@ module LearningSystem
     include Taggable
     include WordList
 
-    attr_reader :times_taken
+    attr_reader :times_taken, :history
     attr_accessor :name
 
     def initialize(name)
@@ -14,10 +14,23 @@ module LearningSystem
 
       @name = name
       @times_taken = 0
+      @history = []
     end
 
     def to_sym
       @name.to_sym
+    end
+
+    def history_reset
+      @history = []
+    end
+
+    def average_score
+      if @history.empty?
+        0
+      else
+        @history.inject(0) { |x, y| x + y } / @history.size
+      end
     end
 
     def take(p)
@@ -30,7 +43,9 @@ module LearningSystem
       end
 
       @times_taken += 1
-      local_score / @words.size
+      score = format("%0.2f", local_score / @words.size).to_f
+      @history << score
+      score
     end
   end
 end

@@ -150,8 +150,6 @@ module LearningSystem
 
       context "Finding more than one exam" do
         it "should find exams by specific word" 
-        it "should find exams by word count" 
-        it "should get empty array if exams were not found"
       end
     end
   end
