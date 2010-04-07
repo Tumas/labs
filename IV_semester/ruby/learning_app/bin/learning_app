@@ -1,6 +1,10 @@
 #!/usr/bin/env shoes
 $: << File.join(File.dirname(__FILE__), "/../lib")
 
+#TODO: tags support
+# add percentage guessing 
+# clean user registration
+
 require 'yaml'
 require 'learning_app'
 require 'table_widget'
@@ -20,6 +24,8 @@ class LearningSystemShoesScript < Shoes
   url '/exams', :exams
   url '/add_exam', :add_exam
   url '/edit_exam', :edit_exam
+  url '/take_quiz', :take_quiz
+  url '/take_test', :take_test
 
   # other global variables => regexp segfaults 
   @@form_words_value = 'words value'
@@ -70,7 +76,7 @@ class LearningSystemShoesScript < Shoes
   def register
     background "#333"
     stack :margin_top => 10 do
-      subtitle TITLE, :align => "center" 
+      subtitle TITLE, :align => "center", :stroke => white
 
       stack :top => 80, :left => 300, :align => "center" do
         @@username_field = edit_line :text => @@user.name, :width => 150
@@ -82,8 +88,8 @@ class LearningSystemShoesScript < Shoes
             # save state
             LearningSystemShoesScript.save_state
 
-            alert "User #{@@username_field.text} was succesfully registered"
-            visit "/menu"
+            alert "User #{@@username_field.text} was succesfully registered. You can now login"
+            visit "/"
           rescue Exception => msg
             alert "#{msg}"
           end
@@ -132,6 +138,26 @@ class LearningSystemShoesScript < Shoes
         end
          @m3.click { visit "/exams" }
       end
+
+      flow do 
+        @logout_link = link "Logout" do
+          @@user_manager.logout(@@user)
+
+          LearningSystemShoesScript.save_state
+          visit '/'
+        end
+
+        @delete_acc_link = link "Delete my account" do
+          @@user_manager.delete(@@user)
+          LearningSystemShoesScript.save_state
+
+          alert "Your account was deleted. Thank you, for using learning system."
+          visit '/'
+        end
+
+        para @logout_link, :top => 330, :left => 330 
+        para @delete_acc_link, :top => 350, :left => 300
+      end
     end
   end
 
@@ -154,7 +180,7 @@ class LearningSystemShoesScript < Shoes
       end
       stack do
         exams = []
-        @@user.each_exam {|e| exams << [ e.name, e.times_taken, e.words.size ] }
+        @@user.each_exam {|e| exams << [ e.name, e.times_taken, e.words.size, e.average_score ] }
 
         if @@user.exams.size > 10
           @size = 10
@@ -162,33 +188,98 @@ class LearningSystemShoesScript < Shoes
           @size = @@user.exams.size
         end
 
-        @wq = table(:top=>-120, :left=>300, :rows=> @size, :headers=>[["Name", 250], ["TT", 75], ["Words", 100]], :items=> exams, :blk=> nil)   
+        @wq = table(:top=>-120, :left=>200, :rows=> @size, :headers=>[["Name", 250], ["TT", 75], ["Words", 100], ["AS", 100]], :items=> exams, :blk=> nil)   
+        button "take as quiz", :margin_top => 40, :margin_left => 25 do
+          if @wq.selected 
+            @@quiz_to_take = @@user.exam(exams[@wq.selected][0])
+            if @@quiz_to_take.words.size > 0
+              visit '/take_quiz'
+            else
+              alert "Selected quiz has no words. Add some before taking."
+            end
+          end
+        end
 
-        button "edit selected", :margin_top => 40, :margin_left => 20 do
-          unless @wq.selected.nil?
+        button "take as test", :margin_top => 1, :margin_left => 25 do
+          if @wq.selected
+            #@@test_to_take = @@user.exam(exams[@wq.selected][0])
+            #visit '/take_test'
+          end
+        end
+
+        button "edit selected", :margin_top => 1, :margin_left => 20 do
+          if @wq.selected
             @@exam_to_edit = @@user.exam(exams[@wq.selected][0]) 
             visit '/edit_exam'
           end
         end
 
         button "remove selected", :margin_top => 1, :margin_left => 10 do
-          begin
-            @@user.remove_exam( @@user.exam(exams[@wq.selected][0]) )
-          rescue Exception => msg
-            alert msg
-          end
+          if @wq.selected
+            begin
+              @@user.remove_exam( @@user.exam(exams[@wq.selected][0])) 
+            rescue Exception => msg
+              alert msg
+            end
 
-          LearningSystemShoesScript.save_state
-          visit '/exams'
+            LearningSystemShoesScript.save_state
+            visit '/exams'
+          end
         end
       end
     end
   end
 
+  def take_quiz
+    background "#333"
+    @score = 0
+
+    flow do
+      @sb = stack do
+        subtitle "#{@@quiz_to_take.name}", :stroke => white, :align => "center"
+       # end
+      end
+      @guesses = {}
+      @score = @@quiz_to_take.take(Proc.new {|word, answer| word.guess(:translation => answer) }) do |word|
+          answer = ask "What does the word #{word.value} mean?"
+          verdict = word.guess(:translation => answer, :count => false)
+          @guesses[word.to_sym] = [verdict, answer]
+          answer
+      end
+
+      @sb.append do
+        para "Your score is #{"%3d" % (@score * 100)}%", :stroke => white, :font => "24px", :left => 50, :top => 50 
+        stack :top => 350, :left => 150 do
+          para link("Go back", :click => '/exams'), :margin => 0
+        end
+        stack :left => 60, :top => 70 do
+
+          #option #2
+          items = []
+          @@quiz_to_take.each_word do |w|
+            guess = @guesses[w.to_sym][1]
+            guess = '?' if guess.nil? or guess.empty?
+            items << [w.value, w.translation, guess]
+          end
+
+          if @@quiz_to_take.words.size > 7
+            @size = 7
+          else
+            @size = @@quiz_to_take.words.size
+          end
+
+          @results_table = table(:top=>20, :left=>20, :rows=> @size, :headers=>[["Value", 200], ["Translation", 200], ["Guess", 200]], :items=> items, :blk=> nil, :color => green, :defaultcolor => red, :predicate => Proc.new {|i| @guesses[(items[i][0]).to_sym][0] })   
+        end
+
+        LearningSystemShoesScript.save_state
+      end
+
+    end
+  end
 
   def edit_exam
     background "#333"
-    quizzer(:title => "Edit this exam, #{@@user.name}", :user => @@user, :quiz => @@exam_to_edit, :mode => 'edit' )
+    quizzer(:title => "Edit this exam, #{@@user.name}", :user => @@user, :exam => @@exam_to_edit, :mode => 'edit' )
   end
 
   def add_exam
@@ -202,7 +293,12 @@ class LearningSystemShoesScript < Shoes
     flow do
       stack :top => 10, :left => 100 do
         items = []
-        @@user.each_word {|w| items << [w.value, w.translation, w.hint, w.times_answered, w.times_guessed] }
+        #@@form_hint = "?" if @@form_hint =~ /^hint (.*)$/
+        @@user.each_word do |w|
+          hint = w.hint
+          hint = '?' if w.hint =~ /^hint (.*)$/ or w.hint.empty? or w.hint.nil?
+          items << [w.value, w.translation, hint, w.times_answered, w.times_guessed] 
+        end
 
         if @@user.words.size > 10
           @size = 10
@@ -214,7 +310,8 @@ class LearningSystemShoesScript < Shoes
 
         button "remove selected", :top => 300, :left => -85 do
           word_to_delete = items.delete_at(@t.selected)
-          @@user.remove_word( @@user.word({ :value => word_to_delete[0] }))
+          word_to_delete = @@user.remove_word( @@user.word({ :value => word_to_delete[0] }))
+          @@user.each_exam {|e| e.remove_word(word_to_delete) }
           LearningSystemShoesScript.save_state
           visit '/words'
         end
@@ -229,6 +326,7 @@ class LearningSystemShoesScript < Shoes
           visit '/add_word/true'
         end
       end
+
 
       stack :top => 10, :left => 10 do
         if @@user.words.size == 1
@@ -256,17 +354,23 @@ class LearningSystemShoesScript < Shoes
     end
 
     stack :margin_top => 10 do
-      subtitle "Add a new word, #{@@user.name}", :stroke => white, :align => "center"
+      @sub = "Add a new"
+      @sub = "Edit a" if state
+      subtitle "#{@sub} word, #{@@user.name}", :stroke => white, :align => "center"
 
       stack :top => 80, :left => 160, :align => "center" do
         @value = edit_line :width => 400, :text => @@form_words_value 
+        @old_value = @@form_words_value
         @translation = edit_line :width => 400, :text => @@form_translation
         @hint = edit_line :width => 400, :text => @@form_hint 
-
-        button "add word", :margin_left => 150, :margin_top => 10, :margin_bottom => 10  do
+        
+        @text = 'add word'
+        @text = 'update word' if state
+        button @text, :margin_left => 150, :margin_top => 10, :margin_bottom => 10  do
           begin
-            @hint.text = nil if @hint.text =~ /^hint (.*)$/
+            @@user.remove_word(@@user.word(:value => @old_value)) if state and @value.text != @old_value
             @@user.add_word(Word.new(@value.text, @translation.text, @hint.text), state)
+
             LearningSystemShoesScript.save_state
             visit '/words'
           rescue Exception => msg

@@ -39,6 +39,15 @@ class Table < Shoes::Widget
     @left=opts[:left]
     @rec=rect :top => 0, :left => 0, :width=>@width+mult*12+2, :height=>31*(@height+1)+4 
     @lefty=0  
+
+    # tweaks 
+    @default_color = black
+    @default_color = opts[:defaultcolor] if opts[:defaultcolor]
+    @color = black
+    @color = opts[:color] if opts[:color]
+    @predicate = Proc.new {|i| true }
+    @predicate = opts[:predicate] unless opts[:predicate].nil?
+
     
     @header=flow do       
         @headers.each_with_index do |h,l|
@@ -61,9 +70,16 @@ class Table < Shoes::Widget
             @columns.times do |ei|
                 rr[ei]=rect(:top=>1, :left=>@lefty+1, :width=>@headers[ei][1]-1,:height=>29, :fill=>white)
                 it[ei]=" " if not it[ei] or it[ei]==""
-                inscription strong(it[ei]), :top=>31*i+3, :left=>@lefty+2, :width=>@headers[ei][1]-1, :align=>'center'
-                @lefty+=@headers[ei][1]+1
+                ins = inscription strong(it[ei]), :top=>31*i+3, :left=>@lefty+2, :width=>@headers[ei][1]-1, :align=>'center'
 
+                # color tweak
+                if @predicate.call(i)
+                  ins.style(:stroke => @color) 
+                else
+                  ins.style(:stroke => @default_color) 
+                end
+
+                @lefty+=@headers[ei][1]+1
             end
 
             hover do
