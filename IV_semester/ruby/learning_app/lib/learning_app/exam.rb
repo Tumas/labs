@@ -29,7 +29,7 @@ module LearningSystem
       if @history.empty?
         0
       else
-        @history.inject(0) { |x, y| x + y } / @history.size
+        format("%0.2f", @history.inject(0) { |x, y| x + y } / @history.size).to_f
       end
     end
 

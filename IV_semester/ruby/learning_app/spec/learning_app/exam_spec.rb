@@ -84,6 +84,13 @@ module LearningSystem
             @e.take(Proc.new {|w, a| w.guess(:translation => a)}) {|w| w.value }
           }.should change {@e.average_score }.from(1).to(0.5)
         end
+        
+        it "should return its average score in valid format" do
+          @e.take(Proc.new {|w, a| w.guess(:value => a)}) {|w| w.value }
+          17.times { @e.take(Proc.new {|w, a| w.guess(:translation => a)}) {|w| w.value } }
+
+          @e.average_score.should return_valid_format
+        end
       end
     end
   end
