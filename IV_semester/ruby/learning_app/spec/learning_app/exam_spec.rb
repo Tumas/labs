@@ -4,6 +4,10 @@ module LearningSystem
   describe Exam do
     include WordSamples
 
+    #Spec::Runner.configure do |config|
+    #  config.include(Matchers)
+    #end
+
     context "creating" do
       it "should not be created with empty name" do
         [nil, "  ", ""].each do |bad_name|
@@ -48,7 +52,7 @@ module LearningSystem
           else
             word.value
           end
-        end.to_s.should =~ /^[0-1]\.[0-9]([0-9])?$/ 
+        end.should return_valid_format
       end
 
       context "counting statistics" do
