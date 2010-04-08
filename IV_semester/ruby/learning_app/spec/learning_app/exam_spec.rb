@@ -15,7 +15,7 @@ module LearningSystem
         end
       end
     end
-    
+
     context "taking" do
       before(:each) do
         @e = Exam.new("name")

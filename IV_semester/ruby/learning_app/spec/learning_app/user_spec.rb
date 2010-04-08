@@ -148,5 +148,20 @@ module LearningSystem
         end
       end
     end
+
+    context "Iterating over items" do
+      before(:each) do
+        @user = @good_users[0]
+      end
+
+      it "should iterate over exams" do
+        @user.each_word.should iterate_over_items_of(@user.words) 
+      end
+
+      it "should iterate over words" do
+        @user.each_exam.should iterate_over_items_of(@user.exams)
+      end
+    end
+
   end
 end

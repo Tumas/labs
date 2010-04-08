@@ -56,8 +56,8 @@ module LearningSystem
         @a.add_tags(tags)
 
         tags.each do |t|
-          @a.tag(t.strip).should_not be_nil 
-          @a.tag(t).should_not be_nil 
+          @a.tag(t.strip).should == t.strip
+          @a.tag(t).should == t.strip
         end
       end
 
@@ -70,6 +70,12 @@ module LearningSystem
         end
 
         @a.should have(0).tags
+      end
+
+      it "should iterate over tags" do
+        tags = [' one ', ' two', 'three ']
+        @a.add_tags(tags)
+        @a.each_tag.should iterate_over_items_of(@a.tags)
       end
     end
 

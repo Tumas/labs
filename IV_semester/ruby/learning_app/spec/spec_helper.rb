@@ -27,3 +27,19 @@ Spec::Matchers.define :return_valid_format do
     "expected #{value} not to be floating point number between 0 and 1 with at most 2 decimal places"
   end
 end
+
+Spec::Matchers.define :iterate_over_items_of do |hash|
+  match do |enumerator|
+    items = {}
+
+    enumerator.each do |item| 
+      items[item.to_sym] = item
+    end
+    
+    items == hash
+  end
+
+  failure_message_for_should do |enumerator|
+    "expected #{enumerator} to iterate over all items of specified collection"
+  end
+end

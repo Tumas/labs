@@ -5,7 +5,7 @@ module LearningSystem
     end
 
     def add_tags(tags_to_add)
-      tags_to_add.each {|t| tags[t.strip.to_sym] = t if not t.nil? and not t.strip.empty? }
+      tags_to_add.each {|t| tags[t.strip.to_sym] = t.strip if not t.nil? and not t.strip.empty? }
     end
 
     def remove_tag(tag)
@@ -14,6 +14,10 @@ module LearningSystem
 
     def tag(tag)
       tags[tag.strip.to_sym]
+    end
+
+    def each_tag(&block)
+      tags.each_value(&block)
     end
   end
 end
