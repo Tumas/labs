@@ -151,15 +151,24 @@ module LearningSystem
 
     context "Iterating over items" do
       before(:each) do
+        @good_word_samples = good_word_samples
         @user = @good_users[0]
       end
 
       it "should iterate over exams" do
-        @user.each_word.should iterate_over_items_of(@user.words) 
+        @user.add_exam(Exam.new("eine"))
+        @user.add_exam(Exam.new("zwei"))
+        @user.add_exam(Exam.new("drei"))
+
+        @user.each_exam.should iterate_over_items_of(@user.exams) 
       end
 
       it "should iterate over words" do
-        @user.each_exam.should iterate_over_items_of(@user.exams)
+        @good_word_samples.each do |sample|
+          @user.add_word(Word.new(sample[:value], sample[:translation], sample[:hint])) 
+        end
+
+        @user.each_word.should iterate_over_items_of(@user.words)
       end
     end
 
