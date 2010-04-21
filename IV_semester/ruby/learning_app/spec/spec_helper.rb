@@ -14,7 +14,7 @@ require 'spec/word_samples'
 #  config.include(LearningSystem::Matchers)
 #end
 
-Spec::Matchers.define :return_valid_format do
+Spec::Matchers.define :be_valid_format do
   match do |value|
     (value.to_s =~ /^[0-1]\.[0-9]([0-9])?$/) != nil
   end
@@ -28,7 +28,7 @@ Spec::Matchers.define :return_valid_format do
   end
 end
 
-Spec::Matchers.define :iterate_over_items_of do |hash|
+Spec::Matchers.define :iterate_over_all_items_of do |hash|
   match do |enumerator|
     items = {}
 

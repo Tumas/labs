@@ -10,23 +10,23 @@ module LearningSystem
       @bad_users = bad_users
     end
 
-    context "User validation" do
-      it "should be valid" do
+    describe User, " validation" do
+      it "should pass validation " do
         @good_users.each {|good_user| good_user.should be_valid }
       end
 
-      it "should not be valid" do
+      it "should not pass validation" do
         @bad_users.each {|bad_user| bad_user.should_not be_valid }
       end
     end
 
-    context "Managing words" do
+    describe User, " managing words" do
       before(:each) do
         @good_word_samples = good_word_samples
         @user = @good_users[0]
       end
 
-      it "should add new words" do
+      it "should register new words" do
           @good_word_samples.each do |sample|
             @user.add_word(Word.new(sample[:value], sample[:translation], sample[:hint]))
           end
@@ -54,7 +54,7 @@ module LearningSystem
         @user.should have(0).words
       end
 
-      context "finding words" do
+      describe User, " finding words" do
         before(:each) do
           @words_to_find = []
           @good_word_samples.each do |sample|
@@ -93,16 +93,16 @@ module LearningSystem
       end
     end
 
-    context "Managing exams" do
+    describe User, " managing exams" do
       before(:each) do
         @user = User.new("Tumas", "Secr3tpass")
       end
 
       it "should create exams" do
-        @user.should have(0).exams
-        @user.add_exam(Exam.new("Sample exam"))
-        @user.add_exam(Exam.new("Sample exam 2"))
-        @user.should have(2).exams
+        lambda do
+          @user.add_exam(Exam.new("Sample exam"))
+          @user.add_exam(Exam.new("Sample exam 2"))
+        end.should change { @user.exams.size }.from(0).to(2)
       end
 
       it "should not create exams with the same name by default" do
@@ -110,20 +110,18 @@ module LearningSystem
         lambda { @user.add_exam(Exam.new("Sample exam")) }.should raise_error
       end
 
-      it "should create exams with the same name on purpose" do
+      it "should create exams with the same name when specifying overwrite option" do
         @user.add_exam(Exam.new("Sample exam"))
         lambda { @user.add_exam(Exam.new("Sample exam"), :overwrite => true ) }.should_not raise_error
       end
 
-      context "removing exams" do
+      describe User, " removing exams" do
         before(:each) do
           @user.add_exam(Exam.new("Sample exam"))
         end
 
         it "should remove exam by title" do
-          @user.should have(1).exams
-          @user.remove_exam("Sample exam")
-          @user.should have(0).exams
+          lambda { @user.remove_exam("Sample exam") }.should change { @user.exams.size }.from(1).to(0)
         end
 
         it "should get nil when trying to remove non existant exam" do
@@ -135,7 +133,7 @@ module LearningSystem
         end
       end
 
-      context "Finding one exam" do
+      describe User, " finding one exam" do
         it "should find exam by name" do
           test_exam = Exam.new("Sample exam")
           @user.add_exam(test_exam)
@@ -149,28 +147,27 @@ module LearningSystem
       end
     end
 
-    context "Iterating over items" do
+    describe User, " iterating over items" do
       before(:each) do
         @good_word_samples = good_word_samples
         @user = @good_users[0]
       end
 
-      it "should iterate over exams" do
-        @user.add_exam(Exam.new("eine"))
+      it "should iterate over its all exams" do
+        @user.add_exam(Exam.new("ein"))
         @user.add_exam(Exam.new("zwei"))
         @user.add_exam(Exam.new("drei"))
 
-        @user.each_exam.should iterate_over_items_of(@user.exams) 
+        @user.each_exam.should iterate_over_all_items_of(@user.exams) 
       end
 
-      it "should iterate over words" do
+      it "should iterate over all  words" do
         @good_word_samples.each do |sample|
           @user.add_word(Word.new(sample[:value], sample[:translation], sample[:hint])) 
         end
 
-        @user.each_word.should iterate_over_items_of(@user.words)
+        @user.each_word.should iterate_over_all_items_of(@user.words)
       end
     end
-
   end
 end

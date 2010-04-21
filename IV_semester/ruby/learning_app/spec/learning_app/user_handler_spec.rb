@@ -11,8 +11,8 @@ module LearningSystem
       @user_handler = UserHandler.new([])
     end
 
-    context "Registration" do 
-      context "registering correct users" do
+    describe UserHandler, " registration" do 
+      describe UserHandler, " registering correct users" do
         it "should register users" do
           @good_users.each do |good_user|
             lambda { @user_handler.register(good_user) }.should_not raise_error
@@ -20,7 +20,7 @@ module LearningSystem
 
         end
 
-        it "should provide a meaningful string after succesfull registration" do
+        it "should return string after succesfull registration" do
           @good_users.each do |good_user|
             message = @user_handler.register(good_user)
             message.should =~ /User (.*) has been succesfully registered!/
@@ -28,15 +28,15 @@ module LearningSystem
         end
       end
 
-      context "registering incorrect users" do
+      describe UserHandler, " registering incorrect users" do
          it "should raise an exception" do
           @bad_users.each do |bad_user|
             lambda { @user_handler.register(bad_user) }.should raise_error
           end
-        end
+         end
       end
 
-      context "registering duplicate users" do
+      describe UserHandler, " registering duplicate users" do
         it "should raise an exception with specific message" do
           @user_handler.register(@good_users[0]) 
           lambda { @user_handler.register(@good_users[0]) }.should raise_error(
@@ -45,7 +45,7 @@ module LearningSystem
         end
       end
 
-      context "deleting accounts" do
+      describe UserHandler, " deleting accounts" do
         it "should delete user accounts" do
           @good_users.each do |good_user|
             @user_handler.register(good_user)
@@ -60,28 +60,24 @@ module LearningSystem
 
     end
     
-    context "Login" do
-      context "incorrect logins" do
-        it "should reject wrong logins" do 
-          @bad_users.each do |bad_user| 
-            lambda { bad_user = @user_handler.login(bad_user) }.should raise_error
-            bad_user.should_not be_logged_in
-          end
+    describe UserHandler, " managing login" do
+      it "should reject wrong logins" do 
+        @bad_users.each do |bad_user| 
+          lambda { bad_user = @user_handler.login(bad_user) }.should raise_error
+          bad_user.should_not be_logged_in
         end
       end
 
-      context "correct logins" do
-        it "should accept correct logins" do
-          @good_users.each do |good_user|
-            @user_handler.register(good_user)
-            lambda { good_user = @user_handler.login(good_user) }.should_not raise_error
-            good_user.should be_logged_in
-          end
+      it "should accept correct logins" do
+        @good_users.each do |good_user|
+          @user_handler.register(good_user)
+          lambda { good_user = @user_handler.login(good_user) }.should_not raise_error
+          good_user.should be_logged_in
         end
       end
     end
 
-    context "Logout" do
+    describe UserHandler, " managing logout" do
       before(:each) do
         @good_users.each {|good_user| @user_handler.register(good_user) }
         @good_users_v2 = @good_users.map {|good_user| @user_handler.login(good_user) }

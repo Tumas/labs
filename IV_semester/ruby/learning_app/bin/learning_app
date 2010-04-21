@@ -105,7 +105,7 @@ class LearningSystemShoesScript < Shoes
     background "#333"
 
    @upper_stack = stack :height => 65 do
-      para("Hello, #{@@user.name}. What do you want to do?", :stroke => white, :top => 30, :align => "center", :font => "Arial 26px" )
+      para("Hello, #{@@user.name}. What do you want to explore?", :stroke => white, :top => 30, :align => "center", :font => "Arial 26px" )
    end
 
    flow  do

@@ -4,46 +4,32 @@ module LearningSystem
   describe Word do
     include WordSamples
 
-    context "creating" do
+    describe Word, " creation" do
       before(:each) do
         @good_word_samples = good_word_samples
         @bad_word_samples = bad_word_samples
       end
 
-      context "creating valid words" do
-        it "should create valid words" do
-          @good_word_samples.each do |sample|
-            lambda { Word.new(sample[:value], sample[:translation], sample[:hint])}.should_not raise_error
-          end
-        end
-      end
-
-      context "creating invalid words" do
-        it "should raise an exception when invalid parameters are specified" do
-          @bad_word_samples.each do |sample|
-            lambda { Word.new(sample[:value], sample[:translation], sample[:hint])}.should raise_error
-          end
+      it "should raise an exception when invalid parameters are specified" do
+        @bad_word_samples.each do |sample|
+          lambda { Word.new(sample[:value], sample[:translation], sample[:hint])}.should raise_error
         end
       end
     end
 
-    context "tagging" do
+    describe Word, " tagging" do
       before(:each) do
         @a = Word.new("Clojure", "functional programming language", "LISP dialect")
+        @tags = [' one ', ' two', 'three ']
       end
 
       it "should be tagged" do
-        tags = ["programming language", "lisp-like", "jvm"]
-        @a.add_tags(tags)
-        @a.should have(tags.size).tags
+        lambda { @a.add_tags(@tags) }.should change { @a.tags.size }.from(0).to(@tags.size)
       end
 
       it "should not be tagged with illogic tags" do
         wrong_tags = [nil, ' ']
-
-        @a.should have(0).tags
-        @a.add_tags(wrong_tags)
-        @a.should have(0).tags
+        lambda { @a.add_tags(wrong_tags) }.should change { @a.tags.size }.by(0)
       end
 
       it "should reference tag" do
@@ -52,34 +38,29 @@ module LearningSystem
       end
 
       it "should strip preceding and succeeding white space" do
-        tags = [' one ', ' two', 'three ']
-        @a.add_tags(tags)
+        @a.add_tags(@tags)
 
-        tags.each do |t|
+        @tags.each do |t|
           @a.tag(t.strip).should == t.strip
           @a.tag(t).should == t.strip
         end
       end
 
       it "should have its tag removed" do
-        tags = [' one ', ' two', 'three ']
-        @a.add_tags(tags)
+        @a.add_tags(@tags)
 
-        tags.each do |t|
-          @a.remove_tag(t)
-        end
-
-        @a.should have(0).tags
+        lambda do 
+          @tags.each { |t| @a.remove_tag(t) }
+        end.should change { @a.tags.size }.from(@tags.size).to(0)
       end
 
-      it "should iterate over tags" do
-        tags = [' one ', ' two', 'three ']
-        @a.add_tags(tags)
-        @a.each_tag.should iterate_over_items_of(@a.tags)
+      it "should iterate over its all tags" do
+        @a.add_tags(@tags)
+        @a.each_tag.should iterate_over_all_items_of(@a.tags)
       end
     end
 
-    context "guessing " do
+    describe Word, " guessing " do
       before(:each) do
         @word = Word.new("Test", "form of examination", "similar to quiz")
         @correct_value_guesses = ["Test", "TEST", "test", " test ", "test ", " test"]
@@ -132,7 +113,7 @@ module LearningSystem
         @word.guess( :translation => "a hypothesis formed speculating", :percent => 50).should == true
       end
 
-      context "counting guessing statistics" do
+      describe Word, " counting guessing statistics" do
         it "should be guessed and answerred equally" do
           @correct_value_guesses.each do |answer|
             @word.guess( :value => answer)

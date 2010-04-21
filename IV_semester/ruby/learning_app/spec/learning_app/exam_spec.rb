@@ -8,7 +8,7 @@ module LearningSystem
     #  config.include(Matchers)
     #end
 
-    context "creating" do
+    describe Exam, " creating" do
       it "should not be created with empty name" do
         [nil, "  ", ""].each do |bad_name|
           lambda { Exam.new(bad_name) }.should raise_error
@@ -16,7 +16,7 @@ module LearningSystem
       end
     end
 
-    context "taking" do
+    describe " taking" do
       before(:each) do
         @e = Exam.new("name")
         good_word_samples.each do |s|
@@ -52,10 +52,10 @@ module LearningSystem
           else
             word.value
           end
-        end.should return_valid_format
+        end.should be_valid_format
       end
 
-      context "counting statistics" do
+      describe Exam, " counting statistics" do
         it "should know how many times it was taken" do
           lambda { 
             @e.take( Proc.new {|w, a| w.guess(:value => a)} ) {|w| w.value }
@@ -89,7 +89,7 @@ module LearningSystem
           @e.take(Proc.new {|w, a| w.guess(:value => a)}) {|w| w.value }
           17.times { @e.take(Proc.new {|w, a| w.guess(:translation => a)}) {|w| w.value } }
 
-          @e.average_score.should return_valid_format
+          @e.average_score.should be_valid_format
         end
       end
     end
