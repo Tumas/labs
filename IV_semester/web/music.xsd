@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+  targetNamespace="http://github.com/Tumas"
+  xmlns="http://github.com/Tumas"
+  xmlns:t="http://github.com/Tumas"
+  elementFormDefault="qualified">
+
+  <!-- keyref i unique/key -->
+  <xs:element name="music_database" type="db">
+    <xs:key name="limitofuniqueness">
+      <xs:selector xpath="t:album" />
+      <xs:field xpath="t:title" />
+    </xs:key>
+
+    <xs:keyref name="mostpopularalbum" refer="limitofuniqueness">
+      <xs:selector xpath="t:most_popular" />
+      <xs:field xpath="t:atitle" />
+    </xs:keyref>
+  </xs:element>
+
+  <xs:complexType name="db">
+    <xs:sequence>
+      <xs:element name="album" type="albumtype" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="file" type="fileorpodcast" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="most_popular" type="atitle" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="atitle">
+    <xs:sequence>
+      <xs:element name="atitle" type="xs:string" />
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Tipu deklaracijos -->
+  <!-- Paprastas tipas, apribojantis koki nors Schema std tipa -->
+
+  <xs:simpleType name="ratingtype">
+    <xs:restriction base="xs:decimal">
+      <xs:minInclusive value="1.0" />
+      <xs:maxInclusive value="5.0" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="licensetype">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="50" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="authortype">
+    <xs:restriction base="xs:string">
+      <xs:maxLength value="100" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Sudėtingi tipai su paprastu turiniu,
+        išvesti praplėtimu (extension) iš jūsų bazinio tipo -->
+  <xs:complexType name="authorwithnationality">
+    <xs:simpleContent>
+      <xs:extension base="authortype">
+        <xs:attribute name="from" type="xs:string" /> 
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <!-- Sudėtingi tipai su paprastu turiniu,
+         išvesti apribojimu (restriction) iš jūsų (ne XML Schema) bazinio tipo -->
+  <xs:complexType name="enhancedlicensetype">
+    <xs:simpleContent>
+      <xs:extension base="licensetype">
+        <xs:attribute name="free" type="xs:string" /> 
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="freelicensetype">
+    <xs:simpleContent>
+      <xs:restriction base="enhancedlicensetype">
+        <xs:enumeration value="Creative Commons" />
+        <xs:enumeration value="Against DRM 2.0" />
+        <xs:enumeration value="Open Audio License" />
+        <xs:enumeration value="Free Art License" />
+
+        <xs:attribute name="free" fixed="yes" type="xs:string" />  
+      </xs:restriction>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <!-- Sudėtingi tipai su sudėtingu turiniu,
+        išvesti praplėtimu (extension) iš jūsų bazinio tipo -->
+  <xs:complexType name="filetype">
+    <xs:sequence>
+      <xs:element name="title" type="xs:string" />
+      <xs:element name="author" type="xs:string" />
+      <xs:element name="length" type="xs:integer" />
+      <xs:element name="genre" type="xs:string" />
+      <xs:element name="rating" type="ratingtype" />
+    </xs:sequence>
+
+    <xs:attribute name="format" type="xs:string" use="required" />
+    <xs:attribute name="bitrate" type="xs:integer" use="required" />
+  </xs:complexType>
+
+  <xs:complexType name="filewithcommenttype">
+    <xs:complexContent>
+      <xs:extension base="filetype">
+        <xs:sequence>
+          <xs:element name="comment" type="mixedcommentwithrestriction" />
+        </xs:sequence> 
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!--  Sudėtingi tipai su sudėtingu turiniu,
+      išvesti apribojimu (restriction) iš jūsų bazinio tipo -->
+  <xs:complexType name="mixedcommentwithrestriction" mixed="true">
+    <xs:complexContent>
+      <xs:restriction base="mixedcomment">
+        <xs:sequence minOccurs="0" maxOccurs="30">
+          <xs:element name="title" type="xs:string" minOccurs="0" />
+          <xs:element name="author" type="authortype" minOccurs="0" />
+        </xs:sequence>
+      </xs:restriction>
+    </xs:complexContent>
+  </xs:complexType>
+
+  <!-- Sudetingas tipas su misriu turiniu    -->
+  <xs:complexType name="mixedcomment" mixed="true">
+    <xs:all>
+      <xs:element name="title" type="xs:string" minOccurs="0" />
+      <xs:element name="author" type="authortype" minOccurs="0" />
+    </xs:all>
+  </xs:complexType>
+
+  <!-- choice valdymo struktura -->
+  <!-- sąrašo tipas (list type) -->
+  <xs:complexType name="fileorpodcast">
+    <xs:sequence>
+      <xs:element name="title" type="xs:string" />
+      <xs:element name="length" type="xs:integer" />
+      <xs:element name="rating" type="ratingtype" />
+      <xs:element name="comment" type="mixedcommentwithrestriction" minOccurs="0" />
+      <xs:element name="license" type="freelicensetype" />
+      <xs:choice>
+        <xs:sequence>
+          <xs:element name="author" type="authorwithnationality" />
+          <xs:element name="genre" type="xs:string" maxOccurs="10" />
+        </xs:sequence>
+        <xs:sequence>
+          <xs:element name="host" type="authorwithnationality" />
+          <xs:element name="topic" type="xs:string" maxOccurs="10" />
+        </xs:sequence>
+      </xs:choice>
+    </xs:sequence>
+
+    <xs:attribute name="format" type="xs:string" use="required" />
+    <xs:attribute name="bitrate" type="xs:integer" use="required" />
+  </xs:complexType>
+
+  <xs:complexType name="albumtype">
+    <xs:sequence>
+      <xs:element name="release_date" type="xs:date" />
+      <xs:element name="title" type="xs:string" />
+      <xs:element name="file" type="fileorpodcast" maxOccurs="unbounded" />
+    </xs:sequence>
+
+    <xs:attribute name="label" type="xs:string" />
+  </xs:complexType>
+</xs:schema>
