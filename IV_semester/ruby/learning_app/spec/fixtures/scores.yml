@@ -1,0 +1,16 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+good:
+  score: 0.95
+  user: john
+  exam: one
+
+average:
+  score: 0.5
+  user: john
+  exam: one
+
+bad:
+  score: 0.1
+  user: john
+  exam: one

@@ -1,0 +1,13 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  title: FirstExam
+  public: false
+  user: john
+  words: spouse, audacity, test
+
+two:
+  title: SecondExam
+  public: true
+  user: john
+  words: audacity

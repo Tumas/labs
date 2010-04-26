@@ -1,0 +1,22 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+one:
+  value: spouse
+  part: translation
+  word: spouse
+  user: john
+  count: 0
+
+two:
+  value: spouse
+  part: value
+  word: spouse
+  user: john
+  count: 0
+
+three:
+  value: wrong
+  part: value
+  word: spouse
+  user: john
+  count: 0

@@ -1,4 +1,6 @@
 coverage
 *.swp
-doc/
-users.yaml
+doc/api
+doc/app
+log/*.log
+logfile

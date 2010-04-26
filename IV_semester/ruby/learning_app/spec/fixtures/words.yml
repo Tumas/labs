@@ -1,0 +1,20 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+spouse:
+  value: spouse
+  translation: a persons partner in marriage
+  example: 
+  user: john
+
+audacity:
+  value: audacity
+  translation: fearless daring
+  example: 
+  user: john
+
+test:
+  value: test
+  translation: form of examintaion 
+  example:
+  user: john
+

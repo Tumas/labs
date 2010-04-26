@@ -1,0 +1,13 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+tom:
+  name: om
+  password: tomspassword
+
+pete:
+  name: Pete
+  password: cure
+
+john:
+  name: John
+  password: johnspassword

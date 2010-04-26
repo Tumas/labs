@@ -1,0 +1,26 @@
+# Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
+
+tag1: 
+  title: verbs
+  users: john
+  taggable: one (Exam)
+
+tag2:
+  title: nouns
+  users: john
+  taggable: one (Exam)
+
+tag3:
+  title: hard word
+  users: john
+  taggable: spouse (Word)
+
+# TO-DO
+#   1. polymorhpic association fixtures ok
+#   2. tests + implementation for tags
+#   3. stubs
+#   4. git
+#
+#   ---
+#   4. user_handler ~!!
+#   5. konspektai
