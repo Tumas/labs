@@ -1,0 +1,29 @@
+1. neaiskus tekstai specifikaciju/testu pavadinimuose. Baltos dezes principas ok
+2. to_s ir kiti esminiai metodai turi buti apibrezti klaseje lets say ok
+3. perdaug procedurinio kodo GUI, galima daug ka iskelt i helperius let say ok
+4. updatint sena koda, matcherius: 3 matcherius galima pakeist i 1 ok
+5. nenaudot context, o describe Thing, "when first created" ok
+6. custom matcher naming'as ok
+7. yaml kodas turi but applikacijos kode
+8. vienas should per testa ok
+
+
+Tips&Tricks:
+  instance_of nelabai turetu but testupose
+  teste turi but vienas should geriausiu atveju
+  before() -> po default :each
+  after() -> freezint time'ui
+
+Dokumentacijos sveikiau neskaityt, o nert i pati koda
+
+Mocha vs Stub
+  1. Gotcha: 
+    STUBAI: kai nereik kito metodo testuot -> izoliuojames nuo jo, ir koncentruojames i reikiama metoda.
+    + tas metodas gali grazint skirtingus duomenis, reik kad butu zinomi
+    ==> izoliacija
+      downside: izoliuodamiesi atsiribojam nuo tikro pasaulio. pvz uzstubbintas metodas gali net neegzistuot.
+
+  2. MOCKAI: ne tik kad uzstubbina, bet dar ir tikrina ar yra kviesta ar nera. 
+    downside'as tas pats.
+
+

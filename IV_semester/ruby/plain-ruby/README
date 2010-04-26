@@ -1,0 +1,73 @@
+**** Uzsienio kalbos mokymosi sistema ****
+
+Esmines esybes:
+  Vartotojas
+  Testas
+  Quizas
+  Gramatikos mokymosi priemone 
+  Zyme
+  Zodis
+  Gramatikos taisykle
+  Hintas
+
+SAVYBES: (svarbiausios pazymetos !)
+
+REGISTRACIJA
+  
+  1.  vartotojas gali isbandyti sistema neprisiregistraves (demo)
+! 2.  vartotojas gali uzsiregistruoti sistemoje
+! 3.  vartotojas gali prisijungti prie sistemos
+! 4.  vartotojas sistemoje gali uzregistruoti nauja zodi
+  5.  vartotojas sistemoje gali uzregistruoti gramatine taisykle
+  6.  vartotojas gali zodziui/gramatinei taisyklei suteikti zyme (tagging)
+  7.  vartotojas gali zodziui/gramatikos taisyklei priskirti hint'a
+  8.  vartotojas gali priskirti paveiksleli zodziui/gramatikos taisyklei (kazkas panasaus i hint'a)	
+! 9.  vartotojas gali atsijungti nuo sistemos
+  9a. vartotojas gali issiregistruoti is sistemos
+
+REDAGAVIMAS
+
+  10. vartotojas gali redaguoti gramatikos taisykle
+! 11  vartotojas gali redaguoti zodi
+! 12  vartotojas gali istrinti zodi
+  13  vartotojas gali istrinti gramatikos taiskyle
+  14  vartotojas gali istrinti testu istorija susieta su zodziu
+  15  vartotojas gali istrinti testu istorija susieta su gramatikos taisykle
+
+ZINIU PATIKRINIMAS
+
+! 16  vartotojas gali atlikti zodziu quiz'a
+! 17  vartotojas gali atlikti zodziu testa
+  18  vartotojas gali naudotis gramatikos patikrinimu 
+  19  vartotojas gali pasirinkti atlikti test'a pagal zymes
+  20  vartotojas gali pasirinkti atlikti test'a pagal sudetinguma (sunkiu zodziu testas, lengvu zodziu testas, sudetingumas priklauso nuo teisingu atsakymu)
+  21  vartotojas gali atlikti sistemos siulomus testus/quiz'us (testai, kuriuose yra seniai kartoti zodziai)
+  22  vartotojas gali atlikti testa/quiz'a pagal globaliasias zymes (visu sistemos vartotoju zodziai pazymeti ta pacia zyme) 
+
+STATISTIKA
+
+  23  vartotojas gali suzinoti savo tobulejimo statistika (apskaiciuoja sistema) 
+  24  vartotojas gali suzinoti savo testu istorija
+
+SISTEMOS NUSTATYMAI
+
+  25  vartotojas gali nustatyti minimalu visu quiz'u/testu dydi 
+  26  vartotojas gali nustatyti maksimalu quiz'u/testu dydi	
+
+PERZIURA
+
+  27  vartotojas gali perziureti visu uzregistruotu zodzius sarasa
+  28  vartotojas gali perziureti visu uzregistruotu gramatikos taisykliu sarasa
+  29  vartotojas gali matyti egzistuojancias zymes
+  30  vartotojas gali perziureti gramatikos taisykles pagal zymes
+  31  vartotojas gali perziureti zodzius pagal zymes
+  32  vartotojas gali matyti kitu vartotoju zymes
+  33  vartotojas gali reitinguoti kitu vartotoju sukurtus testus
+  34  vartotojas gali rekomenduoti izeidzianti zodi/termina administratoriaus perziurai
+  35  vartotojas gali matyti ir atlikti kitu vartotoju sukurtus testus
+    	
+*-----
+Quizas - pateikiamas vertimas/apibrezimas -> vartotojas turi parasyti tikslu zodi
+Testas - pateikimas zodis ir keletas galimu vertimu/apibrezimu 
+
+Gramatikos mokymasis - parodomas pavadinimas, jei reikia hintas. Vartotojas paspaudzia 'gauti atsakyma' ar kazka panasaus ir parodomas atsakymas. Vartotojas pats isivertina savo spejima. Gramatikos mokymasis skiriasi nuo testo ir nuo quiz'o nes sistema negali ivertinti atsakymo korektiskumo. 

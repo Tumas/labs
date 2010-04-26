@@ -10,4 +10,13 @@
 
 http://wiki.github.com/dchelimsky/rspec
 
-2. 
+2. Entity classes must be refactored to ActiveRecord, tests should be refactored as well with least possible loss of functionality => 
+"spec titles should remain the same"
+  At least 2 stubs and 2 mocks :  example: http://mocha.rubyforge.org/
+  ActiveRecord features:
+    validation http://api.rubyonrails.org/classes/ActiveRecord/Validations/ClassMethods.html
+    assocations http://api.rubyonrails.org/classes/ActiveRecord/Associations/ClassMethods.html
+    etc..
+
+  Use one of many possible solutions to automatically insert test data. Fixtures :  http://api.rubyonrails.org/classes/Fixtures.html
+  No UI needed

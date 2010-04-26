@@ -1,0 +1,4 @@
+coverage
+*.swp
+doc/
+users.yaml
