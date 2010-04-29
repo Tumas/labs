@@ -29,12 +29,13 @@ class User < ActiveRecord::Base
   end
 
   def remove_word(word)
+    # This doesn't delete from the DB if :dependent => delete/destroy is not set
+    # self.words.delete(word)
     Word.delete(word.id)
   end
 
-  def remove_exam(opts = {})
-    opts[:user_id] = self.id
-    Exam.destroy_all(opts).size
+  def remove_exam(exam) 
+    Exam.delete(exam.id)
   end
 
   def word(opts = {})

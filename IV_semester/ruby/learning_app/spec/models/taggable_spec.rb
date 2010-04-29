@@ -7,20 +7,19 @@ describe Taggable do
 
   # testuojam moduli
   # stubbinam klases, kurios ji includins
+  fixtures :users
 
-  before(:each) do
+  before do
     @taggable_object = TaggableObject.new
-    # 
     @taggable_object.stubs(:id).returns(111)
-    # per fixtures
-    @taggable_object.stubs(:user).returns(User.find_or_create_by_name(:name => "Joe", :password => "asdjaksjd"))
+    @taggable_object.stubs(:user).returns(users(:john))
 
     @data = ["tag"]
-    Tag.destroy_all
+    Tag.delete_all
   end
 
   it "should add tags" do
-    tags = Tag.all(true).size
+    tags = Tag.all.size
     lambda { 
       @taggable_object.add_tags(@data)
     }.should change { Tag.all(true).size }.from(tags).to(tags + 1)
@@ -47,6 +46,7 @@ describe Taggable do
     @taggable_object.add_tags(@data)
 
     Tag.first.users.should_not be_empty
+    Tag.first.users.first.should === @taggable_object.user
   end
 
   it "should skip illogic tags" do

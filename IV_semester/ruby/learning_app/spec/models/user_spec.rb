@@ -3,46 +3,64 @@ require File.dirname(__FILE__) + '/../spec_helper'
 describe User do
   fixtures :users
 
-  before(:each) do
+  before do
     @user = User.find_by_name('John')
   end
 
+  # automatic associations
+  # do not use .find(1) us models(:fixture)
+  # Fixtures are evil! -> kas nors paeditins ir  nusicrashins. Pasisearchink apie fixtures settings
+  # transactional_fixtures greitai veikia
+  # hornsby - 
+  #     testai kuriami atominiais principais
+  #     @kint sharinami tik kai apsirasom
+  #     ideja -> apjungiam scenarijus, nereikia visko susimest. Nereikia maintainenit visos kruvos, gera izoliacija
+  #     naudojam AR, ir su create! iskart matom kas negerai su validacija
+  #
+  # blueprints -
+  # Factory girl
+  # Faker
+  
   describe User, " validation" do
-    it "should have name with at least 3 and at most 20 symbols and password with at least 6 and at most 50 symbols " do
-      User.find_all_by_name(['om', 'Pete']).each do |user|
-        user.should_not be_valid
-      end
-    end
+    # remarkable_rails plugin for rails validations testing
+    it { should validate_presence_of :name }
+    it { should validate_length_of :name,  :maximum => 20, :minimum => 3 }
+    it { should validate_length_of :password,  :maximum => 50, :minimum => 6 }
+
+    # remarkable_rails for association testing
   end
 
   describe User, " managing words" do
     fixtures :words
+    before do
+      @new_word = Word.new(:value => 'X', :translation => 'Y')
+    end
 
     it "should register new words" do
       words_size = @user.words.size
       
       lambda {
-        @user.add_word(Word.new(:value => "X", :translation => "Y"))
+        @user.add_word(@new_word)
       }.should change { #@user.words.size
         User.find_by_name(@user.name).words(true).size
       }.from(words_size).to(words_size + 1)
     end
 
     it "should raise an exception when registering word with the same value" do
-      @user.add_word(Word.new(:value => "X", :translation => "Y"))
+      @user.add_word(@new_word)
       lambda {
-        @user.add_word(Word.new(:value => "X", :translation => "Y"))
+        @user.add_word(Word.new(:value => @new_word.value, :translation => "Y"))
       }.should raise_error 
     end
 
     it "should not raise an exception when registering word with the same value and the overwrite option is set" do
-      @user.add_word(Word.new(:value => "X", :translation => "Y"))
+      @user.add_word(@new_word)
       lambda {
-        @user.add_word(Word.new(:value => "X", :translation => "Y"), :overwrite => true)
+        @user.add_word(Word.new(:value => @new_word.value, :translation => "Y"), :overwrite => true)
       }.should_not raise_error 
     end
 
-    it "should remove words" do
+    it "should remove from its words" do
       words_size = @user.words.size
       
       lambda {
@@ -52,9 +70,18 @@ describe User do
         User.find_by_name(@user.name).words(true).size
         }.from(words_size).to(words_size - 1)
     end
+
+    it "should remove words from the database" do
+      words_size = Word.all.size
+      
+      lambda {
+        @user.remove_word(@user.words.first)
+      }.should change {
+        Word.all(true).size
+        }.from(words_size).to(words_size - 1)
+    end
   end
 
-  # Not quite needed when using ActiveRecord
   describe User, " finding words" do
     fixtures :words
 
@@ -84,60 +111,47 @@ describe User do
   describe User, " managing exams" do
     fixtures :exams
 
+    before do
+      @exam = Exam.new(:title => "X")
+    end
+
     it "should create exams" do
       exams_size = @user.exams(true).size
       
-      lambda {
-        @user.add_exam(Exam.new(:title => "X"))
-      }.should change { #@user.words.size
-        User.find_by_name(@user.name).exams(true).size
-      }.from(exams_size).to(exams_size + 1)
+      lambda { @user.add_exam(@exam) }.should
+      change { User.find_by_name(@user.name).exams(true).size }.from(exams_size).to(exams_size + 1)
     end
 
     it "should raise an exception when creating exam with the same name" do
-      @user.add_exam(Exam.new(:title => "X"))
-
-      lambda {
-        @user.add_exam(Exam.new(:title => "X"))
-      }.should raise_error
+      @user.add_exam(@exam)
+      lambda { @user.add_exam(Exam.new(:title => @exam.title)) }.should raise_error
     end
 
     it "should not raise an exception when creating exam with the same name and the overwrite option is set" do
-      @user.add_exam(Exam.new(:title => "X"))
-
-      lambda {
-        @user.add_exam(Exam.new(:title => "X"), :overwrite => true)
-      }.should_not raise_error
+      @user.add_exam(@exam)
+      lambda { @user.add_exam(Exam.new(:title => @exam.title), :overwrite => true) }.should_not raise_error
     end
 
-    it "should remove exams by title" do
-      @user.add_exam(Exam.new(:title => "X"))
+    it "should remove exams" do
+      @user.add_exam(@exam)
       exams_size = @user.exams(true).size
       
-      lambda {
-        @user.remove_exam(:title => "X")
-      }.should change { #@user.words.size
+      lambda { @user.remove_exam(@user.exams.first) }.should change { 
         User.find_by_name(@user.name).exams(true).size
       }.from(exams_size).to(exams_size - 1)
     end
 
-    it "should return number of deleted exams when they are removed" do
-      @user.add_exam(Exam.new(:title => "X"))
-      @user.remove_exam(:title => "X").should == 1
-    end
-  end
+    describe User, " finding exam" do
+      fixtures :exams
 
-  describe User, " finding exam" do
-    fixtures :exams
+      it "should find exam by title" do
+        @user.add_exam(@exam)
+        @user.exam(:title => @exam.title).should === @exam
+      end
 
-    it "should find exam by title" do
-      e = Exam.new(:title => "X")
-      @user.add_exam(e)
-      @user.exam(:title => "X").should === e
-    end
-
-    it "should return nil if exam wasn't found" do
-      @user.exam(:title => "X").should be_nil
+      it "should return nil if exam wasn't found" do
+        @user.exam(:title => "some_random_name_that_should_not_exist").should be_nil
+      end
     end
   end
 end

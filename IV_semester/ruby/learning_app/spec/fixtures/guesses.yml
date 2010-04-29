@@ -1,22 +1,29 @@
 # Read about fixtures at http://ar.rubyonrails.org/classes/Fixtures.html
 
-one:
+incorrect_by_translation:
   value: spouse
   part: translation
   word: spouse
   user: john
   count: 0
 
-two:
+correct_by_value:
   value: spouse
   part: value
   word: spouse
   user: john
   count: 0
 
-three:
+incorrect_by_value:
   value: wrong
   part: value
+  word: spouse
+  user: john
+  count: 0
+
+correct_by_translation:
+  value: a persons partner in marriage 
+  part: translation
   word: spouse
   user: john
   count: 0
