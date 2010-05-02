@@ -6,7 +6,6 @@ class Exam < ActiveRecord::Base
 
   validates_presence_of :title
 
-  # no direct SQL here => I doubt users would put huge numbers of words inside singeexam
   def take(predicate)
     local_score = 0
 
@@ -29,6 +28,17 @@ class Exam < ActiveRecord::Base
     count = get_scores_count
     return score_format(sum / count) if count != 0
     0
+  end
+
+  def hours_from_last_taking_to(time = Time.new)
+    time = Time.parse(time) if time.class != Time
+    minutes = (time - Time.parse(self.last_score.created_at)).to_i / 60
+
+    if minutes % 60 > 30
+      minutes / 60 + 1
+    else
+      minutes / 60
+    end
   end
 
   private

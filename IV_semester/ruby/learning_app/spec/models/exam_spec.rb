@@ -5,9 +5,12 @@ describe Exam do
   fixtures :words
   fixtures :exams
 
+  before do
+    @e = exams(:one)
+  end
+
   describe Exam, " taking and calculating statistics" do
     before do
-      @e = exams(:one)
       @predicate = Proc.new {|word, answer| word.value == answer }
     end
 
@@ -39,9 +42,15 @@ describe Exam do
       }.should change { @e.scores(true).size }.from(scores_size).to(scores_size + 1)
     end
 
-    it "should reset its scoring history" 
+    it "should reset its scoring history"  do
+      pending("not yet implemented")
 
-    # Move out Proc
+      scores_size = @e.scores.size
+      lambda { 
+        @e.reset_scores
+      }.should change { @e.scores(true).size }.from(scores_size).to(0)
+    end
+
     it "should know its average score rating" do
       @e.take(@predicate) { |w| w.value }
       @e.take(@predicate) { |w| w.translation }
@@ -54,6 +63,22 @@ describe Exam do
       @e.average_score.should have_valid_format
     end
 
-    it "should know time since last being taken"
+    it "should find its last score" 
+
+    describe Exam, " counting inactivity time" do
+      before do
+        @last_score = Score.new
+        @last_score.expects(:created_at).returns("2010-04-28 22:25:59")
+        @e.expects(:last_score).returns(@last_score)
+      end
+
+      it "should know time in hours since last taking" do
+        @e.hours_from_last_taking_to("2010-04-29 01:25:59").should == 3
+      end
+
+      it "should return 2 if 1.5h have passed" do
+        @e.hours_from_last_taking_to("2010-04-28 23:56:59").should == 2
+      end
+    end
   end
 end
