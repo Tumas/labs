@@ -5,6 +5,13 @@ describe Guess do
   fixtures :words
   fixtures :guesses
 
+  describe Guess, " validations/associations" do
+    it { should validate_presence_of :value }
+    it { should validate_inclusion_of(:part, :in => %w(value translation)) }
+    it { should belong_to :user }
+    it { should belong_to :word }
+  end
+
   describe Guess, " being guessed" do
     it "should increase its counter" do
       g = guesses(:correct_by_value)

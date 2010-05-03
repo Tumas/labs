@@ -33,6 +33,7 @@ class Exam < ActiveRecord::Base
   def hours_from_last_taking_to(time = Time.new)
     time = Time.parse(time) if time.class != Time
     minutes = (time - Time.parse(self.last_score.created_at)).to_i / 60
+    raise "Given date is earlier than #{self.title} was last taken" if minutes < 0
 
     if minutes % 60 > 30
       minutes / 60 + 1

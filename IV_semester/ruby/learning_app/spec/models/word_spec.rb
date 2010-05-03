@@ -7,6 +7,16 @@ describe Word do
 
   before do
     @word = words(:spouse)
+    @guess = Guess.new
+  end
+
+  describe Word, " validations/associations" do
+    it { should validate_presence_of :value }
+    it { should validate_presence_of :translation }
+    it { should belong_to :user }
+    it { should have_many :guesses }
+    it { should have_many :tags }
+    it { should have_and_belong_to_many :exams }
   end
 
   describe Word, " guessing" do
@@ -55,5 +65,11 @@ describe Word do
     end
 
     it "should know its wrong guesses and times they were guessed" 
+  end
+
+  describe Word, " getting synonyms" do
+    it "should get an array of synonyms with specified length"
+    it "should get an array of synonyms by value"
+    it "should get an array of synonyms by definition"
   end
 end

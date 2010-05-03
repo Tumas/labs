@@ -6,7 +6,6 @@ class Guess < ActiveRecord::Base
   validates_inclusion_of :part, :in => %w(value translation)
 
   def guessed
-    #g = Guess.find_or_create_by_value_and_part_and_user_id_and_word_id(:value => self.value, :part => self.part, :user_id => self.user.id, :word_id => self.word.id)
     g = Guess.find(:first, :conditions => { :value => self.value, :part => self.part, :user_id => self.user_id, :word_id => self.word.id })  
 
     g.count += 1

@@ -7,20 +7,6 @@ describe User do
     @user = User.find_by_name('John')
   end
 
-  # automatic associations
-  # do not use .find(1) us models(:fixture)
-  # Fixtures are evil! -> kas nors paeditins ir  nusicrashins. Pasisearchink apie fixtures settings
-  # transactional_fixtures greitai veikia
-  # hornsby - 
-  #     testai kuriami atominiais principais
-  #     @kint sharinami tik kai apsirasom
-  #     ideja -> apjungiam scenarijus, nereikia visko susimest. Nereikia maintainenit visos kruvos, gera izoliacija
-  #     naudojam AR, ir su create! iskart matom kas negerai su validacija
-  #
-  # blueprints -
-  # Factory girl
-  # Faker
-  
   describe User, " validation" do
     # remarkable_rails plugin for rails validations testing
     it { should validate_presence_of :name }
@@ -28,6 +14,11 @@ describe User do
     it { should validate_length_of :password,  :maximum => 50, :minimum => 6 }
 
     # remarkable_rails for association testing
+    it { should have_many :words }
+    it { should have_many :exams }
+    it { should have_many :guesses }
+    it { should have_many :scores }
+    it { should have_and_belong_to_many :tags }
   end
 
   describe User, " managing words" do
