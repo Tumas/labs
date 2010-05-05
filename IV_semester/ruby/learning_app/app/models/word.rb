@@ -9,9 +9,11 @@ class Word < ActiveRecord::Base
   def times_guessed
     # self.guesses.inject(0) {|sum, g| sum + g.count }
 
-    count = ActiveRecord::Base.connection.execute("select sum(count) from guesses where guesses.word_id = #{self.id}").first[0]
-    return 0 if count.nil?
-    count.to_i
+    #count = ActiveRecord::Base.connection.execute("select sum(count) from guesses where guesses.word_id = #{self.id}").first[0]
+    #return 0 if count.nil?
+    #count.to_i
+
+    Guess.sum("count")
   end
 
   def times_answered
@@ -20,9 +22,11 @@ class Word < ActiveRecord::Base
     #  sum += g.count if (g.part == "translation" and g.value == self.translation) or (g.part == "value" and g.value == self.value)
     #end
     
-    count = ActiveRecord::Base.connection.execute("select sum(count) from guesses where guesses.word_id = #{self.id} and ((guesses.part = 'translation' and guesses.value = '#{self.translation}') or (guesses.part = 'value' and guesses.value = '#{self.value}'))").first[0]
-    return 0 if count.nil?
-    count.to_i
+    #count = ActiveRecord::Base.connection.execute("select sum(count) from guesses where guesses.word_id = #{self.id} and ((guesses.part = 'translation' and guesses.value = '#{self.translation}') or (guesses.part = 'value' and guesses.value = '#{self.value}'))").first[0]
+    #return 0 if count.nil?
+    #count.to_i
+
+    Guess.sum("count", :conditions => "(part = 'translation' and value = '#{self.translation}') or (part = 'value' and value = '#{self.value}')")
   end
 
   def guess(guess)

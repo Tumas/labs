@@ -59,11 +59,7 @@ describe Word do
       @word.times_guessed.should == @word.times_answered
     end
 
-    it "should know how many different wrong guesses were attempted" do
-      pending
-      @word.should have(2).wrong_guesses
-    end
-
+    it "should know how many different wrong guesses were attempted"
     it "should know its wrong guesses and times they were guessed" 
   end
 
