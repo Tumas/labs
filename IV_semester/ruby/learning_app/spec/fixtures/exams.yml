@@ -11,3 +11,10 @@ two:
   public: true
   user: john
   words: audacity
+
+three:
+  title: ThirdExam
+  public: true
+  user: john
+  words: audacity, test
+

@@ -4,6 +4,7 @@ describe Exam do
   fixtures :users
   fixtures :words
   fixtures :exams
+  fixtures :scores
 
   describe Exam, " validations/associations" do
     it { should validate_presence_of :title }
@@ -55,13 +56,11 @@ describe Exam do
     end
 
     it "should know its average score rating" do
-      exams(:one).take(@predicate) { |w| w.value }
-      exams(:one).take(@predicate) { |w| w.translation }
-      exams(:one).average_score.should == 0.5
+      exams(:one).average_score.should == 0.52
     end
 
     it "should have averago score 0 if it hasn't been taken yet" do
-      exams(:one).average_score.should == 0
+      exams(:three).average_score.should == 0
     end
 
     it "should return its average score as a float number between 0 and 1 and with maximum two decimal places as score" do

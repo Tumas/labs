@@ -14,3 +14,8 @@ bad:
   score: 0.1
   user: john
   exam: one
+
+other:
+  score: 0.4
+  user: john
+  exam: two
