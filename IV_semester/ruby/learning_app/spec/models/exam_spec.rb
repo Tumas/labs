@@ -47,8 +47,6 @@ describe Exam do
     end
 
     it "should reset its scoring history"  do
-      pending("not yet implemented")
-
       scores_size = exams(:one).scores.size
       lambda { 
         exams(:one).reset_scores
@@ -69,7 +67,11 @@ describe Exam do
       exams(:one).average_score.should have_valid_format
     end
 
-    it "should find its last score" 
+    it "should find its last score" do
+      scores(:average).created_at = Time.new.tomorrow.to_s(:db)
+      scores(:average).save
+      exams(:one).last_score.should === scores(:average)
+    end
 
     describe Exam, " counting inactivity time" do
       before do

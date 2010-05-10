@@ -42,6 +42,14 @@ class Exam < ActiveRecord::Base
     end
   end
 
+  def reset_scores
+    Score.delete_all("exam_id = '#{self.id}'")
+  end
+
+  def last_score
+    Score.find(:first, :order => "created_at desc")
+  end
+
   private
     def score_format(float)
       format("%0.2f", float).to_f
