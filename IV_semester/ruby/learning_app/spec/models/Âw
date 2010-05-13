@@ -59,7 +59,6 @@ describe Word do
     end
   end
 
-  # testing webservice
   describe Word, " getting synonyms" do
     before do
       words(:test).synonym_finder = mock()
@@ -82,27 +81,31 @@ describe Word do
     it "should return 4 synonyms if count is not specified" do
       words(:test).synonym_finder.expects(:related).with(words(:test).value, 4, :type => :synonym).returns([{"wordstrings"=>["judgment", "distinction", "standard", "touchstone"], "relType"=>"synonym"}])
 
-      words(:test).synonyms.size.should == 4
+      words(:spouse).synonyms.size.should == 4
     end
 
     it "should get an array of similar translations" do
-      words(:test).stubs(:synonyms).returns(["judgment", "distinction", "standard"])
+      words(:spouse).similar_definitions(3).size.should == 4
+    end
 
-      words(:test).synonym_finder.expects(:define).with("judgment", :count => 1).returns([{"headword"=>"judgment", "sequence"=>"0", "citations"=>[{"cite"=>"I oughte deme, of skilful <ex>jugement</ex>,\nThat in the salte sea my wife is deed.", "source"=>"Chaucer."}], "exampleUses"=>[{"text"=>"by careful <ex>judgment</ex> he avoided the peril; by a series of wrong <ex>judgments</ex> he forfeited confidence."}], "partOfSpeech"=>"noun", "text"=>"The act of judging; the operation of the mind, involving comparison and discrimination, by which a knowledge of the values and relations of things, whether of moral qualities, intellectual concepts, logical propositions, or material facts, is obtained", "id"=>720904, "seqString"=>"1."}]
-)
-      words(:test).synonym_finder.expects(:define).with("distinction", :count => 1).returns([{"headword"=>"distinction", "sequence"=>"0", "citations"=>[{"cite"=>"The <ex>distinction</ex> of tragedy into acts was not known.", "source"=>"Dryden."}], "partOfSpeech"=>"noun", "text"=>"A marking off by visible signs; separation into parts; division.", "id"=>675821, "seqString"=>"1.", "labels"=>[{"text"=>"obsolete", "type"=>"mark"}]}])
-
-      words(:test).synonym_finder.expects(:define).with("standard", :count => 1).returns([{"headword"=>"standard", "sequence"=>"0", "citations"=>[{"cite"=>"His armies, in the following day,\nOn those fair plains their <ex>standards</ex> proud display.", "source"=>"Fairfax."}], "partOfSpeech"=>"noun", "text"=>"A flag; colors; a banner; especially, a national or other ensign.", "id"=>795578, "seqString"=>"1."}]
-)
-
-      words(:test).similar_definitions(3).size.should == 3
+    it "should return 4 similar definitions if count is not specified" do 
+      words(:spouse).similar_definitions.size.should == 4
     end
 
     it "should return empty array if there was no synonyms" do
-      words(:test).synonym_finder.expects(:related).with("123123_should_have_no_synonyms2k3j1l", 4, :type => :synonym).returns([])
-
-      words(:test).stubs(:value => "123123_should_have_no_synonyms2k3j1l") 
-      words(:test).synonyms.should be_empty
+      words(:spouse).stubs(:value => "123123_should_have_no_synonyms2k3j1l") 
+      words(:spouse).synonyms.should be_empty
     end
+
+    #it "should retrieve synonyms with given API" do
+      #finder = words(:spouse).synonym_finder
+      #finder.expects(:related).with(words(:spouse).value, 4, :type=>:synonym)
+      #words(:spouse).synonyms
+    #end
+
+    # TODO:
+    #   Finish synonyming
+    #   Explore mocha for mocking examples
+    #   User_authentication
   end
 end

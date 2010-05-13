@@ -56,20 +56,10 @@ class Exam < ActiveRecord::Base
     end
 
     def get_scores_sum
-      #sum = ActiveRecord::Base.connection.execute("select sum(score) from scores where exam_id = '#{self.id}'").first[0]
-      #return 0 if sum.nil?
-      #sum.to_f
-      
-      #Score.sum("score")
       Score.sum("score", :conditions => "exam_id = '#{self.id}'")
     end
 
     def get_scores_count
-      #count = ActiveRecord::Base.connection.execute("select count() from scores where exam_id = '#{self.id}'").first[0]
-      #return 0 if count.nil?
-      #count.to_f
-
-      #Score.count(:exam_id)
       Score.count(:exam_id, :conditions => "exam_id = '#{self.id}'")
     end
 end

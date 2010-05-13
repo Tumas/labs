@@ -76,8 +76,8 @@ describe Exam do
     describe Exam, " counting inactivity time" do
       before do
         last_score = Score.new
-        last_score.expects(:created_at).returns("2010-04-28 22:25:59")
-        exams(:one).expects(:last_score).returns(last_score)
+        last_score.stubs(:created_at).returns("2010-04-28 22:25:59")
+        exams(:one).stubs(:last_score).returns(last_score)
       end
 
       it "should know time in hours since last taking" do
