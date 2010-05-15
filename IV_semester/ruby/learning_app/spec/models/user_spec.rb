@@ -21,6 +21,12 @@ describe User do
     it { should have_and_belong_to_many :tags }
   end
 
+  describe User, "registration " do
+    it "should check if user.name is already taken" do
+      User.new(:name => 'John').should be_already_registered
+    end
+  end
+
   describe User, " managing words" do
     fixtures :words
     before do

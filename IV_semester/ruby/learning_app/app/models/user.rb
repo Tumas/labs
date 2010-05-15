@@ -9,6 +9,10 @@ class User < ActiveRecord::Base
   validates_length_of :name, :in => 3..20
   validates_length_of :password, :in => 6..50
 
+  def already_registered?
+    !User.find_by_name(self.name).nil?
+  end
+
   def add_word(word, opts = { })
     if self.words.exists?(:value => word.value, :translation => word.translation) and not opts[:overwrite]
       raise "Word #{word.value} with the same value is already there!"
