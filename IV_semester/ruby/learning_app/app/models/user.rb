@@ -1,3 +1,5 @@
+require 'digest/sha1'
+
 class User < ActiveRecord::Base
   has_many :words
   has_many :exams
@@ -9,12 +11,21 @@ class User < ActiveRecord::Base
   validates_length_of :name, :in => 3..20
   validates_length_of :password, :in => 6..50
 
-  def already_registered?
+  def registered?
     !User.find_by_name(self.name).nil?
   end
 
+  def register
+    self.password = User.digest(self.password)
+    self.save
+  end
+
+  def self.authenticate(name, plain_password)
+    User.find_by_name_and_password(name, User.digest(plain_password))
+  end
+
   def add_word(word, opts = { })
-    if self.words.exists?(:value => word.value, :translation => word.translation) and not opts[:overwrite]
+    if self.words.exists?(:value => word.value) and not opts[:overwrite]
       raise "Word #{word.value} with the same value is already there!"
     else
       # save word with correct association
@@ -33,8 +44,6 @@ class User < ActiveRecord::Base
   end
 
   def remove_word(word)
-    # This doesn't delete from the DB if :dependent => delete/destroy is not set
-    # self.words.delete(word)
     Word.delete(word.id)
   end
 
@@ -50,5 +59,9 @@ class User < ActiveRecord::Base
   def exam(opts = {})
     opts[:user_id] = self.id
     Exam.find(:first, :conditions => opts)
+  end
+
+  def self.digest(string)
+    Digest::SHA1.hexdigest(string)
   end
 end
