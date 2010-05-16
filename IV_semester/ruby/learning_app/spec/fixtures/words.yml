@@ -18,3 +18,8 @@ test:
   example:
   user: john
 
+jam:
+  value: jam
+  translation: marmelade
+  example:
+  user: 

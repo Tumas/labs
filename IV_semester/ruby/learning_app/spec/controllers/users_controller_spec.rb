@@ -7,6 +7,7 @@ describe UsersController do
       params_from(:get, "/register").should == {:controller => "users", :action => 'new'}
     end
   end
+
   # Registration
   describe UsersController, " POST create" do
     context "when submitted parameters are valid" do
@@ -16,10 +17,11 @@ describe UsersController do
         User.any_instance.stubs(:valid?).returns(true)
       end
 
-      it "should redirect to users_path with a notice on succesful creation" do
+      it "should redirect to user_path with a notice on succesful creation " do
         post 'create'
         flash[:error].should be_nil
         assigns[:user].should_not be_new_record
+        session[:user_id].should == assigns[:user].id
         response.should redirect_to(user_path(assigns[:user]))
       end
 
@@ -50,18 +52,56 @@ describe UsersController do
 
     it "should redirect to home page" do
       delete "destroy", :id => users(:john).id
-      response.should redirect_to('/')
+      response.should redirect_to root_url
     end
 
     it "should delete the user" do 
-      User.expects(:delete).with(users(:john).id)
+      controller.stubs(:current_user).returns(users(:john))
+      User.expects(:delete).with(users(:john).id.to_s)
       delete "destroy", :id => users(:john).id
     end
   end
 
-  # should create session if redirect to panel
-  # register -> create
-  # unregister -> delete
-  # /users/id  -> user panel | show
-  # /users/id/edit -> change password or user_name | edit => update
+  describe UsersController, " GET show" do
+    #it { should require_login_on { :method => 'get', :action => 'show' } }
+    fixtures :users
+
+    it "should assign authorized user to @user" do
+      controller.stubs(:current_user).returns(users(:john))
+      get :show, :id => users(:john).id
+      assigns[:user].should == users(:john)
+    end
+  end
+
+  describe UsersController, "GET edit" do
+    fixtures :users
+
+    it "should assign requested user to @user" do
+      controller.stubs(:current_user).returns(users(:john))
+      get :edit, :id => users(:john).id
+      assigns[:user].should == users(:john)
+    end
+  end
+
+  describe UsersController, "PUT update" do
+    fixtures :users
+
+    before do
+      controller.stubs(:current_user).returns(users(:john))
+    end
+
+    it "should re-render its template if new values are incorrect" do
+      put :update, :id => users(:john).id, :user => { :name => "", :password => "" }
+      flash[:error].should_not be_nil
+      response.should render_template('edit')
+      assigns[:user].should == users(:john)
+    end
+
+    it "should redirect to user_path when new values are correct" do
+      users(:john).expects(:save).returns(true)
+      put :update, :id => users(:john).id, :user => { :password => "newPassword" }
+      flash[:message].should_not be_nil
+      response.should redirect_to user_path(users(:john))
+    end
+  end
 end

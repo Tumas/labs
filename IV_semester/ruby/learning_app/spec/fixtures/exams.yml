@@ -18,3 +18,8 @@ three:
   user: john
   words: audacity, test
 
+no_owner:
+  title: FourthExam
+  public: true
+  user:
+  words: test
