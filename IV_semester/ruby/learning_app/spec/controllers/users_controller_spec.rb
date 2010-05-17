@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 describe UsersController do
+  fixtures :users
 
   describe UsersController, " GET new " do
     it "should route from /register " do
@@ -11,7 +12,6 @@ describe UsersController do
   # Registration
   describe UsersController, " POST create" do
     context "when submitted parameters are valid" do
-      fixtures :users
 
       before do
         User.any_instance.stubs(:valid?).returns(true)
@@ -48,7 +48,6 @@ describe UsersController do
   end
 
   describe UsersController, " DELETE destroy" do
-    fixtures :users
 
     it "should redirect to home page" do
       delete "destroy", :id => users(:john).id
@@ -64,7 +63,6 @@ describe UsersController do
 
   describe UsersController, " GET show" do
     #it { should require_login_on { :method => 'get', :action => 'show' } }
-    fixtures :users
 
     it "should assign authorized user to @user" do
       controller.stubs(:current_user).returns(users(:john))
@@ -74,7 +72,6 @@ describe UsersController do
   end
 
   describe UsersController, "GET edit" do
-    fixtures :users
 
     it "should assign requested user to @user" do
       controller.stubs(:current_user).returns(users(:john))
@@ -84,7 +81,6 @@ describe UsersController do
   end
 
   describe UsersController, "PUT update" do
-    fixtures :users
 
     before do
       controller.stubs(:current_user).returns(users(:john))
