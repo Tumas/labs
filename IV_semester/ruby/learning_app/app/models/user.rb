@@ -30,7 +30,6 @@ class User < ActiveRecord::Base
     else
       # save word with correct association
       self.words << word
-      word.save
     end
   end
 
@@ -39,7 +38,6 @@ class User < ActiveRecord::Base
       raise "Exam with #{exam.title} is already there!"
     else
       self.exams << exam
-      exam.save
     end
   end
 

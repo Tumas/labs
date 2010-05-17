@@ -22,7 +22,7 @@ describe User do
       User.new(:name => 'John').should be_registered
     end
 
-    it "should register new users" do
+    it "should save new users when registering" do
       users(:john).expects(:save)
       users(:john).register
     end
@@ -47,15 +47,18 @@ describe User do
     fixtures :words
 
     it "should register new words" do
-      words_size = users(:john).words.size
+      #words_size = users(:john).words.size
       
-      lambda { users(:john).add_word(words(:jam)) }.should change {
-        users(:john).words(true).size
-      }.from(words_size).to(words_size + 1)
+      #lambda { users(:john).add_word(words(:jam)) }.should change {
+      #  users(:john).words(true).size
+      #}.from(words_size).to(words_size + 1)
+      words(:jam).expects(:save)
+      users(:john).add_word(words(:jam))
+      words(:jam).user_id.should == users(:john).id
     end
 
     it "should raise an exception when registering word with the same value " do
-      users(:john).add_word(words(:jam))
+      words(:jam).expects(:save).never
       lambda { users(:john).add_word(words(:jam)) }.should raise_error 
     end
 
