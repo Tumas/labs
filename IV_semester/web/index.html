@@ -1,0 +1,126 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <link rel="stylesheet" href="style.css" type="text/css" />
+    <link rel="stylesheet" href="print.css" type="text/css" media="print" />
+    <script src="effects.js" type="text/javascript"></script>
+    <title>Tiny music collection</title>
+  </head>
+
+  <body>
+    <div id="header">
+      <h1>Tiny Music collection</h1>
+      <p class="description">Collection consists of <span class="album-counter">3</span> albums so far.</p>
+    </div>
+
+    <div id="album-list">
+
+      <div class="album">
+        <h2>Selected Ambient Works 85-92</h2> 
+        <p class="description first-letter">Selected Ambient Works 85-92 by Aphex Twin was released in 2002 by R&amp;S. </p>
+        <ul class="tracks">
+          <li>Heliospan by <span class="bold">Aphex Twin</span></li>
+          <li>Xtal by <span class="bold">Aphex Twin</span></li>
+          <li>Ptolemy by <span class="bold">Aphex Twin</span></li>
+        </ul>
+
+        <div class="comments"></div>
+      </div> 
+
+      <div class="album">
+        <h2>Solace</h2> 
+        <p class="description first-letter">Solace by Jakob was released in 2006 by Midium. </p>
+        <ul class="tracks">
+          <li>Malachite by <span class="bold">Jakob</span></li>
+          <li>Solace by <span class="bold">Jakob</span></li>
+        </ul>
+        <div class="comments"></div>
+      </div> 
+
+      <div class="album">
+        <h2>VA Jungle Jazz Vol. 1</h2> 
+        <p class="description first-letter">VA Jungle Jazz Volume 1 was released in 1996 by Quadra label. </p>
+        <ul class="tracks">
+          <li>Pulp Fiction by <span class="bold">Alex Reece</span></li>
+          <li>This Time by <span class="bold">John L.</span></li>
+        </ul>
+        <div class="comments">
+
+          <div class="comment odd">
+            <div class="controls">
+              <span class="remove-comment">Remove</span>
+            </div>
+            <div class="comentator-meta">
+              <span class="host bold">John</span> at <span class="domain bold">gmail</span> dot <span class="domain-suffix bold">com</span>  
+            </div>
+            <div class="comment-text">
+              Great album! enjoyed every track of it.
+            </div>
+          </div>
+
+          <div class="comment even">
+            <div class="controls">
+              <span class="remove-comment">Remove</span>
+            </div>
+            <div class="comentator-meta">
+              <span class="host bold">John</span> at <span class="domain bold">gmail</span> dot <span class="domain-suffix bold">com</span>  
+            </div>
+            <div class="comment-text">
+              Great album! enjoyed every track of it.
+            </div>
+          </div>
+
+          <div class="comment odd">
+            <div class="controls">
+              <span class="remove-comment">Remove</span>
+            </div>
+            <div class="comentator-meta">
+              <span class="host bold">John</span> at <span class="domain bold">gmail</span> dot <span class="domain-suffix bold">com</span>  
+            </div>
+            <div class="comment-text">
+              Sorry, duplicated post..
+            </div>
+          </div>
+      </div> 
+    </div>
+
+    <form method="post" action="" id="add-coment-form">
+      <fieldset>
+        <legend>Personal Info</legend>
+
+        <div class="field">
+          <label for="name" id="namelabel">Your Name</label>
+          <input type="text" id="name" name="name" />
+        </div> 
+        <div class="field">
+          <label for="e-mail" id="e-maillabel">Your e-mail</label>
+          <input type="text" id="e-mail" name="e-mail" />
+        </div> 
+        <div class="field">
+          <label for="birthday" id="birthdaylabel">Your birthday date</label>
+          <input type="text" id="birthday" name="birthday" />
+        </div> 
+        <div class="field">
+          <label for="telephone" id="telephonelabel">Your telephone number</label>
+          <input type="text" id="telephone" name="telephone" />
+        </div> 
+      </fieldset>
+
+      <fieldset>
+        <legend>Album Info</legend>
+
+        <div class="field">
+          <label for="album-number" id="album-numberlabel">Album number You'd like to comment</label>
+          <input type="text" id="album-number" name="album-number" />
+        </div> 
+        <div class="field">
+          <label for="comment" id="commentlabel">Your comment: </label>
+          <textarea id="comment" rows="3" cols="50" name="comment"></textarea>
+        </div>
+      </fieldset>
+
+      <input type="button" id="comment-button" value="Comment" />
+    </form>
+  </body>
+</html>

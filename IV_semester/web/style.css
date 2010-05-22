@@ -1,0 +1,91 @@
+body {
+  text-align: center;
+  font-family: Sans-Serif;
+}
+
+#album-list {
+  padding: 20px;
+  position: relative;
+  margin: 0.5em;
+}
+
+.album {
+  background-color: #E4E4E4; 
+  float: left;
+  width: 29%;
+  margin: 0.5em 1.2em;
+  border: 1px solid black;
+}
+
+.tracks {
+  text-align: left;
+  font-size: 13px;
+  margin-left: 20px;
+}
+
+body p.description {
+  text-decoration: underline;
+  text-indent: 15px;
+  font-size: 12px;
+}
+
+strong, legend {
+  font-weight: bold;
+}
+
+p[class~="first-letter"]:first-letter {
+  font-size: 30px;
+}
+
+form {
+  clear: both;
+  width: 50%;
+  margin: 0 auto;
+  text-align: left;
+  padding-top: 2em;
+}
+
+.field {
+  margin: 0.4em;
+}
+
+form fieldset {
+  margin-bottom: 1em;
+}
+
+fieldset input, fieldset textarea {
+  float: right;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+/* comments */
+.comment {
+  border: 1px solid black;
+  padding: 1em;
+  font-size: 12px;
+}
+
+.controls {
+  float: right;
+}
+
+.comentator-meta {
+  float: left;
+}
+
+.comment-text {
+  clear: both;
+  padding: 1em;
+  font-size: 13px;
+}
+
+.odd {
+  background-color: #F3A593;
+}
+
+.even {
+  background-color: #E4F3B0;
+}
