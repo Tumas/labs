@@ -1,0 +1,111 @@
+Definitions
+
+An engineer might ask "As the size of the input to an algorithm increases, by what factor does the running time and memory requirements increase? And what are the implications of that?" In other words, complexity theory, among other things, investigates the scalability of computational problems and algorithms. In particular, it places practical limits on what computers can and cannot do.
+
+A problem is a collection of related questions, where each question is a finite string, not enumerated but written in an algebra called Big O notation, where the actual amount of resources uses numbers only to represent orders of magnitude and not the exact resources used by a particular machine.
+
+[edit]
+Example
+
+The problem of integer factorization is:
+given an integer find all of the primes into which it can be factored.
+
+A particular question is called an instance. For example, "give the factors of the number 15" is one instance of the factorization problem. But it is not usually solved simply for the number 15; that would be a simple matter of making a back-of-the-envelope calculation and plugging the results into the program so it can regurgitate them on demand. The aim is to solve for any integer, not just 15.
+
+[edit]
+Analysis
+
+[edit]
+Big O notation
+Main article: Big O notation
+
+The time complexity of a problem is the number of steps that it takes to solve an instance of the problem as a function of the size of the input, using the most efficient known algorithm. If an instance has length n and can be solved in n2 steps we can say the problem has a time complexity of n2.
+
+But of course, the exact amount of resources will depend on what machine or language is being used. To avoid that difficulty, the Big O notation is generally used (the O stands for the "order" of the calculation). If a problem runs in O(n2) on one computer, then (barring perverse effects) it will also run in O(n2) on all others, even though it may take longer or shorter depending on what resources they have. So this notation allows us to generalize away from the details of a particular computer.
+
+For example, searching an unsorted list of words for a particular word will take, on average, half the time of the size of the list, because if one starts from the beginning or end one must (on average) inspect half the words in the list before finding it. If the word does not exist, one must inspect the whole list to discover that fact, so actually it could be worse, depending on how likely it is that a word in the input is in the list.
+
+But a binary search algorithm is logarithmic in time over size (it is O(logn)). By analogy, humans roughly know where an entry would be in a phone book or dictionary, and use strategies quickly to get to their target, such as using headwords or a thumb index quickly to get roughly to the right place, then use a linear search when they are close to the target.
+
+It is important to note that most computational complexity theory is useful in other engineering fields and has made contributions to mathematics that would be of interest even if computers did not exist.
+
+[edit]
+Worst case analysis
+
+A common approach to computational complexity is the worst-case analysis, the estimation of the largest amount of computational resources (time or space) needed to run an algorithm. In many cases, the worst-case estimates are rather too pessimistic to explain the good performance of some algorithm in real use on real input. To address this, other approaches have been sought, such as average-case analysis or smoothed analysis.
+
+[edit]
+Axiomatic analysis
+Main article: NP-complete
+
+An axiomatic approach to computational complexity was developed by Manuel Blum. He introduced measures of complexity such as the size of a machine and measures of the computational overhead of recursive functions. The complexity of algorithms are special cases of the axiomatic complexity measure. Blum axioms help in the study of computational complexity in the most general cases.
+
+An important aspect of the theory is to categorize computational problems and algorithms into complexity classes. The most important open question of complexity theory is whether the complexity class P is the same as the complexity class NP, or whether it is a strict subset as is generally believed[who?].
+
+Shortly after the question was first posed, it was realised that many important industry problems in the field of operations research are of an NP subclass called NP-complete. NP-complete problems have solutions that are quick to check, yet current methods to find those solutions are not "efficiently scalable" (as described more formally below). That is, it is believed that a good algorithm exists, but finding it takes longer than the algorithm itself. Another subclass of problems are NP-hard.
+
+If the NP class is larger than P, it can be proved[citation needed] that no efficient scalable solutions exist.
+
+The fact that the P − NP problem has not been solved, prompts and justifies various research areas in the theory, such as:
+spotting and solving special cases of common computational problems
+the study of the computational complexity itself
+finding heuristic solutions
+researching into the hierarchies of complexity classes
+exploring multivariate algorithmic approaches such as Parameterized complexity.
+
+[edit]
+Graph theory
+Main article: Graph theory
+
+Graph theory is used practically to solve many requirements of computer programs, Many are NP-hard, which presumes that any exact algorithm requires time exponential to its input size.
+
+The relatively new idea of parameterized complexity is to take a two-dimensional view, where in addition to the input size we consider a parameter k; a typical parameter is the estimated size of the output. A problem is called Fixed-parameter tractable (FPT) if an instance of size n can be solved in f(k)nO(1) time, where f is some arbitrary computable function that absorbs the exponential part of the running time. Thus, whenever the parameter turns out to be small, in practice, one can expect good running times.
+
+Various techniques to design fixed-parameter algorithms include data reduction, iterative compression, and colorcoding.
+
+[edit]
+History
+
+The first publication on computational complexity appeared in 1956.[1] But this publication in Russian was for a long time unknown in the Western world.
+
+The beginning of studies in computational complexity can be attributed not only to Trahtenbrot,[2] but also to Rabin.[3][4][5][6][7]
+
+Hartmanis and Stearns' paper[7] became the most popular in this area. As a result, some researchers attribute the beginning of computational complexity theory only to Hartmanis, Lewis and Stearns.[8]
+
+Andrey Kolmogorov's research in the theory of algorithms influenced the development of computational complexity theory. A notable early discovery was the Karatsuba algorithm in 1960, for the multiplication of two numbers. This algorithm disproved Kolmogorov's 1956 conjecture that the fastest multiplication algorithm must be O(n2), and thus helped launch the study of algorithms in earnest. In 1967, Manuel Blum developed an axiomatic complexity theory based on his axioms and proved an important result, the so called, speed-up theorem.
+
+The field was subsequently expanded by many researchers, including:
+Manuel Blum
+Allan Borodin
+Stephen Cook
+Michael Fellows
+Michael R. Garey
+Oded Goldreich
+Juris Hartmanis
+David S. Johnson
+Richard Karp
+Marek Karpinski
+Donald Knuth
+Leonid Levin
+Christos H. Papadimitriou
+Alexander Razborov
+Richard Stearns
+Leslie Valiant
+Andrew Yao
+
+On August 6, 2002, the AKS primality test was published in a paper "PRIMES is in P"[9] by three Indian computer scientists. They showed a deterministic primality-proving algorithm they had made. The algorithm determines whether a number is a Prime number or Composite number in polynomial time, and was soon improved by others. The key significance of AKS is that it was the first published primality-proving algorithm to be all of general, polynomial, deterministic, and unconditional. The authors received the 2006 Gödel Prize and the 2006 Fulkerson Prize for their work.
+
+[edit]
+Computational complexity theory topics
+
+[edit]
+Time and space complexity
+
+Complexity theory attempts to describe how difficult it is for an algorithm to find a solution to a problem. This differs from computability theory, which describes whether a problem can be solved at all: a branch of science probably made most famous by Alan Turing's essay On Computable Numbers, with an Application to the Entscheidungsproblem.
+
+[edit]
+Decision problems
+
+Much of complexity theory deals with decision problems. A decision problem is one where the answer is always "yes" or "no". Some problems are undecidable, or at least seem so, so complexity theory can be used to distinguish problems where it is certain to get a correct "yes" or "no" (not necessarily both). A problem that reverses which can be relied upon is called a complement of that problem.
+
+For example, the problem IS − PRIME says "yes" if its input is a prime and "no" otherwise, while the problem IS − COMPOSITE says "yes" if the number is not prime. Either may be unpredictable when the correct result would be "no", they may say "yes" or perhaps never finish even if they were actually going to produce the right result, given an infinite number of monkeys.
