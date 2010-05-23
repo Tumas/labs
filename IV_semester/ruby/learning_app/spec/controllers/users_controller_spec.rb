@@ -28,14 +28,15 @@ describe UsersController do
       it "should register new user" do
         User.expects(:new).with(nil).returns(users(:john))
         users(:john).stubs(:registered?).returns(false)
+
         users(:john).expects(:register)
         post :create
       end
 
       it "should not register new user when it already exists" do
         User.expects(:new).with(nil).returns(users(:john))
-        users(:john).stubs(:registered?).returns(true)
         users(:john).expects(:register).never
+
         post :create
       end
     end
@@ -48,7 +49,6 @@ describe UsersController do
   end
 
   describe UsersController, " DELETE destroy" do
-
     it "should redirect to home page" do
       delete "destroy", :id => users(:john).id
       response.should redirect_to root_url
@@ -62,8 +62,6 @@ describe UsersController do
   end
 
   describe UsersController, " GET show" do
-    #it { should require_login_on { :method => 'get', :action => 'show' } }
-
     it "should assign authorized user to @user" do
       controller.stubs(:current_user).returns(users(:john))
       get :show, :id => users(:john).id
@@ -72,7 +70,6 @@ describe UsersController do
   end
 
   describe UsersController, "GET edit" do
-
     it "should assign requested user to @user" do
       controller.stubs(:current_user).returns(users(:john))
       get :edit, :id => users(:john).id
@@ -81,7 +78,6 @@ describe UsersController do
   end
 
   describe UsersController, "PUT update" do
-
     before do
       controller.stubs(:current_user).returns(users(:john))
     end

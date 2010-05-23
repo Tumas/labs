@@ -11,7 +11,6 @@ describe SessionsController do
     it "should re-render its template if user is not authenticated" do
       User.stubs(:authenticate).returns(nil)
       post 'create'
-      flash[:error].should_not be_nil
       response.should render_template('new')
     end
 
@@ -32,11 +31,6 @@ describe SessionsController do
         session[:user_id].should == users(:john).id
       end
 
-      it "should set correct messages " do
-        post 'create'
-        flash[:error].should be_nil
-        flash[:message].should_not be_nil
-      end
     end
   end
 
