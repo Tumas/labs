@@ -1,0 +1,64 @@
+body {
+  background-color: #E6EAE9
+  }
+
+#content {
+  margin: 5em auto;
+  width: 30%;
+}
+form {
+  margin: 2em;
+  width: 60%;
+}
+input {
+  display:block
+}
+
+input[type="submit"]{
+  margin: auto;
+}
+
+div.errors { color: red; }
+div.messages { color: green; }
+
+a {
+  position:absolute;
+  top: 5px;
+  left: 10px;
+}
+
+th {
+	font: bold 11px "Trebuchet MS", Verdana, Arial, Helvetica,
+	sans-serif;
+	color: #6D929B;
+	border-right: 1px solid #C1DAD7;
+	border-left: 1px solid #C1DAD7;
+	border-bottom: 1px solid #C1DAD7;
+	border-top: 1px solid #C1DAD7;
+	letter-spacing: 2px;
+	text-transform: uppercase;
+	text-align: left;
+	padding: 6px 6px 6px 12px;
+	background: #CAE8EA;
+}
+td {
+	border-right: 1px solid #C1DAD7;
+	border-bottom: 1px solid #C1DAD7;
+	background: #fff;
+	padding: 6px 6px 6px 12px;
+	color: #6D929B;
+}
+
+h1, h2, h3, h4 {
+  text-align : center;
+}
+
+table {
+margin-bottom: 2em;
+}
+caption {
+	padding: 0 0 5px 0;
+	width: 500px;	 
+	font: italic 11px "Trebuchet MS", Verdana, Arial, Helvetica, sans-serif;
+	text-align: right;
+}

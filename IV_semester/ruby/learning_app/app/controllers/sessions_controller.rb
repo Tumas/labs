@@ -11,7 +11,7 @@ class SessionsController < ApplicationController
       flash[:message] = "User #{user.name} sucessuflly logged in"
       redirect_to user_path(user.id)
     else
-      flash[:error] = "Invalid login"
+      flash.now[:error] = "Invalid login"
       render :action => 'new'
     end
   end

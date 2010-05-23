@@ -1,0 +1,30 @@
+
+#content
+  .messages= flash[:message]
+  .errors= flash[:error]
+  %h2= "Welcome #{@user.name}"
+  = link_to "Logout", session_path, :method => :delete
+  #statistics
+    .words
+      - if @user.words.size > 0
+        %table#words-table
+          %caption 
+            = "#{@user.name} words" 
+          %tr
+            %th Value
+            %th Translation
+          = render :partial => "word", :collection => @user.words
+      - else
+        %p User has no words yet
+    .exams
+      - if @user.exams.size > 0
+        %table#exams-table
+          %caption
+            = "#{@user.name} exams"
+          %tr
+            %th Title
+            %th Number of words
+            %th Average score
+          = render :partial => "exam", :collection => @user.exams
+      - else
+        %p User has no exams yet

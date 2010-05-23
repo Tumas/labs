@@ -1,0 +1,14 @@
+#content
+  = link_to 'Login', '/login'
+  .errors= flash[:error]
+  .messages= flash[:message]
+  %h2 Register new user
+  #register_form
+    - form_for User.new do |f|
+      %fieldset
+        %legend Enter your details
+        = label(:user, :name, "User name:")
+        = f.text_field :name
+        = label(:user, :password, "Password:")
+        = f.password_field :password
+        = f.submit "Register"

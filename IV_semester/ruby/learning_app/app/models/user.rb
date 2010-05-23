@@ -28,7 +28,6 @@ class User < ActiveRecord::Base
     if self.words.exists?(:value => word.value) and not opts[:overwrite]
       raise "Word #{word.value} with the same value is already there!"
     else
-      # save word with correct association
       self.words << word
     end
   end

@@ -9,7 +9,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20100426014610) do
+ActiveRecord::Schema.define(:version => 20100523124330) do
 
   create_table "exams", :force => true do |t|
     t.datetime "created_at"
@@ -58,8 +58,8 @@ ActiveRecord::Schema.define(:version => 20100426014610) do
   create_table "users", :force => true do |t|
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "name",       :default => "f", :null => false
-    t.string   "password",   :default => "f", :null => false
+    t.string   "name",       :default => "unknown", :null => false
+    t.string   "password",   :default => "unknown", :null => false
   end
 
   create_table "words", :force => true do |t|

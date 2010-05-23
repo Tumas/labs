@@ -1,0 +1,14 @@
+#content
+  = link_to 'Register', '/register' 
+  .errors= flash[:error]
+  .messages= flash[:message]
+  %h2 Enter your user name and password
+  #login_form
+    - form_tag(session_path) do 
+      %fieldset
+        %legend Enter your details
+        = label(:login, "Login:")
+        = text_field_tag :login, params[:login]
+        = label(:password, "Password:")
+        = password_field_tag :password, params[:password]
+        = submit_tag "Login"

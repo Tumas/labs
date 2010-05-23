@@ -9,7 +9,7 @@ class UsersController < ApplicationController
       @user.errors.each_full {|error| flash[:error] += error + ';' }
       render 'users/new'
     elsif @user.registered?
-      flash[:error] = "User name #{@user.name} taken"
+      flash.now[:error] = "User name #{@user.name} taken"
       render 'users/new'
     else
       @user.register
