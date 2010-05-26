@@ -1,0 +1,44 @@
+Reikalavimai:
+	Paieska
+	Ivedimas
+	Atnaujinimas
+	Salinimas
+
+MENU
+	1. Find user : even if just registered
+	        Enter name, surname
+	        Show full information (multiple tables joined)
+	2. Update user
+		show AK's
+		fetch all fields to user object (no objects)
+		show update menu
+		   user selects stuff to update
+		update query is executed
+	3. Delete user
+		show AK's
+		delete user
+	4. Register new game
+		Print teams
+		Enter home team number and result
+		Enter visitor team number and result
+		Enter date
+		Enter statistics
+			for each player in team:
+			   enter individual statistics
+			   update statistics
+
+Classes
+	Player manager  => prepared statements defined
+		getFullUser
+		getAllUsers {ak, name, surname}
+		updateUser
+		deleteUser
+	Team manager
+                getTeamName
+                getAllTeams {number, name}
+
+	Menu
+
+USE OBJECT WRAPPERS!
+
+

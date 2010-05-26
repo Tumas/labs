@@ -1,0 +1,29 @@
+package estore;
+
+import estore.core.Shop;
+import estore.core.Stock;
+import estore.core.Item;
+import estore.core.Customer;
+import estore.output.console.ConsoleMenu;
+
+import estore.input.plain.FileDataReader;
+
+import estore.output.gui.GUIMenu;
+import java.util.ArrayList;
+import java.io.FileNotFoundException;
+
+public class Main
+{
+    public static void main(String[] arg) throws FileNotFoundException
+    {
+
+        ArrayList<Item> items = FileDataReader.readStockItems("C:\\Users\\hanniph\\Desktop\\ndlatest\\items", ":");
+        ArrayList<Customer> customers = FileDataReader.readShopCustomers("C:\\Users\\hanniph\\Desktop\\ndlatest\\customers", ":");
+
+        Stock st = new Stock("Ukmerges plentas, 198a Vilnius", items);
+        Shop ourShop = new Shop(st, customers);
+
+        new ConsoleMenu(ourShop).run();
+       //new GUIMenu("E-Store GUI", ourShop).run();
+    }
+}
