@@ -1,0 +1,8 @@
+0. implement core +
+1. implement processes +
+2. implement resources +
+3. implement interaction and interrupts + 
+=== 
+4. implement timing +
+5. implement GUI 
+6. implement shared memory acces + semaphores +
