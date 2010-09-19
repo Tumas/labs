@@ -2,8 +2,8 @@
 #define __SPELLCAST_H__
 
 #define BUFFLEN 1024
-#define SOURCEBACKLOG = 1
-#define CLIENTBACKLOG = 1
+#define SOURCEBACKLOG 1
+#define CLIENTBACKLOG 1
 
 #define P_ERROR(str) fprintf(stderr, "Error occurred: %s\n", str)
 
@@ -34,13 +34,20 @@ typedef struct _client_meta {
 
 typedef struct _spellcast_server {
   server_meta *server_metadata;
-  int source_port;
-  int client_port;
+  char *source_port;
+  char *client_port;
+  struct addrinfo hints;
+  struct addrinfo *srv_src_addrinfo, *srv_cl_addrinfo;
+  int src_sock;
+  int cl_sock;
+  fd_set read_socks;
+  int latest_socket;
 } spellcast_server;
 
-
 static spellcast_server* init_variables(int args, char *argv[]);
-static void init_server(spellcast_server *srv);
+static int init_server(spellcast_server *srv);
 static void dispose_server(spellcast_server *srv);
+
+int create_access_point(struct addrinfo*, struct addrinfo**, char *);
 
 #endif
