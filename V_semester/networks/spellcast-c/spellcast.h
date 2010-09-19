@@ -41,13 +41,15 @@ typedef struct _spellcast_server {
   int src_sock;
   int cl_sock;
   fd_set read_socks;
-  int latest_socket;
+  int latest_sock;
 } spellcast_server;
 
-static spellcast_server* init_variables(int args, char *argv[]);
-static int init_server(spellcast_server *srv);
-static void dispose_server(spellcast_server *srv);
-
+static spellcast_server* init_variables(int , char *[]);
+static int init_server(spellcast_server *);
+static void dispose_server(spellcast_server *);
 int create_access_point(struct addrinfo*, struct addrinfo**, char *);
+static int run(spellcast_server *);
+static int accept_source(spellcast_server *);
+static int accept_client(spellcast_server *);
 
 #endif
