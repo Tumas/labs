@@ -191,7 +191,7 @@ accept_source(spellcast_server *srv)
     srv->latest_sock = new_src_sock;
   }
 
-  // todo
+  // TODO
   printf("New connection from: \n");
 
   return 0;
@@ -200,6 +200,24 @@ accept_source(spellcast_server *srv)
 static int 
 accept_client(spellcast_server* srv)
 {
+  struct sockaddr_storage remote_addr;
+  socklen_t addrlen = sizeof remote_addr;
+  int new_cl_sock;
+
+  if ((new_cl_sock = accept(srv->cl_sock, (struct sockaddr*) &remote_addr, &addrlen)) == -1){
+    perror("Client accept");
+    return -1;
+  }
+
+  FD_SET(new_cl_sock, &srv->read_socks);
+  if (new_cl_sock > srv->latest_sock){
+    srv->latest_sock = new_cl_sock;
+  }
+
+  // TODO
+  printf("New Client connection from: \n");
+
+  return 0;
 }
 
 /*
