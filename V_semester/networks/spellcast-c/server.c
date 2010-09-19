@@ -60,6 +60,8 @@ init_variables(int args, char *argv[])
   srv->server_metadata->server_data->url = "http://github.com/Tumas/labs/V_semester/networks";
   srv->server_metadata->server_data->mime_type = "audio/mpeg";
   srv->server_metadata->server_data->pub = 0; /* private server */
+  srv->connected_sources = 0;
+  srv->connected_clients = 0;
 
   return srv;
 }
@@ -159,6 +161,7 @@ run(spellcast_server *srv)
 
     for(i = 0; i < srv->latest_sock; i++){
       if (FD_ISSET(i, &temp_read)){
+        
         if (i == srv->src_sock){
           accept_source(srv);
         }
@@ -169,6 +172,7 @@ run(spellcast_server *srv)
           // we have src broadcasting
           // src or client disconnecting
         }
+
       } // FD_ISSET
     }
   } // while(1)
@@ -179,22 +183,61 @@ accept_source(spellcast_server *srv)
 {
   struct sockaddr_storage remote_addr;
   socklen_t addrlen = sizeof remote_addr;
-  int new_src_sock;
+  source_meta *new_src;
+  int new_src_sock, len;
+
+  // TODO: shows notification but doesn't notify source that's trying to connect
+  if (srv->connected_sources == MAX_SOURCES){
+    P_ERROR("max number of clients already reached");
+    return -1;
+  }
 
   if ((new_src_sock = accept(srv->src_sock, (struct sockaddr*) &remote_addr, &addrlen)) == -1){
     perror("Source accept");
     return -1;
   }
 
+  // TODO: print some useful info
+  printf("New connection from: \n");
+
+  /**  READING DATA that could actually block **/
+
+  // TODO: this could actually block
+  if ((len = recv(new_src_sock, srv->buffer, sizeof srv->buffer - 1, 0)) <= 0){
+    if (len == 0){
+      return -1;
+    }
+    else {
+      perror("Initial receive:");
+    }
+  }
+
+  srv->buffer[len] = "\0";
+  parse_source_details(srv->buffer, len, &new_src);
+
+  // TODO: shows notification but doesn't notify source that's trying to connect
+  // if (check_mountpoint(new_src) == -1) { P_ERROR("mountpoint already taken"); return -1; }
+
+  // register_source:; 
+  //  update connected_clients size
+  //  add to list 
+
+  /** END OF POSSIBLE BLOCKING **/
+
+  // update top sockets : mountpoint is ok, limit is ok, source created
   FD_SET(new_src_sock, &srv->read_socks);
   if (new_src_sock > srv->latest_sock){
     srv->latest_sock = new_src_sock;
   }
 
-  // TODO
-  printf("New connection from: \n");
-
+  // send ok header? 
   return 0;
+}
+
+static void
+parse_source_details(char *buffer, int width, source_meta *src)
+{
+  printf(" %s\n %d\n", buffer, width);
 }
 
 static int 
