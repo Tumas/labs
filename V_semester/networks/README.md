@@ -28,9 +28,7 @@ multiplexes stream sent from SOURCE and distributes it to clients that request f
   * A sessions ends when clients closes the connection
 
  
-### VLC
-
-# Using vlc as source 
+## Using vlc as source 
 
     cvlc -vvv ~/Desktop/Dimdoz_JungleXSelectaH_VibeSteppazVol6.mp3 --sout '#transcode{acodec=mp3, ab=96, channels=2, samplerate=44100}:std{access=shout{mp3=1,bitrate=96, samplerate=44100, channels=2,name='name',genre='all'}, mux=raw, dst=source:vlcas@127.0.0.1:8001/test1}'
 
@@ -39,18 +37,18 @@ multiplexes stream sent from SOURCE and distributes it to clients that request f
     
 ## REFERENCES:
 
-General concepts:
+#### General concepts:
   * http://en.flossmanuals.net/Icecast/Introduction
 
-Protocol:
+#### Protocol:
   * http://forums.radiotoolbox.com/viewtopic.php?f=8&t=74
   * http://www.gigamonkeys.com/book/practical-a-shoutcast-server.html
   * http://www.smackfu.com/stuff/programming/shoutcast.html
 
-Similar projects:
+#### Similar projects:
   * http://www.icecast.org/
   * http://ample.sourceforge.net/index.shtml
   * http://cs-people.bu.edu/liulk/slurpcast/
 
-VLC:
+#### VLC:
   * http://www.videolan.org/doc/streaming-howto/en/
