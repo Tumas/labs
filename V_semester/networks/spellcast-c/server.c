@@ -20,6 +20,7 @@ main(int argc, char *argv[])
   }
 
   init_server(server_info);
+  run(server_info);
 
   dispose_server(server_info);
   return 0;
@@ -89,7 +90,9 @@ init_server(spellcast_server *srv)
   }
 
   FD_ZERO(&srv->read_socks);
-  
+  FD_SET(srv->src_sock, &srv->read_socks);
+  FD_SET(srv->cl_sock, &srv->read_socks);
+  srv->latest_sock = srv->cl_sock;
   return 0;
 }
 
@@ -141,22 +144,65 @@ dispose_server(spellcast_server *srv)
 }
 
 
+static int 
+run(spellcast_server *srv)
+{
+  int i;
+  fd_set temp_read;
+
+  while (1){
+    temp_read = srv->read_socks;
+    if (select(srv->latest_sock+1, &temp_read, NULL, NULL, NULL) == -1){
+      perror("Select");
+      return -1;
+    }
+
+    for(i = 0; i < srv->latest_sock; i++){
+      if (FD_ISSET(i, &temp_read)){
+        if (i == srv->src_sock){
+          accept_source(srv);
+        }
+        else if (i == srv->cl_sock){
+          accept_client(srv);
+        }
+        else {
+          // we have src broadcasting
+          // src or client disconnecting
+        }
+      } // FD_ISSET
+    }
+  } // while(1)
+}
+
+static int 
+accept_source(spellcast_server *srv)
+{
+  struct sockaddr_storage remote_addr;
+  socklen_t addrlen = sizeof remote_addr;
+  int new_src_sock;
+
+  if ((new_src_sock = accept(srv->src_sock, (struct sockaddr*) &remote_addr, &addrlen)) == -1){
+    perror("Source accept");
+    return -1;
+  }
+
+  FD_SET(new_src_sock, &srv->read_socks);
+  if (new_src_sock > srv->latest_sock){
+    srv->latest_sock = new_src_sock;
+  }
+
+  // todo
+  printf("New connection from: \n");
+
+  return 0;
+}
+
+static int 
+accept_client(spellcast_server* srv)
+{
+}
+
 /*
-static void 
-run(server_meta *srv)
-{
-}
-
-static void 
-accept_source(server_meta *srv)
-{
-}
-
-static void 
-accept_client()
-{
-}
-
 static void
 broadcast()
 {
