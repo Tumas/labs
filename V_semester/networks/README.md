@@ -37,7 +37,7 @@ Implementation:
 
 # Using vlc as source 
 
-  cvlc -vvv ~/Desktop/Dimdoz_JungleXSelectaH_VibeSteppazVol6.mp3 --sout '#transcode{acodec=mp3, ab=96, channels=2, samplerate=44100}:std{access=shout{mp3=1,bitrate=96, samplerate=44100, channels=2,name='name',genre='all'}, mux=raw, dst=source:vlcas@127.0.0.1:8001/}'
+    cvlc -vvv ~/Desktop/Dimdoz_JungleXSelectaH_VibeSteppazVol6.mp3 --sout '#transcode{acodec=mp3, ab=96, channels=2, samplerate=44100}:std{access=shout{mp3=1,bitrate=96, samplerate=44100, channels=2,name='name',genre='all'}, mux=raw, dst=source:vlcas@127.0.0.1:8001/}'
 
  streams file Dimdoz_JungleXSelectaH_VibeSteppazVol6.mp3 to SPELLcast (or any other *cast server) located on localhost on port 8001
 
