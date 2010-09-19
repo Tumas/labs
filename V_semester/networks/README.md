@@ -1,92 +1,65 @@
-# SHOUTCAST protokolas per TCP/IP (be HTTP):  saltinis + serveris + klientas 
+# SPELLcast
 
-## C  
-* Portabilus kodas (Win, Unix aplinkos)
-* Naudojami multipleksoriai (select arba poll)
-* Serveris turi aptikti nenumatyta klientu atsijungima (atlaisvinti resursus ir testi darba)
-* Turi kompiliuotis uosio serveryje, turi buti paruostas make failas
-* multicast?
+Audio streaming server similar to Shoutcast and Icecast developed for computer network class. The intent of this project is to learn about computer networks, not to create another Icecast clone that could be used in real life situations.
 
-## Java
-* Java nio?
+## FEATURES:
+  * supports mp3 file streaming 
+  * supports both IPv4 and IPv6
+  * supports ICY (SHOUTcast protocol). Do not confuse this with Icecast protocol which is slightly different. 
+  * multiple broadcasts (sources) using mountpoints
+  * logging 
 
-### Shoutcast protokolas
+Implementation:
+  * uses select() for multiplexing
 
-#### Source (saltinis)
+## DESCRIPTION:
 
-1. Saltinis prisijungia prie serverio 
-2. Saltinis siuncia slaptazodi serveriui
+  SOURCE
+    generates media content in encoded bitstream 
 
-    password\r\n
+  SERVER
+    multiplexes stream sent from SOURCE and distributes it to clients that request for it
 
-3.1 Jei slaptazodis geras serveris atsako:
+  CLIENT
 
-  OK2\r\nicy-caps:11\r\n\r\n 
 
-3.2 Jei slaptazodis blogas:
+### PROTOCOLS
 
-  invalid password\r\n
+#### SOURCE-SERVER PROTOCOL
 
-4. Saltinis, gaves atskaymas OK2 siuncia informacija apie stream'a serveriui:
-  
-    icy-name:Unnamed Server\r\n
-    icy-genre:Unknown Genre\r\n
-    icy-pub:1\r\n
-    icy-br:56\r\n
-    icy-url:http://www.shoutcast.com\r\n
-    icy-irc:%23shoutcast\r\n
-    icy-icq:0\r\n
-    icy-aim:N%2FA\r\n
-    \r\n
+#### CLIENT-SERVER PROTOCOL
 
-5. Saltinis siuncia mp3 uzkoduota srauta
+    * Steam is considered to be infinite meaning that content lenght is not known
+    * A sessions ends when clients closes the connection
 
-### Serveris  (bus programuojamas)
-* 2 rusiu socketai: vienas saltiniui, kitas klientam
+ 
+### VLC
 
-### Klientas (bus programuojamas)
+# Using vlc as source 
 
-* Prisijungia prie serverio 
-  - gauti tinkamu stociu sarasa
-  - atsijungti 
-  - prisijungti prie stoties su ID
-  - atsijungit nuo stoties (two way communication?)
+  cvlc -vvv ~/Desktop/Dimdoz_JungleXSelectaH_VibeSteppazVol6.mp3 --sout '#transcode{acodec=mp3, ab=96, channels=2, samplerate=44100}:std{access=shout{mp3=1,bitrate=96, samplerate=44100, channels=2,name='name',genre='all'}, mux=raw, dst=source:vlcas@127.0.0.1:8001/}'
 
-1. Klientas prisijungia prie serverio ir siuncia informacija apie save:
+ streams file Dimdoz_JungleXSelectaH_VibeSteppazVol6.mp3 to SPELLcast (or any other *cast server) located on localhost on port 8001
 
-  CLIENT  ???
+    
+## REFERENCES:
 
-  SOURCE / HTTP/1.0
-  Authorization: Basic c291cmNlOnZsY2Fz
-  User-Agent: VLC media player 1.0.6
-  Content-Type: audio/mpeg
-  ice-name: name
-  ice-public: 0
-  ice-url: http://www.videolan.org/vlc
-  ice-genre: all
-  ice-audio-info: bitrate=96;samplerate=44100;channels=2
-  ice-description: Live stream from VLC media player
+  General concepts:
 
-1.1 Jei klientas nori gauti metadata apie mp3 stream'a siuncia papildoma lauka:
+    * http://en.flossmanuals.net/Icecast/Introduction
 
-  icy-metadata:1\r\n
+  Protocol:
 
-2. Serveris atsako:
+    * http://forums.radiotoolbox.com/viewtopic.php?f=8&t=74
+    * http://www.gigamonkeys.com/book/practical-a-shoutcast-server.html
+    * http://www.smackfu.com/stuff/programming/shoutcast.html
 
-  ICY 200 OK\r\n
-  icy-notice1:<BR>This stream requires <a href="http://www.winamp.com/">Winamp</a><BR> 
-  icy-notice2:SHOUTcast Distributed Network Audio Server/posix v1.x.x<BR> 
-  icy-name:Unnamed Server\r\n 
-  icy-genre:Unknown Genre\r\n 
-  icy-url:http://www.shoutcast.com\r\n 
-  Content-Type:audio/mpeg\r\n 
-  icy-pub:1\r\n 
-  icy-br:56\r\n
-  icy-metaint:8192\r\n 
-  \r\n (end of header)
+  Similar projects:
 
-3. Serveris persiuncia mp3 srauta
+    * http://www.icecast.org/
+    * http://ample.sourceforge.net/index.shtml
+    * http://cs-people.bu.edu/liulk/slurpcast/
 
-icy-metaint:8192\r\n siunciamas jei  icy-metadata:1 
+  VLC:
 
-#### SHOUTcast meta data information
+    * http://www.videolan.org/doc/streaming-howto/en/
