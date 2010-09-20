@@ -38,7 +38,7 @@ main(int argc, char *argv[])
   srv_info.server_data->bitrate = 0;
   srv_info.server_data->pub = 0;
 
-  while ((opt = getopt(argc, argv, "s:c:n:n:u:pm:")) != -1){
+  while ((opt = getopt(argc, argv, "s:c:n:t:u:p:m:")) != -1){
     switch(opt){
       case 's':
         s_port = optarg;
@@ -56,10 +56,10 @@ main(int argc, char *argv[])
         srv_info.server_data->url = optarg;
         break;
       case 'p':
-        srv_info.server_data->pub = atoi(optarg);
+        srv_info.server_data->pub =  atoi(optarg) ? 1 : 0;
         break;
       case 'm':
-        srv_info.metaint = atoi(optarg);
+        srv_info.metaint = (unsigned int) atoi(optarg);
         break;
       case '?':
         fprintf(stdout, "Unrecognized option (will have no effect) : %c\n", optopt);
@@ -70,6 +70,8 @@ main(int argc, char *argv[])
   if (!strcmp(c_port, s_port)){
     P_ERROR("You must set different ports\n");
     free(srv_info.server_data);
+
+    return -1;
   }
 
   srv = spellcast_init_server_variables(s_port, c_port, &srv_info);
