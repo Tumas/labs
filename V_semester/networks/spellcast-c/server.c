@@ -149,7 +149,7 @@ dispose_server(spellcast_server *srv)
 static int 
 run(spellcast_server *srv)
 {
-  int i;
+  int i, len;
   fd_set temp_read;
 
   while (1){
@@ -169,14 +169,30 @@ run(spellcast_server *srv)
           accept_client(srv);
         }
         else {
-          // we have src broadcasting
-          // src or client disconnecting
-        }
 
+          source_meta* source = get_source(srv, i);
+          if (source){
+            // we have a soure with info
+            if (IS_EMPTY_SOURCE(source)){
+
+              // len = recv();
+              // parse_source_header();
+              // send ok
+            }
+            else {
+              // broadcast to client
+            }
+          }
+          else {
+            // client stuff
+          }
+        }
       } // FD_ISSET
     }
   } // while(1)
 }
+
+/** SOURCE RELATED FUNCTIONS **/
 
 static int 
 accept_source(spellcast_server *srv)
@@ -186,7 +202,6 @@ accept_source(spellcast_server *srv)
   source_meta *new_src;
   int new_src_sock, len;
 
-  // TODO: shows notification but doesn't notify source that's trying to connect
   if (srv->connected_sources == MAX_SOURCES){
     P_ERROR("max number of clients already reached");
     return -1;
@@ -200,46 +215,67 @@ accept_source(spellcast_server *srv)
   // TODO: print some useful info
   printf("New connection from: \n");
 
-  /**  READING DATA that could actually block **/
-
-  // TODO: this could actually block
-  if ((len = recv(new_src_sock, srv->buffer, sizeof srv->buffer - 1, 0)) <= 0){
-    if (len == 0){
-      return -1;
-    }
-    else {
-      perror("Initial receive:");
-    }
-  }
-
-  srv->buffer[len] = "\0";
-  parse_source_details(srv->buffer, len, &new_src);
-
-  // TODO: shows notification but doesn't notify source that's trying to connect
-  // if (check_mountpoint(new_src) == -1) { P_ERROR("mountpoint already taken"); return -1; }
-
-  // register_source:; 
-  //  update connected_clients size
-  //  add to list 
-
-  /** END OF POSSIBLE BLOCKING **/
-
-  // update top sockets : mountpoint is ok, limit is ok, source created
   FD_SET(new_src_sock, &srv->read_socks);
   if (new_src_sock > srv->latest_sock){
     srv->latest_sock = new_src_sock;
   }
 
-  // send ok header? 
+  new_src = create_empty_source(new_src_sock);
+  if (new_src){
+    srv->sources[srv->connected_sources++] = new_src;
+  }
+
   return 0;
 }
 
+static source_meta*
+create_empty_source(int socket)
+{
+  source_meta* src = (source_meta*) malloc(sizeof(source_meta));
+  if (!src){
+    P_ERROR("malloc gave NULL (creating new source)");
+    return NULL; 
+  }
+
+  src->sock_d = socket;
+  src->stream_data = (stream_meta*) malloc(sizeof(stream_meta));
+  if (!src->stream_data){
+    P_ERROR("malloc gave NULL (creating new source : allocating stream_meta)");
+    return NULL; 
+  }
+
+  src->stream_data->name = EMPTY_SOURCE_NAME;
+  return src;
+}
+
+void
+dispose_source(source_meta* src)
+{
+  free(src->stream_data);
+  free(src);
+}
+
+static source_meta*
+get_source(spellcast_server* srv, int socket)
+{
+  int i;
+
+  for (i = 0; i < srv->connected_sources; i++){
+    if (socket == srv->sources[i]->sock_d){
+      return srv->sources[i];
+    }
+  }
+
+  return NULL;
+}
+
 static void
-parse_source_details(char *buffer, int width, source_meta *src)
+parse_source_header(char *buffer, int width, source_meta *src)
 {
   printf(" %s\n %d\n", buffer, width);
 }
 
+/* CLIENT RELATED FUNCTIONS */
 static int 
 accept_client(spellcast_server* srv)
 {

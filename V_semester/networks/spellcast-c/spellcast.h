@@ -6,7 +6,10 @@
 #define MAX_SOURCES 5
 #define SOURCEBACKLOG 5
 #define CLIENTBACKLOG 5
+#define EMPTY_SOURCE_NAME "EMPTY"
+
 #define P_ERROR(str) fprintf(stderr, "Error occurred: %s\n", str)
+#define IS_EMPTY_SOURCE(src) (src->stream_data->name == EMPTY_SOURCE_NAME)
 
 typedef struct _stream_meta {
   char *name;
@@ -44,9 +47,11 @@ typedef struct _spellcast_server {
   int cl_sock;
   fd_set read_socks;
   int latest_sock;
+
   client_meta* clients[MAX_CLIENTS];
   source_meta* sources[MAX_SOURCES];
   char buffer[BUFFLEN];
+
   int connected_sources;
   int connected_clients;
 } spellcast_server;
@@ -59,6 +64,11 @@ static int run(spellcast_server *);
 static int accept_source(spellcast_server *);
 static int accept_client(spellcast_server *);
 
+static source_meta* create_empty_source(int);
+void dispose_source(source_meta*);
+static source_meta* get_source(spellcast_server*, int);
+
 /* Protocol functions */
-static void parse_source_details(char*, int, source_meta*);
+static void parse_source_header(char*, int, source_meta*);
+
 #endif
