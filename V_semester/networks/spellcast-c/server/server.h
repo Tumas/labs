@@ -9,10 +9,6 @@
 #include <unistd.h>
 #include <string.h>
 
-/*
-#include "source.h"
-#include "client.h"
-*/
 
 #define BUFFLEN 1024
 #define MAX_CLIENTS 10
@@ -75,12 +71,15 @@ void spellcast_print_server_info(const spellcast_server*);
 spellcast_server* spellcast_init_server_variables(const char *, const char*, const server_meta*);
 
 /**/
-int spellcast_init_server(spellcast_server *);
+int spellcast_init_server(spellcast_server*);
 
 /**/
-int spellcast_server_run(spellcast_server *);
+int spellcast_server_run(spellcast_server*);
 
 /**/
-void spellcast_server_dispose(spellcast_server *);
+void spellcast_server_dispose(spellcast_server*);
+
+/**/
+void spellcast_dispose_stream_meta(stream_meta*);
 
 #endif

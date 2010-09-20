@@ -53,6 +53,9 @@ spellcast_init_server_variables(const char *s_port, const char *c_port, const se
   srv->connected_sources = 0;
   srv->connected_clients = 0;
 
+  memset(srv->sources, 0, sizeof(srv->sources));
+  memset(srv->clients, 0, sizeof(srv->clients));
+
   return srv;
 }
 
@@ -186,13 +189,21 @@ spellcast_server_dispose(spellcast_server *srv)
   freeaddrinfo(srv->srv_src_addrinfo);
   freeaddrinfo(srv->srv_cl_addrinfo);
 
-  free(srv->server_metadata->server_data->name);
-  free(srv->server_metadata->server_data->url);
-  free(srv->server_metadata->server_data->mime_type);
-  free(srv->server_metadata->server_data);
+  spellcast_dispose_stream_meta(srv->server_metadata->server_data);
+
   free(srv->server_metadata->notice);
   free(srv->client_port);
   free(srv->source_port);
   free(srv->server_metadata);
   free(srv);
+}
+
+void 
+spellcast_dispose_stream_meta(stream_meta *stream)
+{
+  free(stream->name);
+  free(stream->genre);
+  free(stream->url);
+  free(stream->mime_type);
+  free(stream);
 }
