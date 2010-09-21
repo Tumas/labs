@@ -22,8 +22,8 @@ int
 main(int argc, char *argv[])
 {
   int opt;
-  char *s_port = "8000";
-  char *c_port = "8001";
+  char *s_port = "8001";
+  char *c_port = "8000";
   spellcast_server* srv;
   server_meta srv_info = {
     (stream_meta*) malloc(sizeof(stream_meta)),

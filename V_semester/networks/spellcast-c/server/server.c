@@ -145,38 +145,44 @@ spellcast_server_run(spellcast_server *srv)
       if (FD_ISSET(i, &temp_read)){
         
         if (i == srv->src_sock){
-          //accept_source(srv);
+          spellcast_accept_source(srv);
         }
         else if (i == srv->cl_sock){
-          //accept_client(srv);
+          //spellcast_accept_client(srv);
         }
         else {
-          /*
-          source_meta* source = get_source(srv, i);
-          if (source){
-            if (IS_EMPTY_SOURCE(source)){
-              // TODO with header parsing
-              
-              printf("SOURCE OK MESSAGE SENT: %d\n", send_message(i, SOURCE_OK_MESSAGE));
 
+          source_meta *source = (source_meta*) spellcast_get_source(srv, i);
+          if (source){
+            if (FD_ISSET(i, &srv->empty_sources)){
+              printf("PARSING HEADER\n");
+
+              /*
+              // TODO with header parsing
               len = read_to_buf(srv, i);
               if (len > 0){
                 parse_source_header(srv->buffer, len, source); 
               }
+
+              printf("SOURCE OK MESSAGE SENT: %d\n", send_message(i, SOURCE_OK_MESSAGE));
+              */
+
+              FD_CLR(i, &srv->empty_sources);
             }
             else {
-               printf("GETTING MP3\n");
+               //printf("GETTING MP3\n");
+               /*
                len = read_to_buf(srv, i);
                parse_source_header(srv->buffer, len, source); 
+               */
               // broadcast to client
             }
           }
           else {
             // client stuff
           }
-          */
         }
-      } // FD_ISSET
+      } // FD_ISSET main
     }
   } // while(1)
 
@@ -206,4 +212,14 @@ spellcast_dispose_stream_meta(stream_meta *stream)
   free(stream->url);
   free(stream->mime_type);
   free(stream);
+}
+
+void* 
+get_in_addr(struct sockaddr *sa)
+{
+  if (sa->sa_family == AF_INET){
+    return &(((struct sockaddr_in*)sa)->sin_addr);
+  }
+
+  return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }

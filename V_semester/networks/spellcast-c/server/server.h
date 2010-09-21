@@ -55,6 +55,7 @@ typedef struct _spellcast_server {
   int src_sock;
   int cl_sock;
   fd_set master_read;
+  fd_set empty_sources;
   int latest_sock;
 
   client_meta* clients[MAX_CLIENTS];
@@ -82,4 +83,6 @@ void spellcast_server_dispose(spellcast_server*);
 /**/
 void spellcast_dispose_stream_meta(stream_meta*);
 
+/**/
+void *get_in_addr(struct sockaddr*);
 #endif

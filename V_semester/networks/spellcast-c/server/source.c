@@ -8,6 +8,8 @@ spellcast_accept_source(spellcast_server* srv)
   source_meta *new_src;
   int new_src_sock, len;
 
+  char remote_ip[INET6_ADDRSTRLEN];
+
   if (srv->connected_sources == MAX_SOURCES){
     P_ERROR("max number of clients already reached");
     return -1;
@@ -18,8 +20,9 @@ spellcast_accept_source(spellcast_server* srv)
     return -1;
   }
 
-  // TODO: print some useful info
-  printf("New connection from: \n");
+  fprintf(stdout, "New connection from: %s on socket %d\n",
+      (const char*) inet_ntop(remote_addr.ss_family, get_in_addr((struct sockaddr*)&remote_addr), remote_ip, INET6_ADDRSTRLEN),
+      new_src_sock);
 
   if (new_src_sock > srv->latest_sock){
     srv->latest_sock = new_src_sock;
@@ -30,6 +33,7 @@ spellcast_accept_source(spellcast_server* srv)
   if (new_src){
     spellcast_register_source(srv, new_src);
     FD_SET(new_src_sock, &srv->master_read);
+    FD_SET(new_src_sock, &srv->empty_sources);
   }
   else {
     close(new_src_sock);
