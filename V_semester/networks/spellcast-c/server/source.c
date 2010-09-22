@@ -6,7 +6,7 @@ spellcast_accept_source(spellcast_server* srv)
   struct sockaddr_storage remote_addr;
   socklen_t addrlen = sizeof remote_addr;
   source_meta *new_src;
-  int new_src_sock, len;
+  int new_src_sock;
 
   char remote_ip[INET6_ADDRSTRLEN];
 
@@ -53,6 +53,7 @@ spellcast_create_empty_source(int sock)
 
   memset(source->buffer, 0, sizeof(source->buffer));
   source->sock_d = sock;
+  source->buf_start = 0;
 
   source->stream_data = (stream_meta*) malloc(sizeof(stream_meta));
   if (source->stream_data == NULL){
@@ -99,6 +100,8 @@ void
 spellcast_dispose_source(source_meta *source)
 {
   spellcast_dispose_stream_meta(source->stream_data);
+  free(source->description);
+  free(source->user_agent);
   free(source);
 }
 
@@ -118,4 +121,91 @@ spellcast_disconnect_source(spellcast_server *srv, source_meta *source)
 
   // TODO: disconnect clients
   spellcast_dispose_source(source);
+}
+
+int
+spellcast_source_parse_header(source_meta *source, icy_protocol* icy_p)
+{
+  memset(source->buffer + source->buf_start, 0, SOURCE_BUFFER_SIZE(source));
+  
+  int received_bytes = recv(source->sock_d, source->buffer + source->buf_start, CHAR_SOURCE_BUFFER_SIZE(source), 0); 
+  source->buffer[source->buf_start + received_bytes] = '\0';
+
+  char *header_line, *match, *prev_line;
+  int is_full_message = strstr(source->buffer, icy_p->source_header->header_end) != NULL ? 1 : 0;
+
+  header_line = strtok(source->buffer, "\r\n");
+  while (header_line != NULL){
+    //printf("parsed_token: %s\n", header_line);
+
+    if ((match = strstr(header_line, icy_p->source_header->source_sep)) != NULL) {
+      char *buf = spellcast_allocate_string(header_line);
+      int len = strlen(buf);
+      char *test = strtok(buf, " ");
+      char *prev = NULL;
+
+      while (test != NULL){
+        if (prev != NULL && strcmp(prev, icy_p->source_header->source_sep) == 0){
+          source->mountpoint = spellcast_allocate_string(test + 1);
+          break;
+        }
+
+        prev = test;
+        test = strtok(NULL, " ");
+      }
+
+      // restore original string : black magic
+      header_line = strtok(header_line + len + 1, "\r\n"); 
+      free(buf);
+
+    } else if ((match = strstr(header_line, icy_p->source_header->url_sep)) != NULL) {
+      source->stream_data->url = spellcast_allocate_string(match + strlen(icy_p->source_header->url_sep));
+
+    } else if ((match = strstr(header_line, icy_p->source_header->description_sep)) != NULL) {
+      source->description = spellcast_allocate_string(match + strlen(icy_p->source_header->description_sep));
+
+    } else if ((match = strstr(header_line, icy_p->source_header->user_agent_sep)) != NULL) {
+      source->user_agent = spellcast_allocate_string(match + strlen(icy_p->source_header->user_agent_sep));
+
+    } else if ((match = strstr(header_line, icy_p->source_header->public_sep)) != NULL) {
+      source->stream_data->pub = atoi(match + strlen(icy_p->source_header->public_sep));
+
+    } else if ((match = strstr(header_line, icy_p->source_header->bitrate_sep)) != NULL) {
+      source->stream_data->bitrate = atoi(match + strlen(icy_p->source_header->bitrate_sep));
+    }
+
+    prev_line = header_line;
+    header_line = strtok(NULL, "\r\n"); 
+  }
+  
+  if (!is_full_message){
+    source->buf_start = strlen(prev_line);
+    strcpy(source->buffer, prev_line);
+
+    return 0;
+  }
+  else { 
+    source->buf_start = 0;
+
+    if (strlen(source->mountpoint) == 0){
+      char mnt[20];
+      sprintf(mnt, "mount%d", source->sock_d);
+      source->mountpoint = spellcast_allocate_string(mnt);
+    }
+  }
+
+  return 1;
+}
+
+void 
+spellcast_print_source_info(source_meta *source)
+{
+  printf(" **** SOURCE **** \n");
+  printf("\tName: %s\n", source->stream_data->name);
+  printf("\tDesc: %s\n", source->description);
+  printf("\tUser-Agent: %s\n", source->user_agent);
+  printf("\tURL: %s\n", source->stream_data->url);
+  printf("\tPublic: %d\n", source->stream_data->pub);
+  printf("\tBitrate: %dkbps\n", source->stream_data->bitrate);
+  printf("\tMount point: %s\n", source->mountpoint);
 }

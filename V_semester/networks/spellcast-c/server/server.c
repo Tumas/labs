@@ -41,13 +41,9 @@ spellcast_init_server_variables(const char *s_port, const char *c_port, const se
     return NULL;
   }
 
-  srv->server_metadata->server_data->name = (char*) malloc(strlen(srv_meta->server_data->name) + 1);
-  srv->server_metadata->server_data->url = (char*) malloc(strlen(srv_meta->server_data->url) + 1);
-  srv->server_metadata->server_data->mime_type = (char*) malloc(strlen(srv_meta->server_data->mime_type) + 1);
-
-  strcpy(srv->server_metadata->server_data->name, srv_meta->server_data->name);
-  strcpy(srv->server_metadata->server_data->url, srv_meta->server_data->url);
-  strcpy(srv->server_metadata->server_data->mime_type, srv_meta->server_data->mime_type);
+  srv->server_metadata->server_data->name = spellcast_allocate_string(srv_meta->server_data->name);
+  srv->server_metadata->server_data->url = spellcast_allocate_string(srv_meta->server_data->url);
+  srv->server_metadata->server_data->mime_type = spellcast_allocate_string(srv_meta->server_data->mime_type);
 
   srv->server_metadata->server_data->pub = srv_meta->server_data->pub; 
   srv->connected_sources = 0;
@@ -55,6 +51,8 @@ spellcast_init_server_variables(const char *s_port, const char *c_port, const se
 
   memset(srv->sources, 0, sizeof(srv->sources));
   memset(srv->clients, 0, sizeof(srv->clients));
+
+  srv->icy_p = spellcast_init_icy_protocol_info();
 
   return srv;
 }
@@ -129,7 +127,7 @@ spellcast_init_server(spellcast_server *srv)
 int 
 spellcast_server_run(spellcast_server *srv)
 {
-  int i, len;
+  int i;
   fd_set temp_read;
 
   FD_ZERO(&temp_read);
@@ -157,24 +155,15 @@ spellcast_server_run(spellcast_server *srv)
             if (FD_ISSET(i, &srv->empty_sources)){
               printf("PARSING HEADER\n");
 
-              /*
-              // TODO with header parsing
-              len = read_to_buf(srv, i);
-              if (len > 0){
-                parse_source_header(srv->buffer, len, source); 
+              if (spellcast_source_parse_header(source, srv->icy_p)){
+                // probably send ok message
+                spellcast_print_source_info(source);
+
+                FD_CLR(i, &srv->empty_sources);
               }
-
-              printf("SOURCE OK MESSAGE SENT: %d\n", send_message(i, SOURCE_OK_MESSAGE));
-              */
-
-              FD_CLR(i, &srv->empty_sources);
             }
             else {
-               //printf("GETTING MP3\n");
-               /*
-               len = read_to_buf(srv, i);
-               parse_source_header(srv->buffer, len, source); 
-               */
+              //printf("GETTING MP3\n");
               // broadcast to client
             }
           }
@@ -201,6 +190,8 @@ spellcast_server_dispose(spellcast_server *srv)
   free(srv->client_port);
   free(srv->source_port);
   free(srv->server_metadata);
+  
+  spellcast_dispose_icy_protocol_info(srv->icy_p);
   free(srv);
 }
 

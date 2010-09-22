@@ -7,17 +7,17 @@
 #define SPELLCAST_SRV2SRC_OK_MSG "ICY OK2\r\nicy-caps:11\r\n\r\n"
 
 #define SPELLCAST_SOURCE_TOKEN "SOURCE"
-#define SPELLCAST_AUTH_TOKEN "Authorization"
-#define SPELLCAST_USER_AGENT_TOKEN "User-Agent"
-#define SPELLCAST_CONTENT_TYPE_TOKEN "Content-Type"
-#define SPELLCAST_NAME_TOKEN "ice-name"
-#define SPELLCAST_URL_TOKEN "ice-url"
-#define SPELLCAST_DESCRIPTION_TOKEN "ice-description"
-#define SPELLCAST_GENRE_TOKEN "ice-genre"
-#define SPELLCAST_BITRATE_TOKEN "bitrate"
+#define SPELLCAST_AUTH_TOKEN "Authorization:"
+#define SPELLCAST_USER_AGENT_TOKEN "User-Agent:"
+#define SPELLCAST_CONTENT_TYPE_TOKEN "Content-Type:"
+#define SPELLCAST_NAME_TOKEN "ice-name:"
+#define SPELLCAST_URL_TOKEN "ice-url:"
+#define SPELLCAST_DESCRIPTION_TOKEN "ice-description:"
+#define SPELLCAST_GENRE_TOKEN "ice-genre:"
+#define SPELLCAST_BITRATE_TOKEN "bitrate="
 #define SPELLCAST_SAMPLERATE_TOKEN "samplerate"
 #define SPELLCAST_CHANNEL_TOKEN "channels"
-#define SPELLCAST_PUBLIC_TOKEN "ice-public"
+#define SPELLCAST_PUBLIC_TOKEN "ice-public:"
 
 typedef struct _source_header_info {
   char *source_sep;
@@ -32,6 +32,7 @@ typedef struct _source_header_info {
   char *samplerate_sep;
   char *channel_sep; 
   char *public_sep;
+  char *header_end;
 } source_header_info;
 
 

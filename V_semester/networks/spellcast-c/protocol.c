@@ -28,6 +28,7 @@ spellcast_init_icy_protocol_info()
   icy_p->source_header->samplerate_sep = spellcast_allocate_string(SPELLCAST_SAMPLERATE_TOKEN);
   icy_p->source_header->channel_sep = spellcast_allocate_string(SPELLCAST_CHANNEL_TOKEN);
   icy_p->source_header->public_sep = spellcast_allocate_string(SPELLCAST_PUBLIC_TOKEN);
+  icy_p->source_header->header_end = spellcast_allocate_string(SPELLCAST_HEADER_END_TOKEN);
 
   return icy_p;
 }
@@ -35,6 +36,7 @@ spellcast_init_icy_protocol_info()
 void
 spellcast_dispose_icy_protocol_info(icy_protocol *i)
 {
+  free(i->source_header->header_end);
   free(i->source_header->public_sep);
   free(i->source_header->channel_sep);
   free(i->source_header->samplerate_sep);

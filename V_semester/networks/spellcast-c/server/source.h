@@ -21,4 +21,10 @@ void spellcast_disconnect_source(spellcast_server*, source_meta*);
 /**/
 void spellcast_dispose_source(source_meta*);
 
+/**/
+int spellcast_source_parse_header(source_meta*, icy_protocol*);
+
+/**/
+void spellcast_print_source_info(source_meta*);
+
 #endif

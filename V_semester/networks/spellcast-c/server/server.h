@@ -9,15 +9,18 @@
 #include <unistd.h>
 #include <string.h>
 
+#include "../helpers.h"
+#include "../protocol.h"
 
-#define BUFFLEN 1024
+#define BUFFLEN 60 
+#define CHAR_BUFFLEN BUFFLEN - 1
 #define MAX_CLIENTS 10
 #define MAX_SOURCES 5
 #define SOURCEBACKLOG 5
 #define CLIENTBACKLOG 5
 
-#define P_ERROR(str) fprintf(stderr, "Error occurred: %s\n", str)
-#define P_WARN(str) fprintf(stdout, "Warning: %s\n", str)
+#define SOURCE_BUFFER_SIZE(src) (BUFFLEN - src->buf_start > 0 ? BUFFLEN - src->buf_start : BUFFLEN)
+#define CHAR_SOURCE_BUFFER_SIZE(src) (CHAR_BUFFLEN - src->buf_start > 0 ? CHAR_BUFFLEN - src->buf_start : CHAR_BUFFLEN)
 
 typedef struct _stream_meta {
   char *name;
@@ -33,6 +36,9 @@ typedef struct _source_meta {
   int sock_d;
   char *mountpoint;
   char buffer[BUFFLEN];
+  char *description;
+  char *user_agent;
+  int buf_start;
 } source_meta;
 
 typedef struct _client_meta {
@@ -48,12 +54,16 @@ typedef struct _server_meta {
 
 typedef struct _spellcast_server {
   server_meta *server_metadata;
+
   char *source_port;
   char *client_port;
+
   struct addrinfo hints;
   struct addrinfo *srv_src_addrinfo, *srv_cl_addrinfo;
+
   int src_sock;
   int cl_sock;
+
   fd_set master_read;
   fd_set empty_sources;
   int latest_sock;
@@ -63,6 +73,8 @@ typedef struct _spellcast_server {
 
   int connected_sources;
   int connected_clients;
+
+  icy_protocol* icy_p;
 } spellcast_server;
 
 /* print information about server */
