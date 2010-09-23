@@ -154,7 +154,7 @@ spellcast_server_run(spellcast_server *srv)
           source_meta *source = (source_meta*) spellcast_get_source(srv, i);
           if (source){
             if (FD_ISSET(i, &srv->empty_sources)){
-              printf("PARSING HEADER\n");
+             //printf("PARSING HEADER\n");
 
               if (spellcast_source_parse_header(srv, source)){
                 // probably send ok message

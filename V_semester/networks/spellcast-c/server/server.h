@@ -13,7 +13,7 @@
 #include "../protocol.h"
 
 
-#define BUFFLEN 60 
+#define BUFFLEN 1024
 #define CHAR_BUFFLEN BUFFLEN - 1
 #define MAX_CLIENTS 10
 #define MAX_SOURCES 5
