@@ -1,3 +1,4 @@
+#include <arpa/inet.h>
 #include "source.h"
 
 int
@@ -124,7 +125,7 @@ spellcast_disconnect_source(spellcast_server *srv, source_meta *source)
 }
 
 int
-spellcast_source_parse_header(source_meta *source, icy_protocol* icy_p)
+spellcast_source_parse_header(spellcast_server *srv, source_meta *source)
 {
   memset(source->buffer + source->buf_start, 0, SOURCE_BUFFER_SIZE(source));
   
@@ -132,20 +133,20 @@ spellcast_source_parse_header(source_meta *source, icy_protocol* icy_p)
   source->buffer[source->buf_start + received_bytes] = '\0';
 
   char *header_line, *match, *prev_line;
-  int is_full_message = strstr(source->buffer, icy_p->source_header->header_end) != NULL ? 1 : 0;
+  int is_full_message = strstr(source->buffer, srv->icy_p->source_header->header_end) != NULL ? 1 : 0;
 
   header_line = strtok(source->buffer, "\r\n");
   while (header_line != NULL){
     //printf("parsed_token: %s\n", header_line);
 
-    if ((match = strstr(header_line, icy_p->source_header->source_sep)) != NULL) {
+    if ((match = strstr(header_line, srv->icy_p->source_header->source_sep)) != NULL) {
       char *buf = spellcast_allocate_string(header_line);
       int len = strlen(buf);
       char *test = strtok(buf, " ");
       char *prev = NULL;
 
       while (test != NULL){
-        if (prev != NULL && strcmp(prev, icy_p->source_header->source_sep) == 0){
+        if (prev != NULL && strcmp(prev, srv->icy_p->source_header->source_sep) == 0){
           source->mountpoint = spellcast_allocate_string(test + 1);
           break;
         }
@@ -158,20 +159,20 @@ spellcast_source_parse_header(source_meta *source, icy_protocol* icy_p)
       header_line = strtok(header_line + len + 1, "\r\n"); 
       free(buf);
 
-    } else if ((match = strstr(header_line, icy_p->source_header->url_sep)) != NULL) {
-      source->stream_data->url = spellcast_allocate_string(match + strlen(icy_p->source_header->url_sep));
+    } else if ((match = strstr(header_line, srv->icy_p->source_header->url_sep)) != NULL) {
+      source->stream_data->url = spellcast_allocate_string(match + strlen(srv->icy_p->source_header->url_sep));
 
-    } else if ((match = strstr(header_line, icy_p->source_header->description_sep)) != NULL) {
-      source->description = spellcast_allocate_string(match + strlen(icy_p->source_header->description_sep));
+    } else if ((match = strstr(header_line, srv->icy_p->source_header->description_sep)) != NULL) {
+      source->description = spellcast_allocate_string(match + strlen(srv->icy_p->source_header->description_sep));
 
-    } else if ((match = strstr(header_line, icy_p->source_header->user_agent_sep)) != NULL) {
-      source->user_agent = spellcast_allocate_string(match + strlen(icy_p->source_header->user_agent_sep));
+    } else if ((match = strstr(header_line, srv->icy_p->source_header->user_agent_sep)) != NULL) {
+      source->user_agent = spellcast_allocate_string(match + strlen(srv->icy_p->source_header->user_agent_sep));
 
-    } else if ((match = strstr(header_line, icy_p->source_header->public_sep)) != NULL) {
-      source->stream_data->pub = atoi(match + strlen(icy_p->source_header->public_sep));
+    } else if ((match = strstr(header_line, srv->icy_p->source_header->public_sep)) != NULL) {
+      source->stream_data->pub = atoi(match + strlen(srv->icy_p->source_header->public_sep));
 
-    } else if ((match = strstr(header_line, icy_p->source_header->bitrate_sep)) != NULL) {
-      source->stream_data->bitrate = atoi(match + strlen(icy_p->source_header->bitrate_sep));
+    } else if ((match = strstr(header_line, srv->icy_p->source_header->bitrate_sep)) != NULL) {
+      source->stream_data->bitrate = atoi(match + strlen(srv->icy_p->source_header->bitrate_sep));
     }
 
     prev_line = header_line;
@@ -187,14 +188,28 @@ spellcast_source_parse_header(source_meta *source, icy_protocol* icy_p)
   else { 
     source->buf_start = 0;
 
-    if (strlen(source->mountpoint) == 0){
-      char mnt[20];
+    if (strlen(source->mountpoint) == 0 || spellcast_source_mountpoint_taken(srv, source)){
+      char mnt[10];
       sprintf(mnt, "mount%d", source->sock_d);
       source->mountpoint = spellcast_allocate_string(mnt);
     }
   }
 
   return 1;
+}
+
+int
+spellcast_source_mountpoint_taken(spellcast_server* srv, source_meta* source)
+{
+  int i;
+
+  for (i = 0; i < srv->connected_sources; i++){
+    if (source != srv->sources[i] && strcmp(source->mountpoint, srv->sources[i]->mountpoint) == 0){
+      return 1;
+    }
+  }
+
+  return 0;
 }
 
 void 

@@ -12,6 +12,7 @@
 #include "../helpers.h"
 #include "../protocol.h"
 
+
 #define BUFFLEN 60 
 #define CHAR_BUFFLEN BUFFLEN - 1
 #define MAX_CLIENTS 10
@@ -97,4 +98,5 @@ void spellcast_dispose_stream_meta(stream_meta*);
 
 /**/
 void *get_in_addr(struct sockaddr*);
+
 #endif

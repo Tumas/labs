@@ -1,4 +1,5 @@
 #include "server.h"
+#include "source.h"
 
 void
 spellcast_print_server_info(const spellcast_server* srv)
@@ -155,7 +156,7 @@ spellcast_server_run(spellcast_server *srv)
             if (FD_ISSET(i, &srv->empty_sources)){
               printf("PARSING HEADER\n");
 
-              if (spellcast_source_parse_header(source, srv->icy_p)){
+              if (spellcast_source_parse_header(srv, source)){
                 // probably send ok message
                 spellcast_print_source_info(source);
 
