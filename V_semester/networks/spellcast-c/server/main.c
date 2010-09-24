@@ -5,8 +5,8 @@
 #include <netdb.h>
 #include <unistd.h>
 
-#include "protocol.h"
-#include "server/server.h"
+#include "../protocol.h"
+#include "server.h"
 
 /* Command line arguments :
  *  -s port - source port
