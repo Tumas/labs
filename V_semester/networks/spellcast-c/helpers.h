@@ -5,5 +5,6 @@
 #define P_WARN(str) fprintf(stdout, "Warning: %s\n", str)
 
 char *spellcast_allocate_string(char *);
+int send_message(int, char*, int);
 
 #endif

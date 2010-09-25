@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 
 #include "helpers.h"
 
@@ -16,4 +18,26 @@ spellcast_allocate_string(char *str)
 
   strcpy(n_str, str);
   return n_str;
+}
+
+int 
+send_message(int socket, char *message, int len)
+{
+  int total = 0;
+  int bytes_left = len;
+  int n;
+
+  while (total < len){
+    n = send(socket, message + total, bytes_left, 0);
+
+    if (n == -1){
+      perror("send");
+      break;
+    }
+
+    total += n;
+    bytes_left -= n;
+  }
+
+  return total;
 }
