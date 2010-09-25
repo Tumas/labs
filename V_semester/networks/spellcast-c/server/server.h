@@ -12,8 +12,7 @@
 #include "../helpers.h"
 #include "../protocol.h"
 
-
-#define BUFFLEN 1024
+#define BUFFLEN 8192
 #define CHAR_BUFFLEN BUFFLEN - 1
 #define MAX_CLIENTS 10
 #define MAX_SOURCES 5
@@ -32,6 +31,15 @@ typedef struct _stream_meta {
   unsigned short pub;
 } stream_meta;
 
+typedef struct _client_meta {
+  char *name;
+  char *mountpoint;
+  int sock_d;
+  int metaint;
+  int buf_start;
+  char buffer[BUFFLEN];
+} client_meta;
+
 typedef struct _source_meta {
   stream_meta *stream_data;
   int sock_d;
@@ -40,12 +48,10 @@ typedef struct _source_meta {
   char *description;
   char *user_agent;
   int buf_start;
-} source_meta;
 
-typedef struct _client_meta {
-  char *name;
-  int sock_d;
-} client_meta;
+  int connected_clients;
+  client_meta* clients[MAX_CLIENTS];
+} source_meta;
 
 typedef struct _server_meta {
   stream_meta *server_data;
@@ -67,6 +73,7 @@ typedef struct _spellcast_server {
 
   fd_set master_read;
   fd_set empty_sources;
+  fd_set empty_clients;
   int latest_sock;
 
   client_meta* clients[MAX_CLIENTS];

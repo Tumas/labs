@@ -12,7 +12,7 @@ spellcast_accept_source(spellcast_server* srv)
   char remote_ip[INET6_ADDRSTRLEN];
 
   if (srv->connected_sources == MAX_SOURCES){
-    P_ERROR("max number of clients already reached");
+    P_ERROR("max number of connected sources already reached");
     return -1;
   }
 
@@ -97,6 +97,21 @@ spellcast_get_source(spellcast_server *srv, int socket)
   return NULL;
 }
 
+source_meta* 
+spellcast_get_source_by_mountpoint(spellcast_server *srv, char* mnt)
+{
+  int i;
+  int connected = srv->connected_sources;
+
+  for (i = 0; i < connected; i++){
+    if (srv->sources[i] && strcmp(srv->sources[i]->mountpoint, mnt) == 0){
+      return srv->sources[i];
+    }
+  }
+
+  return NULL;
+}
+
 void
 spellcast_dispose_source(source_meta *source)
 {
@@ -109,10 +124,13 @@ spellcast_dispose_source(source_meta *source)
 void 
 spellcast_disconnect_source(spellcast_server *srv, source_meta *source)
 {
-  int i, connected = srv->connected_sources;
+  printf("DISCONNECTING SOURCE: \n");
+  spellcast_print_source_info(source);
+
+  int i;
 
   FD_CLR(source->sock_d, &srv->master_read);
-  for (i = 0; i < connected; i++){
+  for (i = 0; i < MAX_SOURCES; i++){
     if (srv->sources[i] && srv->sources[i]->sock_d == source->sock_d){
       srv->sources[i] = NULL;
       srv->connected_sources--;
@@ -130,6 +148,12 @@ spellcast_source_parse_header(spellcast_server *srv, source_meta *source)
   memset(source->buffer + source->buf_start, 0, SOURCE_BUFFER_SIZE(source));
   
   int received_bytes = recv(source->sock_d, source->buffer + source->buf_start, CHAR_SOURCE_BUFFER_SIZE(source), 0); 
+  if (received_bytes == 0){
+    spellcast_disconnect_source(srv, source);
+
+    return 2;
+  }
+
   source->buffer[source->buf_start + received_bytes] = '\0';
 
   char *header_line, *match, *prev_line;

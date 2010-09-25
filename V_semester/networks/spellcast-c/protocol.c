@@ -30,12 +30,15 @@ spellcast_init_icy_protocol_info()
   icy_p->source_header->public_sep = spellcast_allocate_string(SPELLCAST_PUBLIC_TOKEN);
   icy_p->source_header->header_end = spellcast_allocate_string(SPELLCAST_HEADER_END_TOKEN);
 
+  icy_p->ok_message = spellcast_allocate_string(SPELLCAST_SRV2SRC_OK_MSG);
+
   return icy_p;
 }
 
 void
 spellcast_dispose_icy_protocol_info(icy_protocol *i)
 {
+  free(i->ok_message);
   free(i->source_header->header_end);
   free(i->source_header->public_sep);
   free(i->source_header->channel_sep);

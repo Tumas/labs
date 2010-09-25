@@ -1,5 +1,6 @@
 #include "server.h"
 #include "source.h"
+#include "client.h"
 
 void
 spellcast_print_server_info(const spellcast_server* srv)
@@ -17,9 +18,7 @@ spellcast_init_server_variables(const char *s_port, const char *c_port, const se
 
   if (!srv){
     P_ERROR("malloc gave NULL (intializing server )");
-    return NULL; 
-  }
-
+    return NULL; } 
   srv->client_port = (char*) malloc(strlen(c_port) + 1);
   srv->source_port = (char*) malloc(strlen(s_port) + 1);
   strcpy(srv->client_port, c_port);
@@ -129,6 +128,7 @@ int
 spellcast_server_run(spellcast_server *srv)
 {
   int i;
+  int tow = 0;
   fd_set temp_read;
 
   FD_ZERO(&temp_read);
@@ -147,29 +147,95 @@ spellcast_server_run(spellcast_server *srv)
           spellcast_accept_source(srv);
         }
         else if (i == srv->cl_sock){
-          //spellcast_accept_client(srv);
+          spellcast_accept_client(srv);
         }
         else {
 
           source_meta *source = (source_meta*) spellcast_get_source(srv, i);
           if (source){
             if (FD_ISSET(i, &srv->empty_sources)){
-             //printf("PARSING HEADER\n");
 
               if (spellcast_source_parse_header(srv, source)){
-                // probably send ok message
                 spellcast_print_source_info(source);
+
+                send_message(source->sock_d, srv->icy_p->ok_message, strlen(srv->icy_p->ok_message));
 
                 FD_CLR(i, &srv->empty_sources);
               }
             }
             else {
               //printf("GETTING MP3\n");
-              // broadcast to client
+              // broadcast to registered client
+              
+              int j;
+
+              char *meta = "U2 - One";
+              char *buf;
+              int msglen = strlen(meta) + 28;
+              int padding = 16 - msglen % 16;
+              int towrite = msglen + padding + 1;
+
+              buf = malloc(towrite);
+              memset(buf, 0, towrite);
+              sprintf(buf, "%cStreamTitle='%s';StreamUrl='';", (msglen+padding)/16, meta);
+
+              int x = 
+                recv(source->sock_d, source->buffer, BUFFLEN - tow, 0);
+
+
+              //fprintf(stdout, source->buffer, x);
+
+              for (j = 0; j < MAX_CLIENTS; j++){
+                if (source->clients[j] != NULL){
+
+                  send_message(source->clients[j]->sock_d, source->buffer, x);
+
+                  if (x == 8192){
+                    // metadata
+                    send_message(source->clients[j]->sock_d, buf, towrite);
+                    tow = 0;
+                  }
+                  else {
+                    tow = 8192 - x;
+                  }
+
+                  //send_message(source->clients[j]->sock_d, buf, towrite);
+                }
+              }
+
+              free(buf);
             }
           }
           else {
-            // client stuff
+
+            client_meta *client = spellcast_get_client(srv, i);
+            if (client){
+              if (FD_ISSET(i, &srv->empty_clients)){
+
+                // will block if client sends metadata without header_end at all
+                if (spellcast_client_parse_header(srv, client)){
+                  spellcast_print_client_info(client);
+
+                   // register with source
+                   spellcast_register_client(srv, client); 
+
+                   // send info about server
+                   char *mes = "ICY 200 OK\r\nContent-Type:audio/mpeg\r\nicy-br:96\r\nicy-metaint:8192\r\n\r\n";
+                   send_message(client->sock_d, mes, strlen(mes));
+
+                  FD_CLR(i, &srv->empty_clients);
+                }
+              }
+              else {
+                printf("client something else\n");
+
+                  int x = recv(client->sock_d, client->buffer, BUFFLEN, 0);
+                  if (x == 0){
+                    printf(" *** CLIENT on socket %d disconnected ***\n", i);
+                    spellcast_disconnect_client(srv, client);
+                  }
+              }
+            }
           }
         }
       } // FD_ISSET main

@@ -3,7 +3,7 @@ program_NAME := server
 CC = gcc
 CFLAGS += -W -Wall
 #CFLAGS += -Wall -ansi
-OBJECTS = main.c server.c source.c ../helpers.c ../protocol.c
+OBJECTS = main.c server.c source.c client.c ../helpers.c ../protocol.c
 
 all: $(program_NAME)
 
