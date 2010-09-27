@@ -11,6 +11,13 @@ spellcast_print_server_info(const spellcast_server* srv)
   fprintf(stdout, "Client port: %s\n", srv->client_port);
 }
 
+void
+spellcast_print_server_stats(const spellcast_server *srv)
+{
+  fprintf(stdout, "Connected sources %d\n", srv->connected_sources);
+  fprintf(stdout, "Connected clients %d\n", srv->connected_clients);
+}
+
 spellcast_server* 
 spellcast_init_server_variables(const char *s_port, const char *c_port, const server_meta *srv_meta)
 {
@@ -127,9 +134,7 @@ spellcast_init_server(spellcast_server *srv)
 int 
 spellcast_server_run(spellcast_server *srv)
 {
-  int i, j;
-  int tow = 0;
-  int total = 0;
+  int i, j, temp1;
   int received_bytes, sent_bytes;
   fd_set temp_read;
 
@@ -147,9 +152,11 @@ spellcast_server_run(spellcast_server *srv)
         
         if (i == srv->src_sock){
           spellcast_accept_source(srv);
+          spellcast_print_server_stats(srv);
         }
         else if (i == srv->cl_sock){
           spellcast_accept_client(srv);
+          spellcast_print_server_stats(srv);
         }
         else {
 
@@ -167,34 +174,44 @@ spellcast_server_run(spellcast_server *srv)
             }
             else {
               // replace with actual data
-              icy_metadata stub = { "U2 - One", NULL };
+              icy_metadata stub = { NULL, "U2 - One" };
 
-              if ((received_bytes = recv(source->sock_d, source->buffer, BUFFLEN - tow, 0)) == 0){
+              if ((received_bytes = recv(source->sock_d, source->buffer, BUFFLEN, 0)) == 0){
                 spellcast_disconnect_source(srv, source);
               }
               else 
               {
                 // send data to clients
                 for (j = 0; srv->connected_clients != 0 && j < MAX_CLIENTS; j++){
-                  if (source->clients[j] != NULL){
+                  client_meta *client = source->clients[j];
 
-                    sent_bytes = send_message(source->clients[j]->sock_d, source->buffer, received_bytes);
-                    total += sent_bytes;
+                  if (client != NULL){
+                    if (client->bytes_to_meta + received_bytes > METAINT){
+                      // send metaint number
+                      temp1 = send_message(client->sock_d, source->buffer, METAINT - client->bytes_to_meta);
 
-                    if (total == METAINT){
-                      send_metadata(source->clients[j]->sock_d, &stub);
+                      // send meta
+                      send_metadata(client->sock_d, &stub);
 
-                      tow = 0;
-                      total = 0;
+                      // send rest of bytes + increase ->bytes_to_meta
+                      client->bytes_to_meta = send_message(client->sock_d, source->buffer + METAINT - client->bytes_to_meta, (client->bytes_to_meta + received_bytes) % METAINT);
+                      sent_bytes = temp1 + client->bytes_to_meta;
                     }
                     else {
-                      tow = METAINT - sent_bytes;
+                      sent_bytes = send_message(client->sock_d, source->buffer, received_bytes);
+                      client->bytes_to_meta += sent_bytes;
                     }
-                  }
-                }
 
-              }
+                    if (sent_bytes != received_bytes){
+                      spellcast_disconnect_client(srv, client);
+                      continue;
+                    }
+
+                  } // if
+                } // for 
+
             }
+          }
           }
           else {
 

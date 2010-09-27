@@ -22,14 +22,14 @@
 
 #define ICY_METADATA_FORMAT "%cStreamTitle='%s';StreamUrl='%s';"
 #define ICY_SRV2CLIENT_MESSAGE "ICY 200 OK\r\n\
-  icy-notice:%s\r\n\
-  icy-name:%s\r\n\
-  icy-genre:%s\r\n\
-  icy-url%s\r\n\
-  Content-Type:%s\r\n\
-  icy-pub:%d\r\n\
-  icy-br:%d\r\n\
-  icy-metaint:%d\r\n\r\n"
+icy-notice:%s\r\n\
+icy-name:%s\r\n\
+icy-genre:%s\r\n\
+icy-url:%s\r\n\
+Content-Type:%s\r\n\
+icy-pub:%d\r\n\
+icy-br:%d\r\n\
+icy-metaint:%d\r\n\r\n"
 
 typedef struct _source_header_info {
   char *source_sep;

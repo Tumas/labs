@@ -35,6 +35,7 @@ typedef struct _client_meta {
   char *mountpoint;
   int sock_d;
   int metaint;
+  int bytes_to_meta;
   int buf_start;
   char buffer[BUFFLEN];
 } client_meta;
@@ -86,6 +87,7 @@ typedef struct _spellcast_server {
 
 /* print information about server */
 void spellcast_print_server_info(const spellcast_server*);
+void spellcast_print_server_stats(const spellcast_server*);
 
 /* initialize server properties like name,  */
 spellcast_server* spellcast_init_server_variables(const char *, const char*, const server_meta*);

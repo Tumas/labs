@@ -141,6 +141,7 @@ spellcast_disconnect_source(spellcast_server *srv, source_meta *source)
 
   // TODO: disconnect clients
   spellcast_dispose_source(source);
+  spellcast_print_server_stats(srv);
 }
 
 int

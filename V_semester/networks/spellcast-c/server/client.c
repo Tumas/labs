@@ -18,7 +18,7 @@ spellcast_accept_client(spellcast_server* srv)
 
   /*
   if (srv->connected_sources == 0){
-    P_ERROR("There are no sources that client could connect to");
+  P_ERROR("There are no sources that client could connect to");
     return -1;
   }
   */
@@ -67,6 +67,7 @@ spellcast_create_empty_client(int socket)
   new_client->sock_d = socket;
   new_client->buf_start = 0;
   new_client->metaint = 0;
+  new_client->bytes_to_meta = 0;
 
   return new_client;
 }
@@ -128,7 +129,6 @@ spellcast_client_parse_header(spellcast_server *srv, client_meta *client)
   }
 
   client->buffer[client->buf_start + received_bytes] = '\0';
-                printf("BUFFER: %s\n", client->buffer); 
 
   char *header_line, *match, *prev_line, *get_token = "GET";
   char *metaint_sep = "Icy-MetaData:";
@@ -212,7 +212,17 @@ spellcast_disconnect_client(spellcast_server *srv, client_meta *client)
     }
   }
 
+  // Wow, now that's efficient 
+  for (i = 0; i < MAX_CLIENTS; i++){
+    if (srv->clients[i] && srv->clients[i]->sock_d == client->sock_d){
+      srv->clients[i] = NULL;
+      srv->connected_clients--;
+      break;
+    }
+  }
+
   spellcast_dispose_client(client);
+  spellcast_print_server_stats(srv);
 }
 
 /**/
