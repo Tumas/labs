@@ -1,5 +1,6 @@
 #include <arpa/inet.h>
 #include "source.h"
+#include "client.h"
 
 int
 spellcast_accept_source(spellcast_server* srv)
@@ -130,6 +131,12 @@ spellcast_disconnect_source(spellcast_server *srv, source_meta *source)
 
   int i;
 
+  for (i = 0; source->connected_clients > 0 && i < MAX_CLIENTS; i++){
+    if (source->clients[i] != NULL){
+      spellcast_disconnect_client(srv, source->clients[i]);
+    }
+  }
+
   FD_CLR(source->sock_d, &srv->master_read);
   for (i = 0; i < MAX_SOURCES; i++){
     if (srv->sources[i] && srv->sources[i]->sock_d == source->sock_d){
@@ -139,7 +146,6 @@ spellcast_disconnect_source(spellcast_server *srv, source_meta *source)
     }
   }
 
-  // TODO: disconnect clients
   spellcast_dispose_source(source);
   spellcast_print_server_stats(srv);
 }

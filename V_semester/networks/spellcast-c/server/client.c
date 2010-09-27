@@ -200,6 +200,7 @@ void
 spellcast_disconnect_client(spellcast_server *srv, client_meta *client)
 {
   int i;
+  // TODO clean this mess
   source_meta* source = spellcast_get_source_by_mountpoint(srv, client->mountpoint);
 
   FD_CLR(client->sock_d, &srv->master_read);
