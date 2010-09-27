@@ -127,8 +127,10 @@ spellcast_init_server(spellcast_server *srv)
 int 
 spellcast_server_run(spellcast_server *srv)
 {
-  int i;
+  int i, j;
   int tow = 0;
+  int total = 0;
+  int received_bytes, sent_bytes;
   fd_set temp_read;
 
   FD_ZERO(&temp_read);
@@ -164,46 +166,34 @@ spellcast_server_run(spellcast_server *srv)
               }
             }
             else {
-              //printf("GETTING MP3\n");
-              // broadcast to registered client
-              
-              int j;
+              // replace with actual data
+              icy_metadata stub = { "U2 - One", NULL };
 
-              char *meta = "U2 - One";
-              char *buf;
-              int msglen = strlen(meta) + 28;
-              int padding = 16 - msglen % 16;
-              int towrite = msglen + padding + 1;
-
-              buf = malloc(towrite);
-              memset(buf, 0, towrite);
-              sprintf(buf, "%cStreamTitle='%s';StreamUrl='';", (msglen+padding)/16, meta);
-
-              int x = 
-                recv(source->sock_d, source->buffer, BUFFLEN - tow, 0);
-
-
-              //fprintf(stdout, source->buffer, x);
-
-              for (j = 0; j < MAX_CLIENTS; j++){
-                if (source->clients[j] != NULL){
-
-                  send_message(source->clients[j]->sock_d, source->buffer, x);
-
-                  if (x == 8192){
-                    // metadata
-                    send_message(source->clients[j]->sock_d, buf, towrite);
-                    tow = 0;
-                  }
-                  else {
-                    tow = 8192 - x;
-                  }
-
-                  //send_message(source->clients[j]->sock_d, buf, towrite);
-                }
+              if ((received_bytes = recv(source->sock_d, source->buffer, BUFFLEN - tow, 0)) == 0){
+                spellcast_disconnect_source(srv, source);
               }
+              else 
+              {
+                // send data to clients
+                for (j = 0; srv->connected_clients != 0 && j < MAX_CLIENTS; j++){
+                  if (source->clients[j] != NULL){
 
-              free(buf);
+                    sent_bytes = send_message(source->clients[j]->sock_d, source->buffer, received_bytes);
+                    total += sent_bytes;
+
+                    if (total == METAINT){
+                      send_metadata(source->clients[j]->sock_d, &stub);
+
+                      tow = 0;
+                      total = 0;
+                    }
+                    else {
+                      tow = METAINT - sent_bytes;
+                    }
+                  }
+                }
+
+              }
             }
           }
           else {
@@ -280,4 +270,20 @@ get_in_addr(struct sockaddr *sa)
   }
 
   return &(((struct sockaddr_in6*)sa)->sin6_addr);
+}
+
+void 
+send_metadata(int socket, icy_metadata *meta)
+{
+  // 28 is the number of additional characters in metadata without url and title
+  int msg_len = ((meta->title != NULL) ? strlen(meta->title) : 0) + ((meta->url != NULL) ? strlen(meta->url) : 0) + 28;
+  int padding = 16 - msg_len % 16;
+  int to_write = msg_len + padding + 1; 
+  char *buf = malloc(to_write);
+
+  memset(buf, 0, to_write);
+  sprintf(buf, ICY_METADATA_FORMAT, (msg_len + padding) / 16, meta->title != NULL ? meta->title : "", meta->url != NULL ? meta->url : "");
+
+  send_message(socket, buf, to_write);
+  free(buf);
 }

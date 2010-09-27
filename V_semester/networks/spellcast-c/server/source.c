@@ -65,6 +65,7 @@ spellcast_create_empty_source(int sock)
   }
 
   memset(source->stream_data, 0, sizeof(stream_meta));
+  memset(source->clients, 0, MAX_CLIENTS * sizeof(client_meta*));
   return source;
 }
 
@@ -72,11 +73,11 @@ void
 spellcast_register_source(spellcast_server *srv, source_meta *source)
 {
   int i;
-  int connected = ++(srv->connected_sources);
 
-  for (i = 0; i < connected; i++){
+  for (i = 0; i < MAX_SOURCES; i++){
     if (srv->sources[i] == NULL){
       srv->sources[i] = source;
+      srv->connected_sources++;
       break;
     }
   }

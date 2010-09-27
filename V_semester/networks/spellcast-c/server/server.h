@@ -13,6 +13,7 @@
 #include "../protocol.h"
 
 #define BUFFLEN 8192
+#define METAINT 8192
 #define CHAR_BUFFLEN BUFFLEN - 1
 #define MAX_CLIENTS 10
 #define MAX_SOURCES 5
@@ -24,9 +25,7 @@
 
 typedef struct _stream_meta {
   char *name;
-  char *genre;
-  char *url;
-  char *mime_type;
+  char *genre; char *url; char *mime_type;
   unsigned int bitrate;
   unsigned short pub;
 } stream_meta;
@@ -105,5 +104,8 @@ void spellcast_dispose_stream_meta(stream_meta*);
 
 /**/
 void *get_in_addr(struct sockaddr*);
+
+/**/
+void send_metadata(int, icy_metadata*);
 
 #endif

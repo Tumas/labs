@@ -56,3 +56,4 @@ spellcast_dispose_icy_protocol_info(icy_protocol *i)
   free(i->source_header);
   free(i);
 }
+

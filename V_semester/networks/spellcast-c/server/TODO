@@ -8,3 +8,7 @@
 7. protocol send 
 8. when client connects to server without mountpoint, server should randomly select source to which it should connect to
 9. protocol parsing -> parse everythin to lower and then compare
+10. Clean disconnect routine -> we don't no srv
+11. ansi c
+12. move all FD_SET to register methods -> will be easier for everyone
+13: cracking sound after client reconnect 
