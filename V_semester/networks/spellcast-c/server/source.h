@@ -30,4 +30,7 @@ void spellcast_print_source_info(source_meta*);
 /**/
 int spellcast_source_mountpoint_taken(spellcast_server*, source_meta*);
 
+/**/
+source_meta* spellcast_get_random_source(spellcast_server*);
+
 #endif

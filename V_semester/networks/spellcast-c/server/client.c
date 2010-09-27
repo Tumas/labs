@@ -11,20 +11,20 @@ spellcast_accept_client(spellcast_server* srv)
 
   char remote_ip[INET6_ADDRSTRLEN];
 
-  if (srv->connected_clients == MAX_CLIENTS){
-    P_ERROR("max number of connected clients already reached");
-    return -1;
-  }
-
-  /*
-  if (srv->connected_sources == 0){
-  P_ERROR("There are no sources that client could connect to");
-    return -1;
-  }
-  */
-
   if ((new_cl_sock = accept(srv->cl_sock, (struct sockaddr*) &remote_addr, &addrlen)) == -1){
     perror("Client accept");
+    return -1;
+  }
+
+  if (srv->connected_clients == MAX_CLIENTS){
+    P_ERROR("max number of connected clients already reached");
+    close(new_cl_sock);
+    return -1;
+  }
+
+  if (srv->connected_sources == 0){
+  P_ERROR("There are no sources that client could connect to");
+    close(new_cl_sock);
     return -1;
   }
 

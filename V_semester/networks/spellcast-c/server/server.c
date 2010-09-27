@@ -1,3 +1,4 @@
+#include <time.h>
 #include "server.h"
 #include "source.h"
 #include "client.h"
@@ -103,6 +104,8 @@ spellcast_create_access_point(struct addrinfo* hints, struct addrinfo** serv_inf
 int
 spellcast_init_server(spellcast_server *srv)
 {
+  srand(time(NULL));
+
   memset(&srv->hints, 0, sizeof(srv->hints));
   srv->hints.ai_family = AF_UNSPEC;
   srv->hints.ai_socktype = SOCK_STREAM;
@@ -228,11 +231,22 @@ spellcast_server_run(spellcast_server *srv)
                 if (spellcast_client_parse_header(srv, client)){
                   spellcast_print_client_info(client);
 
-                   // register with source
-                   spellcast_register_client(srv, client); 
-
                    // send info about source
                    source_meta *source = spellcast_get_source_by_mountpoint(srv, client->mountpoint);
+                   if (srv->connected_sources > 0){
+                     // could not source with given mountpoint 
+                     printf("Could not find source with specified mountpoint : %s\n", client->mountpoint);
+                     printf("Connecting to a random source...");
+
+                     source = spellcast_get_random_source(srv);
+
+                     free(client->mountpoint);
+                     client->mountpoint = spellcast_allocate_string(source->mountpoint);
+                     printf("Random source selected: %p (%s) \n", source, client->mountpoint);
+                   }
+
+                   // register with source
+                   spellcast_register_client(srv, client); 
 
                    char mes[BUFFLEN];
                    sprintf(mes, ICY_SRV2CLIENT_MESSAGE, srv->server_metadata->notice,

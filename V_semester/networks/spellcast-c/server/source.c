@@ -88,9 +88,8 @@ source_meta*
 spellcast_get_source(spellcast_server *srv, int socket)
 {
   int i;
-  int connected = srv->connected_sources;
 
-  for (i = 0; i < connected; i++){
+  for (i = 0; i < MAX_SOURCES; i++){
     if (srv->sources[i] && srv->sources[i]->sock_d == socket){
       return srv->sources[i];
     }
@@ -103,9 +102,8 @@ source_meta*
 spellcast_get_source_by_mountpoint(spellcast_server *srv, char* mnt)
 {
   int i;
-  int connected = srv->connected_sources;
 
-  for (i = 0; i < connected; i++){
+  for (i = 0; i < MAX_SOURCES; i++){
     if (srv->sources[i] && strcmp(srv->sources[i]->mountpoint, mnt) == 0){
       return srv->sources[i];
     }
@@ -255,4 +253,24 @@ spellcast_print_source_info(source_meta *source)
   printf("\tPublic: %d\n", source->stream_data->pub);
   printf("\tBitrate: %dkbps\n", source->stream_data->bitrate);
   printf("\tMount point: %s\n", source->mountpoint);
+}
+
+source_meta*
+spellcast_get_random_source(spellcast_server *srv)
+{
+  int random_src_num = rand() % srv->connected_sources;
+  int passed = 0, i;
+
+  for (i = 0; i < MAX_SOURCES; i++){
+    if (srv->sources[i] != NULL){
+      if (passed != random_src_num){
+        passed++;
+      }
+      else {
+        return srv->sources[i];
+      }
+    }
+  }
+
+  return NULL;
 }
