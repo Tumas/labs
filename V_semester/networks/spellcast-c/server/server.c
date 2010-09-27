@@ -136,6 +136,7 @@ spellcast_server_run(spellcast_server *srv)
 {
   int i, j, temp1;
   int received_bytes, sent_bytes;
+  int meta_sent;
   fd_set temp_read;
 
   FD_ZERO(&temp_read);
@@ -191,7 +192,11 @@ spellcast_server_run(spellcast_server *srv)
                       temp1 = send_message(client->sock_d, source->buffer, METAINT - client->bytes_to_meta);
 
                       // send meta
-                      send_metadata(client->sock_d, &stub);
+                      meta_sent = send_metadata(client->sock_d, &stub);
+                      if (meta_sent == -1){
+                        spellcast_disconnect_client(srv, client);
+                        continue;
+                      }
 
                       // send rest of bytes + increase ->bytes_to_meta
                       client->bytes_to_meta = send_message(client->sock_d, source->buffer + METAINT - client->bytes_to_meta, (client->bytes_to_meta + received_bytes) % METAINT);
@@ -298,7 +303,7 @@ get_in_addr(struct sockaddr *sa)
   return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
-void 
+int  
 send_metadata(int socket, icy_metadata *meta)
 {
   // 28 is the number of additional characters in metadata without url and title
@@ -310,6 +315,8 @@ send_metadata(int socket, icy_metadata *meta)
   memset(buf, 0, to_write);
   sprintf(buf, ICY_METADATA_FORMAT, (msg_len + padding) / 16, meta->title != NULL ? meta->title : "", meta->url != NULL ? meta->url : "");
 
-  send_message(socket, buf, to_write);
+  msg_len = send_message(socket, buf, to_write);
   free(buf);
+
+  return msg_len == to_write ? 1 : -1;
 }

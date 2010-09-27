@@ -108,6 +108,6 @@ void spellcast_dispose_stream_meta(stream_meta*);
 void *get_in_addr(struct sockaddr*);
 
 /**/
-void send_metadata(int, icy_metadata*);
+int send_metadata(int, icy_metadata*);
 
 #endif
