@@ -209,18 +209,27 @@ spellcast_server_run(spellcast_server *srv)
                    // register with source
                    spellcast_register_client(srv, client); 
 
-                   // send info about server
-                   char *mes = "ICY 200 OK\r\nContent-Type:audio/mpeg\r\nicy-br:96\r\nicy-metaint:8192\r\n\r\n";
+                   // send info about source
+                   source_meta *source = spellcast_get_source_by_mountpoint(srv, client->mountpoint);
+
+                   char mes[BUFFLEN];
+                   sprintf(mes, ICY_SRV2CLIENT_MESSAGE, srv->server_metadata->notice,
+                        source->stream_data->name,
+                        source->stream_data->genre,
+                        source->stream_data->url, 
+                        srv->server_metadata->server_data->mime_type,
+                        source->stream_data->pub,
+                        source->stream_data->bitrate, 
+                        srv->server_metadata->metaint);
+
                    send_message(client->sock_d, mes, strlen(mes));
 
-                  FD_CLR(i, &srv->empty_clients);
+                   FD_CLR(i, &srv->empty_clients);
                 }
               }
               else {
-                printf("client something else\n");
-
-                  int x = recv(client->sock_d, client->buffer, BUFFLEN, 0);
-                  if (x == 0){
+                  received_bytes = recv(client->sock_d, client->buffer, BUFFLEN, 0);
+                  if (received_bytes == 0){
                     printf(" *** CLIENT on socket %d disconnected ***\n", i);
                     spellcast_disconnect_client(srv, client);
                   }

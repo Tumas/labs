@@ -28,7 +28,7 @@ main(int argc, char *argv[])
   server_meta srv_info = {
     (stream_meta*) malloc(sizeof(stream_meta)),
     "You are connected to a dummy spellcast server.",
-    16000
+    METAINT
   };
 
   srv_info.server_data->name = "SpellCast dummy server";

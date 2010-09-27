@@ -3,6 +3,7 @@
 
 #define SPELLCAST_LINE_TOKEN "\r\n"
 #define SPELLCAST_HEADER_END_TOKEN "\r\n\r\n"
+
 #define SPELLCAST_HEADER_INFO_SEPARATOR ":"
 #define SPELLCAST_SRV2SRC_OK_MSG "ICY 200 OK\r\n\r\n"
 
@@ -20,6 +21,15 @@
 #define SPELLCAST_PUBLIC_TOKEN "ice-public:"
 
 #define ICY_METADATA_FORMAT "%cStreamTitle='%s';StreamUrl='%s';"
+#define ICY_SRV2CLIENT_MESSAGE "ICY 200 OK\r\n\
+  icy-notice:%s\r\n\
+  icy-name:%s\r\n\
+  icy-genre:%s\r\n\
+  icy-url%s\r\n\
+  Content-Type:%s\r\n\
+  icy-pub:%d\r\n\
+  icy-br:%d\r\n\
+  icy-metaint:%d\r\n\r\n"
 
 typedef struct _source_header_info {
   char *source_sep;
@@ -52,6 +62,5 @@ icy_protocol* spellcast_init_icy_protocol_info();
 
 /**/
 void spellcast_dispose_icy_protocol_info(icy_protocol*);
-
 
 #endif
