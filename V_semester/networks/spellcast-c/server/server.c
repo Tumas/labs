@@ -233,16 +233,22 @@ spellcast_server_run(spellcast_server *srv)
 
                    // send info about source
                    source_meta *source = spellcast_get_source_by_mountpoint(srv, client->mountpoint);
-                   if (srv->connected_sources > 0){
-                     // could not source with given mountpoint 
-                     printf("Could not find source with specified mountpoint : %s\n", client->mountpoint);
-                     printf("Connecting to a random source...");
+                   if (source == NULL){
+                     if (srv->connected_sources > 0){
+                       // could not source with given mountpoint 
+                       printf("Could not find source with specified mountpoint : %s\n", client->mountpoint);
+                       printf("Connecting to a random source...");
 
-                     source = spellcast_get_random_source(srv);
+                       source = spellcast_get_random_source(srv);
 
-                     free(client->mountpoint);
-                     client->mountpoint = spellcast_allocate_string(source->mountpoint);
-                     printf("Random source selected: %p (%s) \n", source, client->mountpoint);
+                       free(client->mountpoint);
+                       client->mountpoint = spellcast_allocate_string(source->mountpoint);
+                       printf("Random source selected: %p (%s) \n", source, client->mountpoint);
+                     }
+                     else {
+                       // should happen rarely 
+                       printf(" --> the end is near.. <-- \n");
+                     }
                    }
 
                    // register with source
