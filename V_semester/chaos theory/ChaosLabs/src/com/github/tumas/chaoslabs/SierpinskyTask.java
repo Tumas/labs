@@ -17,6 +17,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
+import java.util.HashMap;
 
 import com.github.tumas.chaoslabs.helper.ExtendedCanvas;
 
@@ -32,18 +33,21 @@ public class SierpinskyTask extends Frame {
 		setLayout(new BorderLayout());
 
 		final TextField numberText = new TextField();
-		final SierpinskyCanvas sp = new SierpinskyCanvas();
+		final SierpinskyCanvas sp = new SierpinskyCanvas(5);
 		
 		Button findPointButton = new Button("Highligh Point");
 		findPointButton.addActionListener(new ActionListener (){
+
 			public void actionPerformed(ActionEvent ae){
-				int decimalNumber = Integer.parseInt(numberText.getText(), 3);
-				
-				if (decimalNumber > sp.getArraySize()){
-					System.out.println("Selected Point does not exist");
+				Point2D.Float pnt = sp.pointsMap.get(numberText.getText());
+
+				if (pnt == null){
+					sp.showErrorMessage("There is no such point");
+					return ;
 				}
-				
-				sp.highlightPoint(sp.getGraphics(), decimalNumber, Color.yellow);
+
+				sp.update(sp.getGraphics());
+				sp.highlightPoint(pnt, Color.yellow);
 			}
 		});
 		
@@ -67,10 +71,11 @@ public class SierpinskyTask extends Frame {
 
 @SuppressWarnings("serial")
 class SierpinskyCanvas extends ExtendedCanvas {
-	private Point2D.Float[] points;
+	private int[] iterationPoints;
 	private int iterations;
-	private int counter;
-	private int arraySize;
+	private int capacity;
+	
+	HashMap<String, Point2D.Float> pointsMap; 
 	
 	@Override
 	public int iY(float y){return maxY - Math.round(y);}
@@ -80,14 +85,18 @@ class SierpinskyCanvas extends ExtendedCanvas {
 	}
 	
 	public SierpinskyCanvas(int iterations){
-		setArraySize((int) (( 1 - Math.pow(3, iterations + 1)) / -2) + 2);
-		
-		points = new Point2D.Float[getArraySize()];
+		capacity = (int) ((1 - Math.pow(3, iterations + 1)) / -2);
+		pointsMap = new HashMap<String, Point2D.Float>(capacity);
+
 		this.iterations = iterations;
+		iterationPoints = new int[iterations];
+		for (int i = 0; i < iterations; i++) iterationPoints[i] = 0;
 	}
 	
 	public void paint(Graphics g){
 		initCanvasInfo();
+		resetStatistics();
+		
 		int minXY = Math.min(maxX, maxY);
 		
 		float side = 0.95F * minXY;
@@ -101,10 +110,6 @@ class SierpinskyCanvas extends ExtendedCanvas {
 		g.drawLine(iX(xA), iY(yA), iX(xB), iY(yB));
 		g.drawLine(iX(xB), iY(yB), iX(xC), iY(yC));
 		g.drawLine(iX(xC), iY(yC), iX(xA), iY(yA));
-	
-		registerPoint(xA, yA);
-		registerPoint(xB, yB);
-		registerPoint(xC, yC);
 	
 		drawSierpinsky(g, iterations, xA, yA, xB, yB, xC, yC);
 	}
@@ -120,10 +125,10 @@ class SierpinskyCanvas extends ExtendedCanvas {
 			yB1 = (yB + yC) / 2;
 			xC1 = (xC + xA) / 2;
 			yC1 = (yC + yA) / 2;
-
-			registerPoint(xA1, yA1);
-			registerPoint(xB1, yB1);
-			registerPoint(xC1, yC1);
+			
+			pointsMap.put(generatePointID(iteration), new Point2D.Float(xA1, yA1));
+			pointsMap.put(generatePointID(iteration), new Point2D.Float(xB1, yB1));
+			pointsMap.put(generatePointID(iteration), new Point2D.Float(xC1, yC1));
 			
 			g.drawLine(iX(xA1), iY(yA1), iX(xB1), iY(yB1));
 			g.drawLine(iX(xB1), iY(yB1), iX(xC1), iY(yC1));
@@ -135,27 +140,42 @@ class SierpinskyCanvas extends ExtendedCanvas {
 		}
 	}
 
-	private void registerPoint(float x, float y){
-		points[counter++ % getArraySize()] = new Point2D.Float(x, y);
-	}
-	
-	public void highlightPoint(Graphics g, int number, Color color){
-		Point2D.Float pnt = points[number];
-		Color tempColor = g.getColor();
-		Graphics2D ga = (Graphics2D) g;
+	public void highlightPoint(Point2D.Float pnt, Color color){
+		Graphics2D ga = (Graphics2D) getGraphics();
+		Color tempColor = ga.getColor();
 		Shape circle = new Ellipse2D.Float((float)pnt.getX() - 2, (float)iY((float)pnt.getY()), 5f, 5f);
 		
-		g.setColor(color);
+		ga.setColor(color);
 		ga.draw(circle);
 		ga.fill(circle);
-		g.setColor(tempColor);
+		ga.setColor(tempColor);
+	}
+	
+		public void resetStatistics(){
+		for (int i = 0; i < iterations; i++) iterationPoints[i] = 0;
 	}
 
-	public void setArraySize(int arraySize) {
-		this.arraySize = arraySize;
+	public void showErrorMessage(String msg){
+		Graphics g = getGraphics();
+		Color color = g.getColor();
+		
+		g.setColor(Color.RED);
+		g.drawString(msg, 50, 30);
+		g.setColor(color);
 	}
+	
+	private String generatePointID(int iter)
+	{
+		String id = "";
+		int number = iterationPoints[iterations - iter]++; 
+		
+		while (number >= 3){
+			id = number % 3 + id;
+			number /= 3;
+		}
+		id = number + id;
 
-	public int getArraySize() {
-		return arraySize;
+		for (int i = iterations - iter; i >= id.length();) { id = "0" + id; } 
+		return id;
 	}
 }
