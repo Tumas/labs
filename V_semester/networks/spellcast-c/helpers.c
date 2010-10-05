@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 
@@ -41,3 +42,13 @@ send_message(int socket, char *message, int len)
 
   return total;
 }
+
+void
+str_to_lower(char *str)
+{
+  while (*str) { 
+    (*str) = tolower(*str);
+    str++;
+  }
+}
+

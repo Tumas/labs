@@ -6,5 +6,6 @@
 
 char *spellcast_allocate_string(char *);
 int send_message(int, char*, int);
+void str_to_lower(char *str);
 
 #endif

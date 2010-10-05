@@ -6,8 +6,8 @@
 void
 spellcast_print_server_info(const spellcast_server* srv)
 {
-  fprintf(stdout, "Server: %s\nURL: %s\nServing: %s\n", srv->server_metadata->server_data->name,
-      srv->server_metadata->server_data->url, srv->server_metadata->server_data->mime_type);
+  fprintf(stdout, "Server: %s\nURL: %s\nServing: %s\n", srv->meta->name,
+      srv->meta->url, srv->meta->mime_type);
   fprintf(stdout, "Source port: %s\n", srv->source_port);
   fprintf(stdout, "Client port: %s\n", srv->client_port);
 }
@@ -17,52 +17,6 @@ spellcast_print_server_stats(const spellcast_server *srv)
 {
   fprintf(stdout, "Connected sources %d\n", srv->connected_sources);
   fprintf(stdout, "Connected clients %d\n", srv->connected_clients);
-}
-
-spellcast_server* 
-spellcast_init_server_variables(const char *s_port, const char *c_port, const server_meta *srv_meta)
-{
-  spellcast_server *srv = (spellcast_server*) malloc(sizeof(spellcast_server));
-
-  if (!srv){
-    P_ERROR("malloc gave NULL (intializing server )");
-    return NULL; } 
-  srv->client_port = (char*) malloc(strlen(c_port) + 1);
-  srv->source_port = (char*) malloc(strlen(s_port) + 1);
-  strcpy(srv->client_port, c_port);
-  strcpy(srv->source_port, s_port);
-
-  // server metadata
-  srv->server_metadata = (server_meta*) malloc(sizeof(server_meta));
-  if (!srv->server_metadata){
-    P_ERROR("malloc gave NULL (initializing server : server metadata)");
-    return NULL;
-  }
-
-  srv->server_metadata->metaint = srv_meta->metaint;
-  srv->server_metadata->notice = (char*) malloc(strlen(srv_meta->notice) + 1);
-  strcpy(srv->server_metadata->notice, srv_meta->notice);
-
-  srv->server_metadata->server_data = (stream_meta*) malloc(sizeof(stream_meta));
-  if (!srv->server_metadata->server_data){
-    P_ERROR("malloc gave NULL (initializing server : server data)");
-    return NULL;
-  }
-
-  srv->server_metadata->server_data->name = spellcast_allocate_string(srv_meta->server_data->name);
-  srv->server_metadata->server_data->url = spellcast_allocate_string(srv_meta->server_data->url);
-  srv->server_metadata->server_data->mime_type = spellcast_allocate_string(srv_meta->server_data->mime_type);
-
-  srv->server_metadata->server_data->pub = srv_meta->server_data->pub; 
-  srv->connected_sources = 0;
-  srv->connected_clients = 0;
-
-  memset(srv->sources, 0, sizeof(srv->sources));
-  memset(srv->clients, 0, sizeof(srv->clients));
-
-  srv->icy_p = spellcast_init_icy_protocol_info();
-
-  return srv;
 }
 
 static int 
@@ -101,6 +55,18 @@ spellcast_create_access_point(struct addrinfo* hints, struct addrinfo** serv_inf
   return -1; //could not bind
 }
 
+int 
+source_socket_match(int key, const void *src2)
+{
+  return key == ((source_meta*)src2)->c_point->sock_d;
+}
+
+int 
+client_socket_match(int key, const void *cl)
+{
+  return key == ((client_meta*)cl)->c_point->sock_d;
+}
+
 int
 spellcast_init_server(spellcast_server *srv)
 {
@@ -131,16 +97,27 @@ spellcast_init_server(spellcast_server *srv)
   FD_SET(srv->src_sock, &srv->master_read);
   FD_SET(srv->cl_sock, &srv->master_read);
   srv->latest_sock = srv->cl_sock;
+
+  srv->connected_clients = 0;
+  srv->connected_sources = 0;
+
+  srv->clients = (sp_hash_table*) malloc(sizeof(sp_hash_table));
+  srv->sources = (sp_hash_table*) malloc(sizeof(sp_hash_table));
+
+  spellcast_htable_init(srv->clients, HASHSIZE, client_socket_match, spellcast_dispose_client);
+  spellcast_htable_init(srv->sources, HASHSIZE, source_socket_match, spellcast_dispose_source);
+
   return 0;
 }
 
 int 
 spellcast_server_run(spellcast_server *srv)
 {
-  int i, j, temp1;
+  int i, temp1;
   int received_bytes, sent_bytes;
-  int meta_sent;
   fd_set temp_read;
+  source_meta *source;
+  client_meta *client;
 
   FD_ZERO(&temp_read);
 
@@ -163,15 +140,13 @@ spellcast_server_run(spellcast_server *srv)
           spellcast_print_server_stats(srv);
         }
         else {
+           spellcast_htable_lookup(srv->sources, i, (void **) &source);
 
-          source_meta *source = (source_meta*) spellcast_get_source(srv, i);
           if (source){
             if (FD_ISSET(i, &srv->empty_sources)){
-
-              if (spellcast_source_parse_header(srv, source)){
+              if (spellcast_parse_header(source->c_point, NULL, NULL)){
                 spellcast_print_source_info(source);
-
-                send_message(source->sock_d, srv->icy_p->ok_message, strlen(srv->icy_p->ok_message));
+                send_message(source->c_point->sock_d, SPELLCAST_SRV2SRC_OK_MSG, strlen(SPELLCAST_SRV2SRC_OK_MSG));
 
                 FD_CLR(i, &srv->empty_sources);
               }
@@ -180,97 +155,105 @@ spellcast_server_run(spellcast_server *srv)
               // replace with actual data
               icy_metadata stub = { NULL, "U2 - One" };
 
-              if ((received_bytes = recv(source->sock_d, source->buffer, BUFFLEN, 0)) == 0){
+              if ((received_bytes = recv(source->c_point->sock_d, source->c_point->buffer, BUFFLEN, 0)) == 0){
                 spellcast_disconnect_source(srv, source);
               }
               else 
               {
                 // send data to clients
-                for (j = 0; srv->connected_clients != 0 && j < MAX_CLIENTS; j++){
-                  client_meta *client = source->clients[j];
+                listElement* element = dlist_head(source->clients);
+                
+                while (element != NULL){
+                  client = (client_meta*) dlist_data(element);
 
-                  if (client != NULL){
-                    if (client->bytes_to_meta + received_bytes > METAINT){
-                      // send metaint number
-                      temp1 = send_message(client->sock_d, source->buffer, METAINT - client->bytes_to_meta);
+                  if (client->bytes_to_meta + received_bytes > METAINT){
+                    temp1 = send_message(client->c_point->sock_d, source->c_point->buffer, METAINT - client->bytes_to_meta);
 
-                      // send meta
-                      meta_sent = send_metadata(client->sock_d, &stub);
-                      if (meta_sent == -1){
-                        spellcast_disconnect_client(srv, client);
-                        continue;
-                      }
-
-                      // send rest of bytes + increase ->bytes_to_meta
-                      client->bytes_to_meta = send_message(client->sock_d, source->buffer + METAINT - client->bytes_to_meta, (client->bytes_to_meta + received_bytes) % METAINT);
-                      sent_bytes = temp1 + client->bytes_to_meta;
-                    }
-                    else {
-                      sent_bytes = send_message(client->sock_d, source->buffer, received_bytes);
-                      client->bytes_to_meta += sent_bytes;
-                    }
-
-                    if (sent_bytes != received_bytes){
+                    if (spellcast_send_metadata(client->c_point->sock_d, &stub) == -1){
                       spellcast_disconnect_client(srv, client);
+
+                      element = dlist_next(element);
                       continue;
                     }
 
-                  } // if
-                } // for 
+                    // send rest of bytes + increase ->bytes_to_meta
+                    client->bytes_to_meta = send_message(client->c_point->sock_d, source->c_point->buffer + METAINT - client->bytes_to_meta, (client->bytes_to_meta + received_bytes) % METAINT);
+                    sent_bytes = temp1 + client->bytes_to_meta;
+                  }
+                  else {
+                    sent_bytes = send_message(client->c_point->sock_d, source->c_point->buffer, received_bytes);
+                    client->bytes_to_meta += sent_bytes;
+                  }
 
+                  if (sent_bytes != received_bytes){
+                    spellcast_disconnect_client(srv, client);
+                    
+                    element = dlist_next(element);
+                    continue;
+                  }
+
+                  element = dlist_next(element);
+                } // while 
+              }
             }
           }
-          }
           else {
+            spellcast_htable_lookup(srv->clients, i, (void **) &client);
+              printf("LOOK UP RESULT FOR CLIENT %p\n", client);
 
-            client_meta *client = spellcast_get_client(srv, i);
             if (client){
               if (FD_ISSET(i, &srv->empty_clients)){
+                printf("EMPYCLIENT\n");
 
                 // will block if client sends metadata without header_end at all
-                if (spellcast_client_parse_header(srv, client)){
+                if (spellcast_parse_header(client->c_point, client, spellcast_client_header_parse_callback)){
                   spellcast_print_client_info(client);
 
+                   source_meta* src = NULL;
+                   if (client->c_point->mountpoint != NULL) {
+                     src = spellcast_get_source_by_mountpoint(srv, client->c_point->mountpoint);
+                   }
+
                    // send info about source
-                   source_meta *source = spellcast_get_source_by_mountpoint(srv, client->mountpoint);
-                   if (source == NULL){
+                   if (src == NULL){
                      if (srv->connected_sources > 0){
                        // could not source with given mountpoint 
-                       printf("Could not find source with specified mountpoint : %s\n", client->mountpoint);
-                       printf("Connecting to a random source...");
+                       printf("Could not find source with specified mountpoint : %s\n", client->c_point->mountpoint);
+                       printf("Connecting to a random source...\n");
 
-                       source = spellcast_get_random_source(srv);
+                       src = spellcast_get_random_source(srv);
+                       printf("Random source found\n");
 
-                       free(client->mountpoint);
-                       client->mountpoint = spellcast_allocate_string(source->mountpoint);
-                       printf("Random source selected: %p (%s) \n", source, client->mountpoint);
+                       free(client->c_point->mountpoint);
+                       printf("removed old mountpoint\n");
+                       client->c_point->mountpoint = spellcast_allocate_string(src->c_point->mountpoint);
+                       printf("Random source selected: %p (%s) \n", src, client->c_point->mountpoint);
                      }
                      else {
-                       // should happen rarely 
-                       printf(" --> the end is near.. <-- \n");
+                       printf(" --> should not happen <-- ");
                      }
                    }
 
                    // register with source
-                   spellcast_register_client(srv, client); 
+                   dlist_insert(src->clients, (const void*) client);
 
                    char mes[BUFFLEN];
-                   sprintf(mes, ICY_SRV2CLIENT_MESSAGE, srv->server_metadata->notice,
-                        source->stream_data->name,
-                        source->stream_data->genre,
-                        source->stream_data->url, 
-                        srv->server_metadata->server_data->mime_type,
-                        source->stream_data->pub,
-                        source->stream_data->bitrate, 
-                        srv->server_metadata->metaint);
+                   sprintf(mes, ICY_SRV2CLIENT_MESSAGE, srv->notice,
+                        src->c_point->meta->name,
+                        src->c_point->meta->genre,
+                        src->c_point->meta->url, 
+                        srv->meta->mime_type,
+                        src->c_point->meta->pub,
+                        src->c_point->meta->bitrate, 
+                        METAINT);
 
-                   send_message(client->sock_d, mes, strlen(mes));
+                   send_message(client->c_point->sock_d, mes, strlen(mes));
 
                    FD_CLR(i, &srv->empty_clients);
                 }
               }
               else {
-                  received_bytes = recv(client->sock_d, client->buffer, BUFFLEN, 0);
+                  received_bytes = recv(client->c_point->sock_d, client->c_point->buffer, BUFFLEN, 0);
                   if (received_bytes == 0){
                     printf(" *** CLIENT on socket %d disconnected ***\n", i);
                     spellcast_disconnect_client(srv, client);
@@ -286,33 +269,6 @@ spellcast_server_run(spellcast_server *srv)
   return 0;
 }
 
-void 
-spellcast_server_dispose(spellcast_server *srv)
-{
-  freeaddrinfo(srv->srv_src_addrinfo);
-  freeaddrinfo(srv->srv_cl_addrinfo);
-
-  spellcast_dispose_stream_meta(srv->server_metadata->server_data);
-
-  free(srv->server_metadata->notice);
-  free(srv->client_port);
-  free(srv->source_port);
-  free(srv->server_metadata);
-  
-  spellcast_dispose_icy_protocol_info(srv->icy_p);
-  free(srv);
-}
-
-void 
-spellcast_dispose_stream_meta(stream_meta *stream)
-{
-  free(stream->name);
-  free(stream->genre);
-  free(stream->url);
-  free(stream->mime_type);
-  free(stream);
-}
-
 void* 
 get_in_addr(struct sockaddr *sa)
 {
@@ -323,8 +279,130 @@ get_in_addr(struct sockaddr *sa)
   return &(((struct sockaddr_in6*)sa)->sin6_addr);
 }
 
+void 
+spellcast_server_dispose(spellcast_server *srv)
+{
+  close(srv->src_sock);
+  close(srv->cl_sock);
+
+  freeaddrinfo(srv->srv_src_addrinfo);
+  freeaddrinfo(srv->srv_cl_addrinfo);
+  freeaddrinfo(&srv->hints);
+
+  spellcast_htable_destroy(srv->clients);
+  spellcast_htable_destroy(srv->sources);
+  free(srv->sources);
+  free(srv->clients);
+}
+
+void 
+spellcast_dispose_stream_meta(stream_meta *stream)
+{
+  free(stream->name);
+  free(stream->genre);
+  free(stream->url);
+  free(stream->mime_type);
+}
+
+
+// TODO : normalize this with returns and stuff for disconnection
+int 
+spellcast_parse_header(connection_point* cnp, void* object, void (*callback)(char *string, void *obj))
+{
+  int received_bytes, is_full_message; 
+  char *header_line, *match, *prev_line;
+  
+  memset(cnp->buffer + cnp->buf_start, 0, CPOINT_BUFFER_SIZE(cnp));
+
+  received_bytes = recv(cnp->sock_d, cnp->buffer + cnp->buf_start, CHAR_CPOINT_BUFFER_SIZE(cnp), 0); 
+  if (received_bytes == 0){
+    //spellcast_disconnect_source(srv, source);
+    return -1;
+  }
+
+  printf("GOT: \n%s\n", cnp->buffer);
+  cnp->buffer[cnp->buf_start + received_bytes] = '\0';
+  is_full_message = strstr(cnp->buffer, SPELLCAST_HEADER_END_TOKEN) != NULL ? 1 : 0;
+  header_line = strtok(cnp->buffer, SPELLCAST_LINE_TOKEN);
+
+
+  while (header_line != NULL){
+    str_to_lower(header_line);
+    printf("parsed_token: %s\n", header_line);
+
+    // This could be moved to a function : expecting client or source?
+    if ((match = strstr(header_line, SPELLCAST_SOURCE_TOKEN)) != NULL || (match = strstr(header_line, SPELLCAST_CLIENT_TOKEN)) != NULL) {
+      char *buf = spellcast_allocate_string(header_line);
+      int len = strlen(buf);
+      char *test = strtok(buf, " ");
+      char *prev = NULL;
+
+      while (test != NULL){
+        if (prev != NULL && (strcmp(prev, SPELLCAST_SOURCE_TOKEN) == 0 || strcmp(prev, SPELLCAST_CLIENT_TOKEN) == 0)){
+          if (strlen(test) > 1){
+            cnp->mountpoint = spellcast_allocate_string(test + 1);
+            printf("MOUNTPOINT allocated: %s\n", cnp->mountpoint);
+          }
+          else {
+            printf("MOUNTPOINT not set. Setting to null\n");
+          }
+          break;
+        }
+
+        prev = test;
+        test = strtok(NULL, " ");
+      }
+
+      // restore original string : black magic
+      header_line = strtok(header_line + len + 1, SPELLCAST_LINE_TOKEN); 
+      free(buf);
+
+    } else if ((match = strstr(header_line, SPELLCAST_URL_TOKEN)) != NULL) {
+      cnp->meta->url = spellcast_allocate_string(match + strlen(SPELLCAST_URL_TOKEN));
+
+    } else if ((match = strstr(header_line, SPELLCAST_DESCRIPTION_TOKEN)) != NULL) {
+      cnp->description = spellcast_allocate_string(match + strlen(SPELLCAST_DESCRIPTION_TOKEN));
+
+    } else if ((match = strstr(header_line, SPELLCAST_USER_AGENT_TOKEN)) != NULL) {
+      cnp->meta->name = spellcast_allocate_string(match + strlen(SPELLCAST_USER_AGENT_TOKEN));
+
+    } else if ((match = strstr(header_line, SPELLCAST_PUBLIC_TOKEN)) != NULL) {
+      cnp->meta->pub = atoi(match + strlen(SPELLCAST_PUBLIC_TOKEN));
+
+    } else if ((match = strstr(header_line, SPELLCAST_BITRATE_TOKEN)) != NULL) {
+      cnp->meta->bitrate = atoi(match + strlen(SPELLCAST_BITRATE_TOKEN));
+    }
+
+    if (callback)
+      callback(header_line, object);
+
+    prev_line = header_line;
+    header_line = strtok(NULL, "\r\n"); 
+  }
+  
+  if (!is_full_message){
+    cnp->buf_start = strlen(prev_line);
+    strcpy(cnp->buffer, prev_line);
+
+    return 0;
+  }
+  else { 
+    cnp->buf_start = 0;
+
+    /* TODO: what if mountpoint taken
+    if (strlen(cnp->mountpoint) == 0 || spellcast_source_mountpoint_taken(srv, source)){
+      char mnt[10];
+      sprintf(mnt, "mount%d", source->sock_d);
+      source->mountpoint = spellcast_allocate_string(mnt);
+    }
+    */
+  }
+
+  return 1;
+}
+
 int  
-send_metadata(int socket, icy_metadata *meta)
+spellcast_send_metadata(int socket, icy_metadata *meta)
 {
   // 28 is the number of additional characters in metadata without url and title
   int msg_len = ((meta->title != NULL) ? strlen(meta->title) : 0) + ((meta->url != NULL) ? strlen(meta->url) : 0) + 28;
