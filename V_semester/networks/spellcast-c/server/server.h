@@ -65,7 +65,6 @@ typedef struct _client_meta {
 typedef struct _spellcast_server {
   stream_meta *meta;
   char *notice;
-  unsigned int metaint; 
 
   char *source_port;
   char *client_port;

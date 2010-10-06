@@ -13,7 +13,6 @@
  *  -c port - client port
  *  -n name - name of a server
  *  -t notice - notice message sent to connected clients
- *  -m metaint - interval at which metadata is sent to clients
  *  -u url     - server's url
  *  -p int     - flag that determines if server is public (1, 0 otherwise)
  */
@@ -36,7 +35,7 @@ main(int argc, char *argv[])
   srv.meta->bitrate = 0;
   srv.meta->pub = 0;
 
-  while ((opt = getopt(argc, argv, "s:c:n:t:u:p:m:")) != -1){
+  while ((opt = getopt(argc, argv, "s:c:n:t:u:p:")) != -1){
     switch(opt){
       case 's':
         srv.source_port = optarg;
@@ -55,9 +54,6 @@ main(int argc, char *argv[])
         break;
       case 'p':
         srv.meta->pub =  atoi(optarg) ? 1 : 0;
-        break;
-      case 'm':
-        srv.metaint = (unsigned int) atoi(optarg);
         break;
       case '?':
         fprintf(stdout, "Unrecognized option (will have no effect) : %c\n", optopt);
