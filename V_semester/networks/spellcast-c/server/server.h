@@ -96,7 +96,7 @@ void spellcast_server_dispose(spellcast_server*);
 int spellcast_server_run(spellcast_server*);
 void *get_in_addr(struct sockaddr*);
 void spellcast_dispose_stream_meta(stream_meta*);
-int spellcast_parse_header(connection_point* cnp, void *object, void (*callback)(char *, void*));
+int spellcast_parse_header(spellcast_server *, connection_point* cnp, void *object, void (*callback)(char *, void*));
 int  spellcast_send_metadata(int socket, icy_metadata *meta);
 
 #endif

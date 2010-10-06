@@ -144,8 +144,10 @@ spellcast_server_run(spellcast_server *srv)
 
           if (source){
             if (FD_ISSET(i, &srv->empty_sources)){
-              if (spellcast_parse_header(source->c_point, NULL, NULL)){
+              if (spellcast_parse_header(srv, source->c_point, NULL, NULL)){
                 spellcast_print_source_info(source);
+                spellcast_print_server_stats(srv);
+
                 send_message(source->c_point->sock_d, SPELLCAST_SRV2SRC_OK_MSG, strlen(SPELLCAST_SRV2SRC_OK_MSG));
 
                 FD_CLR(i, &srv->empty_sources);
@@ -206,8 +208,9 @@ spellcast_server_run(spellcast_server *srv)
                 printf("EMPYCLIENT\n");
 
                 // will block if client sends metadata without header_end at all
-                if (spellcast_parse_header(client->c_point, client, spellcast_client_header_parse_callback)){
+                if (spellcast_parse_header(srv, client->c_point, client, spellcast_client_header_parse_callback)){
                   spellcast_print_client_info(client);
+                  spellcast_print_server_stats(srv);
 
                    source_meta* src = NULL;
                    if (client->c_point->mountpoint != NULL) {
@@ -307,7 +310,7 @@ spellcast_dispose_stream_meta(stream_meta *stream)
 
 // TODO : normalize this with returns and stuff for disconnection
 int 
-spellcast_parse_header(connection_point* cnp, void* object, void (*callback)(char *string, void *obj))
+spellcast_parse_header(spellcast_server *srv, connection_point* cnp, void* object, void (*callback)(char *string, void *obj))
 {
   int received_bytes, is_full_message; 
   char *header_line, *match, *prev_line;
@@ -328,7 +331,7 @@ spellcast_parse_header(connection_point* cnp, void* object, void (*callback)(cha
 
   while (header_line != NULL){
     str_to_lower(header_line);
-    printf("parsed_token: %s\n", header_line);
+    //printf("parsed_token: %s\n", header_line);
 
     // This could be moved to a function : expecting client or source?
     if ((match = strstr(header_line, SPELLCAST_SOURCE_TOKEN)) != NULL || (match = strstr(header_line, SPELLCAST_CLIENT_TOKEN)) != NULL) {
@@ -389,13 +392,15 @@ spellcast_parse_header(connection_point* cnp, void* object, void (*callback)(cha
   else { 
     cnp->buf_start = 0;
 
-    /* TODO: what if mountpoint taken
-    if (strlen(cnp->mountpoint) == 0 || spellcast_source_mountpoint_taken(srv, source)){
-      char mnt[10];
-      sprintf(mnt, "mount%d", source->sock_d);
-      source->mountpoint = spellcast_allocate_string(mnt);
+    if (cnp->mountpoint){
+      // What if mountpoint is aready taken?
+      source_meta *test = spellcast_get_source_by_mountpoint(srv, cnp->mountpoint);
+      if (test && test->c_point != cnp){
+        char mnt[10];
+        sprintf(mnt, "mount%d", cnp->sock_d);
+        cnp->mountpoint = spellcast_allocate_string(mnt);
+      }
     }
-    */
   }
 
   return 1;
