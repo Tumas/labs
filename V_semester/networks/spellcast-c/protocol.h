@@ -21,6 +21,9 @@
 #define SPELLCAST_PUBLIC_TOKEN "ice-public:"
 #define SPELLCAST_METAINT_TOKEN "icy-metadata:"
 
+#define SPELLCAST_METAINT_CLIENT_TOKEN "icy-metaint:"
+#define SPELLCAST_BR_TOKEN "br:"
+
 #define ICY_METADATA_FORMAT "%cStreamTitle='%s';StreamUrl='%s';"
 #define SPELLCAST_SRV2SRC_OK_MSG "ICY 200 OK" SPELLCAST_HEADER_END_TOKEN
 #define ICY_SRV2CLIENT_MESSAGE "ICY 200 OK\r\n\
@@ -32,6 +35,12 @@ Content-Type:%s\r\n\
 icy-pub:%d\r\n\
 icy-br:%d\r\n\
 icy-metaint:%d\r\n\r\n"
+
+#define ICY_CLIENT2SRV_MESSAGE "GET /%s %s\r\n\
+Host: %s:%s\r\n\
+User-Agent: %s\r\n\
+Icy-MetaData: %d\r\n\
+Connection: %s\r\n\r\n"
 
 typedef struct _icy_metadata {
   char *url;
