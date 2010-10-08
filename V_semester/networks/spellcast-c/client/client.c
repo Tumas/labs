@@ -36,8 +36,7 @@ main(int argc, char *argv[])
   c_info->needs_meta = 1;
 
   struct addrinfo hints, *servinfo, *p;
-  int rv, bytes_received;
-  char buffer[BUFFER_SIZE];
+  int rv;
 
   while ((opt = getopt(argc, argv, "u:p:m:hi")) != -1){
     switch(opt){
@@ -61,7 +60,8 @@ main(int argc, char *argv[])
         break;
       case 'h':
         fprintf(stdout, "USAGE: %s -p port -u url -m mountpoint\n", argv[0]);
-        break;
+
+        return 0;
       case '?':
         fprintf(stdout, "Unrecognized option (will have no effect) : %c\n", optopt);
         break;
@@ -94,46 +94,52 @@ main(int argc, char *argv[])
     break;
   }
 
+  freeaddrinfo(servinfo);
+
   if (p == NULL){
     fprintf(stderr, "Client: failed to connect\n");
     return 1;
   }
 
-  freeaddrinfo(servinfo);
-
   /* Send information about client */
-  sprintf(buffer, ICY_CLIENT2SRV_MESSAGE, m_point, "http 1.1", url, port, "TEST agent", 1, "close");
+  char buffer[1000];
+  sprintf(buffer, ICY_CLIENT2SRV_MESSAGE, m_point, "HTTP/1.0", url, port, "TEST agent", 1, "close");
   send_message(c_info->sock_d, buffer, strlen(buffer));
 
   /* Parse information from server */
-  if ((bytes_received = recv(c_info->sock_d, buffer, BUFFER_SIZE - 1, 0)) == 0){
-    perror("recv");
-    return 1;
+  if (spellcast_get_server_information(c_info) != 0){
+    spellcast_client_cleanup(c_info);
+    return 0;
   }
 
-  buffer[bytes_received] = '\0';
-  printf("SERVER RESPONDED with %d bytes\n\n%s\n", bytes_received, buffer);
-
-  spellcast_client_parse_server_response(buffer, c_info);
   spellcast_client_print_connection_info(c_info);
-  
-  spellcast_client_play(c_info);
 
+  printf(" Starting playback ... \n");
+  spellcast_client_play(c_info);
   spellcast_client_cleanup(c_info);
+  printf(" Finishing playback ... \n");
+
   return 0;
 }
 
-void 
-spellcast_client_parse_server_response(const char *response, spellcast_con_info *sp)
-{
-   char rsp[strlen(response) + 1];
-   strcpy(rsp, response);
 
-   char *header_line = strtok(rsp, SPELLCAST_LINE_TOKEN);
-   char *match;
+/*
+ * Return value
+ *  0 - no mistakes, all information succesfully parsed
+ *  1 - no mistakes, but parsing is not finished. Could not get all response
+ *  -1 - mistake happened
+ *  -2 - wrong server response code
+ */
+static int 
+spellcast_client_parse_server_response(spellcast_cache *rsp, spellcast_con_info *sp)
+{
+   int is_full_message = strstr(rsp->buffer, SPELLCAST_HEADER_END_TOKEN) == NULL ?  0 : 1;
+   char *header_line = strtok(rsp->buffer, SPELLCAST_LINE_TOKEN);
+   char *match, *prev_line;
 
    while (header_line != NULL){
      str_to_lower(header_line);
+     printf("Parsed line  %s\n", header_line);
 
      if ((match = strstr(header_line, SPELLCAST_BR_TOKEN)) != NULL){
        sp->bitrate = atoi(match + strlen(SPELLCAST_BR_TOKEN));
@@ -142,8 +148,68 @@ spellcast_client_parse_server_response(const char *response, spellcast_con_info 
        sp->metaint = atoi(match + strlen(SPELLCAST_METAINT_CLIENT_TOKEN));
      }
 
+     prev_line = header_line;
      header_line = strtok(NULL, SPELLCAST_LINE_TOKEN);
    }
+
+   if (!is_full_message){
+     rsp->buf_start = strlen(prev_line);
+     strcpy(rsp->buffer, prev_line);
+
+     printf("Cached buffer %d %s\n", rsp->buf_start, rsp->buffer);
+     return 1;
+   }
+
+   return 0;
+}
+
+int 
+spellcast_get_server_information(spellcast_con_info *c_info)
+{
+  // TODO: wrap this into a abstract data type
+  spellcast_cache *buffer = (spellcast_cache*) malloc(sizeof(spellcast_cache));
+  buffer->buffer = (char*) malloc(BUFFER_SIZE * sizeof(char));
+  buffer->bufflen = BUFFER_SIZE;
+  buffer->buf_start = 0;
+
+  int bytes_received = 0;
+  int ret_val;
+
+  do {
+    printf("CURRENT BUFFER size and start point : %d %d\n", buffer->bufflen, buffer->buf_start);
+
+    if (buffer->buf_start == buffer->bufflen - 1){
+      // we have all buffer cached 
+      //  so we need to expand it!
+      char temp_buffer[buffer->bufflen];
+      int temp_size = buffer->bufflen;
+      memcpy(temp_buffer, buffer->buffer, temp_size);
+
+      free(buffer->buffer);
+      buffer->buffer = (char*) malloc(buffer->bufflen * 2 * sizeof(char));
+      buffer->bufflen *= 2;
+      memcpy(buffer->buffer, temp_buffer, temp_size);
+
+      printf("expanding buffer: size %d, start %d\n", buffer->bufflen, buffer->buf_start);
+    }
+
+    if ((bytes_received = recv(c_info->sock_d, buffer->buffer + buffer->buf_start, buffer->bufflen - 1 - buffer->buf_start, 0)) < 1){
+      printf(" bytes receiied %d\n", bytes_received);
+      perror("recv");
+
+      free(buffer->buffer);
+      free(buffer);
+      return -1;
+    }
+
+    buffer->buffer[buffer->buf_start + bytes_received] = '\0';
+    printf("SERVER RESPONDED with %d bytes\n\n%s\n", bytes_received, buffer->buffer);
+
+  } while ((ret_val = spellcast_client_parse_server_response(buffer, c_info)) == 1);
+
+  free(buffer->buffer);
+  free(buffer);
+  return ret_val;
 }
 
 void 
@@ -163,38 +229,37 @@ spellcast_client_play(spellcast_con_info *c_info)
   char l_byte;
 
 
-  while ((bytes_received = recv(c_info->sock_d, buffer, BUFFER_SIZE, 0)) > 1){
-    //printf("client received: %d\n", bytes_received);
-    //printf("Bytes to meta %d\n", bytes_to_meta);
-    //printf("getting_meta? %d\n", getting_meta);
+  while ((bytes_received = recv(c_info->sock_d, buffer, BUFFER_SIZE, 0)) > 0){
+    /*
+    printf("client received: %d\n", bytes_received);
+    printf("Bytes to meta %d\n", bytes_to_meta + bytes_received);
+    printf("getting_meta? %d\n", getting_meta);
+    */
 
     if (!getting_meta) {
 
       if (bytes_received + bytes_to_meta > c_info->metaint){
+
+        /*
         printf("metaint %d\n", c_info->metaint);
         printf("bytes_received %d\n", bytes_received);
         printf("bytes_to_meta %d\n", bytes_to_meta);
         printf("bytes_received + bytes_to_meta %d\n", bytes_received + bytes_to_meta);
         printf("meta starts at %d - %d : %d\n", c_info->metaint, bytes_to_meta, c_info->metaint - bytes_to_meta);
+        */
 
         // music bytes : c_info->metaint - bytes_to_meta
         l_byte = buffer[c_info->metaint - bytes_to_meta];
         meta_length = buffer[c_info->metaint - bytes_to_meta] * 16;
-        printf("metalen %d\n", meta_length);
-
-        /*
-        printf("l_byte char %c\n", (int) l_byte);
-        printf("l_byte char atoi %d\n", atoi(&l_byte));
-        printf("pure int %d\n", buffer[c_info->metaint - bytes_to_meta]);
-        */
+        //printf("metalen %d\n", meta_length);
 
         //int x;
         //for (x = 0; x < bytes_received; x++){ printf("%c - %d\n", buffer[x], x); }
-        //for (x = c_info->metaint - bytes_to_meta + 1; x < c_info->metaint - bytes_to_meta + meta_length; x++){ printf("%c", buffer[x]); }
 
         if (bytes_received - meta_length < 0){
-          memcpy(meta_info, buffer + c_info->metaint - bytes_to_meta + 1, bytes_received - bytes_to_meta + 1);
-          filled_meta_length = bytes_received - bytes_to_meta + 1;
+
+          memcpy(meta_info, buffer + c_info->metaint - bytes_to_meta + 1, bytes_received - (c_info->metaint - bytes_to_meta + 1));
+          filled_meta_length = bytes_received - (c_info->metaint - bytes_to_meta + 1);
           getting_meta = 1;
         }
         else {
@@ -206,26 +271,38 @@ spellcast_client_play(spellcast_con_info *c_info)
 
           // some music at the end
           bytes_to_meta = bytes_received - (c_info->metaint - bytes_to_meta) - meta_length - 1;
-          printf("bytes_to_meta %d\n", bytes_to_meta);
         }
       }
       else {
         // it's all music
         bytes_to_meta += bytes_received;
-          //printf("bytes_to_meta %d\n", bytes_to_meta);
       }
     }
     else {
       // getting rest of the meta
-      printf("YOHOOO\n");
-      memcpy(meta_info + filled_meta_length, buffer, meta_length - filled_meta_length);
-      buffer[meta_length] = '\0';
-      printf("METADATA: %s\n", buffer);
+      /*
+      printf("GETTING REST OF META \n");
+      printf("left meta %d bytes_received %d\n", meta_length - filled_meta_length, bytes_received);
+      */
 
-      getting_meta = 0;
-      bytes_to_meta = bytes_received + meta_length - filled_meta_length;
+      if (meta_length - filled_meta_length < bytes_received){
+        // all the rest of metadata is inside received bytes
+        memcpy(meta_info + filled_meta_length, buffer, meta_length - filled_meta_length);
+        meta_info[meta_length] = '\0';
+        printf("METADATA: %s\n", meta_info);
+         
+        // + a little bit of music at the end
+        bytes_to_meta = bytes_received - meta_length + filled_meta_length;
+        getting_meta = 0;
+      }
+      else {
+        memcpy(meta_info + filled_meta_length, buffer, bytes_received);
+        filled_meta_length += bytes_received;
+      }
     }
   }
+
+  printf("Disconnected from the server: (client received %d)\n", bytes_received);
 }
 
 void 
