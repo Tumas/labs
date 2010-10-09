@@ -225,9 +225,9 @@ spellcast_client_play(spellcast_con_info *c_info)
   char meta_info[255 * 16];
 
   int bytes_received;
-  int bytes_to_meta = 0, meta_length, filled_meta_length, getting_meta = 0;
+  int meta_length, filled_meta_length, getting_meta = 0;
   char l_byte;
-
+  long bytes_to_meta = 0;
 
   while ((bytes_received = recv(c_info->sock_d, buffer, BUFFER_SIZE, 0)) > 0){
     /*
@@ -243,9 +243,9 @@ spellcast_client_play(spellcast_con_info *c_info)
         /*
         printf("metaint %d\n", c_info->metaint);
         printf("bytes_received %d\n", bytes_received);
-        printf("bytes_to_meta %d\n", bytes_to_meta);
-        printf("bytes_received + bytes_to_meta %d\n", bytes_received + bytes_to_meta);
-        printf("meta starts at %d - %d : %d\n", c_info->metaint, bytes_to_meta, c_info->metaint - bytes_to_meta);
+        printf("bytes_to_meta %ld\n", bytes_to_meta);
+        printf("bytes_received + bytes_to_meta %ld\n", bytes_received + bytes_to_meta);
+        printf("meta starts at %d - %ld : %ld\n", c_info->metaint, bytes_to_meta, c_info->metaint - bytes_to_meta);
         */
 
         // music bytes : c_info->metaint - bytes_to_meta
@@ -253,24 +253,32 @@ spellcast_client_play(spellcast_con_info *c_info)
         meta_length = buffer[c_info->metaint - bytes_to_meta] * 16;
         //printf("metalen %d\n", meta_length);
 
-        //int x;
-        //for (x = 0; x < bytes_received; x++){ printf("%c - %d\n", buffer[x], x); }
+        if (meta_length != 0){
+          //int x, j;
+          //for (x = c_info->metaint - bytes_to_meta, j = 0; j < meta_length; x++, j++){ printf("%c - %d\n", buffer[x], x); }
+          //for (x = 0; x < bytes_received; x++){ printf("%c", buffer[x]); }
 
-        if (bytes_received - meta_length < 0){
+          if (bytes_received - meta_length < 0){
+            memcpy(meta_info, buffer + c_info->metaint - bytes_to_meta + 1, bytes_received - (c_info->metaint - bytes_to_meta + 1));
 
-          memcpy(meta_info, buffer + c_info->metaint - bytes_to_meta + 1, bytes_received - (c_info->metaint - bytes_to_meta + 1));
-          filled_meta_length = bytes_received - (c_info->metaint - bytes_to_meta + 1);
-          getting_meta = 1;
-        }
+            filled_meta_length = bytes_received - (c_info->metaint - bytes_to_meta + 1);
+            getting_meta = 1;
+          }
+          else {
+            // all meta is contained here in maybe have some music at the end
+            memcpy(meta_info, buffer + c_info->metaint - bytes_to_meta + 1, meta_length);
+            meta_info[meta_length] = '\0';
+
+            printf("\nMETADATA1: %s\n", meta_info);
+
+            // some music at the end
+            bytes_to_meta = bytes_received - (c_info->metaint - bytes_to_meta) - meta_length - 1;
+          }
+        } 
         else {
-          // all meta is contained here in maybe have some music at the end
-          memcpy(meta_info, buffer + c_info->metaint - bytes_to_meta + 1, meta_length);
-          meta_info[meta_length] = '\0';
-
-          printf("\nMETADATA: \n%s\n", meta_info);
-
-          // some music at the end
-          bytes_to_meta = bytes_received - (c_info->metaint - bytes_to_meta) - meta_length - 1;
+          // it's all music but we need to reset the counter since server provided no metadata
+          bytes_to_meta += bytes_received - 1;
+          bytes_to_meta %= c_info->metaint;
         }
       }
       else {
@@ -296,6 +304,7 @@ spellcast_client_play(spellcast_con_info *c_info)
         getting_meta = 0;
       }
       else {
+        printf("GETTING REST OF META2 \n");
         memcpy(meta_info + filled_meta_length, buffer, bytes_received);
         filled_meta_length += bytes_received;
       }
