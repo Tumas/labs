@@ -71,10 +71,12 @@ main(int argc, char *argv[])
   spellcast_print_server_info(&srv);
   fprintf(stdout, " ***  *** \n\n");
 
-  if (!spellcast_init_server(&srv)){
-    spellcast_server_run(&srv);
+  if (spellcast_init_server(&srv) != 0){
+    free(srv.meta);
+    return 1;
   }
 
+  spellcast_server_run(&srv);
   spellcast_server_dispose(&srv);
   free(srv.meta);
   return 0;

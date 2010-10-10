@@ -32,7 +32,6 @@ spellcast_accept_source(spellcast_server* srv)
   new_src = spellcast_allocate_space_for_empty_source(new_src_sock);
 
   if (new_src){
-    printf("SUCESUFULU ALLOCATED NEW SOURCE\n");
     spellcast_register_source(srv, new_src);
     FD_SET(new_src_sock, &srv->master_read);
     FD_SET(new_src_sock, &srv->empty_sources);

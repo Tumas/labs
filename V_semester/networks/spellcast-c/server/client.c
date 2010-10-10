@@ -86,15 +86,16 @@ spellcast_allocate_space_for_empty_client(int sock)
   return cl;
 }
 
+// TODO: add third parameter to disconnect client
 void 
 spellcast_disconnect_client(spellcast_server *srv, client_meta *client)
 {
   void *data;
+  close(client->c_point->sock_d);
+
   source_meta *src = spellcast_get_source_by_mountpoint(srv, client->c_point->mountpoint);
   dlist_remove_by_data(src->clients, (void*) client, &data);
 
-  printf("FOUND\n");
-  
   spellcast_htable_remove(srv->clients, client->c_point->sock_d, &data);
   FD_CLR(client->c_point->sock_d, &srv->master_read);
 

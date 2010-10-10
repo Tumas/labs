@@ -319,7 +319,7 @@ spellcast_parse_header(spellcast_server *srv, connection_point* cnp, void* objec
 
   received_bytes = recv(cnp->sock_d, cnp->buffer + cnp->buf_start, CHAR_CPOINT_BUFFER_SIZE(cnp), 0); 
   if (received_bytes == 0){
-    spellcast_disconnect_source(srv, source);
+    //spellcast_disconnect_source(srv, source);
     return -1;
   }
 
