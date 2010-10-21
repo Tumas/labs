@@ -13,8 +13,8 @@ import java.awt.geom.Point2D;
 import com.github.tumas.chaoslabs.helper.ExtendedCanvas;
 
 @SuppressWarnings("serial")
-public class LinearTransformatinosTask extends Frame {
-	public LinearTransformatinosTask(){
+public class LinearTransformationsTask extends Frame {
+	public LinearTransformationsTask(){
 		super("Sierpinsky Triangle");
 		
 		addWindowListener(new WindowAdapter(){
@@ -30,7 +30,7 @@ public class LinearTransformatinosTask extends Frame {
 	}
 	
 	public static void main(String[] args){
-		new LinearTransformatinosTask();
+		new LinearTransformationsTask();
 	}
 }
 
@@ -101,7 +101,7 @@ class BikeCanvas extends ExtendedCanvas {
 			repaint();
 			
 			try {
-				Thread.sleep(100);
+				Thread.sleep(1000 / 20);
 			} catch (InterruptedException ex){}
 		}
 	}	
