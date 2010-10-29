@@ -26,6 +26,10 @@ public class Main {
 
 			client.connect();
 			String header = client.getResponse();
+
+			System.out.println(header);
+			
+			
 			client.updateInfo(IcyProtocol.parseHeader(header));
 			client.playStream();
 		}
@@ -35,10 +39,15 @@ public class Main {
 		catch (Exception e){
 			System.err.print("Whoops: ");
 			System.err.println(e);
+		
+			client.closeConnection();
 		}
+		
+		/* Does not work -> we still have some thread working on that socket 
 		finally {
 			client.closeConnection();
 		}
+		*/
 
 	}
 }
