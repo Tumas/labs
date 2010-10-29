@@ -1,0 +1,6 @@
+JSpellCast/bin/*
+JSpellCast/.classpath
+JSpellCast/.settings/*
+JSpellCast/.metadata/*
+JSpellCast/.project
+*.class
