@@ -16,7 +16,7 @@ import java.util.logging.Logger;
 import javazoom.jl.decoder.JavaLayerException;
 import javazoom.jl.player.Player;
 
-import com.github.tumas.jspellcast.proto.IcyProtocol;
+import static com.github.tumas.jspellcast.proto.IcyProtocol.*;
 
 public class JSpellCastClient {
 	private final int BUFSIZE = 8192;
@@ -55,7 +55,7 @@ public class JSpellCastClient {
 	 * @throws IOException
 	 */
 	public void connect() throws UnknownHostException, IOException {
-		String message = String.format(IcyProtocol.clientToServerMessage, getMountPoint(),
+		String message = String.format(clientToServerMessage, getMountPoint(),
 				"HTTP/1.0", getHost(), getPort(), 1);
 			
 		socket = new Socket(getHost(), getPort());
@@ -90,11 +90,11 @@ public class JSpellCastClient {
 		while (!endPresented && ((bytesRead = input.read(b)) != -1)){
 			String temp = new String(b);
 			
-			if ((index = temp.indexOf(IcyProtocol.HeaderEndToken)) != -1){
+			if ((index = temp.indexOf(HeaderEndToken)) != -1){
 				endPresented = true;
-				response += temp.substring(0, index + IcyProtocol.HeaderEndToken.length());
+				response += temp.substring(0, index + HeaderEndToken.length());
 
-				for (int i = index + IcyProtocol.HeaderEndToken.length(); i < bytesRead; i++){
+				for (int i = index + HeaderEndToken.length(); i < bytesRead; i++){
 					buffer.offer((Byte) b[i]);
 				}
 			}
@@ -102,7 +102,7 @@ public class JSpellCastClient {
 				response += temp;
 		}
 
-		musicBytes = bytesRead - (index + IcyProtocol.HeaderEndToken.length());
+		musicBytes = bytesRead - (index + HeaderEndToken.length());
 
 		logger.info("Server responded");
 		return response;
