@@ -121,7 +121,8 @@ public class JSpellCastClient {
 		System.out.println("Connection info: \n\tBR: " + getBitRate() + " kbps\n\tMetaInt: " + getMetaInt());
 
 		class DownloadThread implements Runnable {
-
+			private String oldMeta;
+			
 			@Override
 			public void run() {
 				byte[] localBuffer = new byte[BUFSIZE];
@@ -131,80 +132,55 @@ public class JSpellCastClient {
 				
 				try {
 					while ((bytesRead = input.read(localBuffer)) != -1){
+						int current = 0;
+						
+						while (current < bytesRead){
+						
+							while (current < bytesRead && musicBytes < getMetaInt()){
+								offertoBuffer(localBuffer[current++]);
+								musicBytes++;
+							}
 
-						if (!gettingMeta){
-							if (bytesRead + musicBytes > getMetaInt()){
-								metaLength = ((int) localBuffer[getMetaInt() - musicBytes]) * 16;
+							if (current == bytesRead) 
+								break;
+				
+							if (!gettingMeta){
+								metaLength = ((int) localBuffer[current++]) * 16;
+								filledMetaLength = 0;
+								gettingMeta = true;
+							}
+						
+							while (current < bytesRead && filledMetaLength < metaLength){
+								metaData += new String(localBuffer, current++, 1);					
+								filledMetaLength++;
+							}
 							
-								if (metaLength != 0){
-									System.out.println("META length: " + metaLength);
-									
-									if (bytesRead - metaLength < 0){
-										filledMetaLength = bytesRead - (getMetaInt() - musicBytes + 1);
-										gettingMeta = true;
-										
-										System.out.println("PART OF METADATA" + new String(localBuffer, getMetaInt() - musicBytes + 1,
-												bytesRead));
-												//musicBytes - (getMetaInt() - musicBytes + 1)));
-												//metaData = new String(localBuffer, getMetaInt() - musicBytes + 1, 
-												//		musicBytes - (getMetaInt() - musicBytes + 1));
-										
-										copyToBuffer(0, getMetaInt() - musicBytes + 1, localBuffer);
-									} 
-									else {
-										metaData = new String(localBuffer, getMetaInt() - musicBytes + 1, metaLength);
-										System.out.println(metaData);
-										
-										copyToBuffer(0, getMetaInt() - musicBytes + 1, localBuffer);
-										copyToBuffer(getMetaInt() - musicBytes + 1 + metaLength, bytesRead, localBuffer);
-
-										musicBytes = bytesRead - (getMetaInt() - musicBytes) - metaLength - 1;
-									}
-								} else {
-									// it's all audio except for one byte
-									copyToBuffer(0, getMetaInt() - musicBytes, localBuffer);
-									copyToBuffer(getMetaInt() - musicBytes + 1, bytesRead, localBuffer);
-
-									musicBytes += bytesRead - 1;
-									musicBytes %= getMetaInt();
-								}
-							}
-							else {
-								// just audio
-								musicBytes += bytesRead;
-								copyToBuffer(0, bytesRead, localBuffer);
-							}
-						}
-						else {
-							// getting rest of the meta
-							if (metaLength - filledMetaLength < bytesRead){
-								System.out.println("REST OF METADATA: " + new String(
-										localBuffer, 0, metaLength - filledMetaLength));
-								
-								copyToBuffer(metaLength - filledMetaLength, bytesRead, localBuffer);
-								musicBytes = bytesRead - metaLength + filledMetaLength;
+							if (filledMetaLength == metaLength){
+								printMetaData(metaData);
+								metaData = "";
 								gettingMeta = false;
-							}
-							else {
-								metaData += new String(localBuffer);
-								filledMetaLength += bytesRead;
+								musicBytes = 0;
 							}
 						}
 					}
-
-				} catch (IOException e) {
-					e.printStackTrace();
 				} catch (Exception e){
 					System.out.println(e.getMessage());
+					e.printStackTrace();
 				}
 			}
 			
 			
-			private void copyToBuffer(int int1, int int2, byte[] localBuffer) throws InterruptedException{
-				for (int i = int1; i < int2; i++){
-					while (!buffer.offer((Byte) localBuffer[i])) { 
-						Thread.sleep(100); 
-					}
+			private void offertoBuffer(byte bt) throws InterruptedException {
+				while (!buffer.offer((Byte) bt)) { 
+					Thread.sleep(100); 
+				}
+			}
+
+			private void printMetaData(String newMeta){
+				if (oldMeta == null || !oldMeta.equals(newMeta)){
+					oldMeta = newMeta;
+
+					System.out.println("Playing: " + newMeta);
 				}
 			}
 		}
@@ -246,8 +222,10 @@ public class JSpellCastClient {
 		executor.execute(new DownloadThread());
 		
 		int toBuffer = getBitRate() * SECONDSTOBUFFER * 1000 / 8;
-		System.out.println(" TO BUFFER: " + toBuffer);
-		while (buffer.size() < toBuffer) { Thread.sleep(200); System.out.println("BUFFERING.. " + buffer.size()); }
+		while (buffer.size() < toBuffer) {
+			Thread.sleep(200);
+			System.out.println("BUFFERING.. " + buffer.size()); 
+		}
 
 		System.out.println("Buffered " + toBuffer + " bytes - (" + SECONDSTOBUFFER + " seconds), starting playback ");
 		executor.execute(new PlayBackThread());
