@@ -28,7 +28,7 @@ public class IcyProtocol {
 		while (st.hasMoreTokens()){
 			line = st.nextToken();
 			
-			String[] strs = line.split(":");
+			String[] strs = line.split(":", 2);
 			if (strs.length >= 2) {
 				protoObject.put(strs[0].toLowerCase(), strs[1]);
 			}
