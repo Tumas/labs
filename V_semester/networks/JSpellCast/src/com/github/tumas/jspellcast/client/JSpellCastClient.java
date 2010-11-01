@@ -55,7 +55,7 @@ public class JSpellCastClient {
 	 * @throws IOException
 	 */
 	public void connect() throws UnknownHostException, IOException {
-		String message = String.format(clientToServerMessage, getMountPoint(),
+		String message = String.format(CLIENT2SRVMESSAGE, getMountPoint(),
 				"HTTP/1.0", getHost(), getPort(), 1);
 			
 		socket = new Socket(getHost(), getPort());
@@ -90,11 +90,11 @@ public class JSpellCastClient {
 		while (!endPresented && ((bytesRead = input.read(b)) != -1)){
 			String temp = new String(b);
 			
-			if ((index = temp.indexOf(HeaderEndToken)) != -1){
+			if ((index = temp.indexOf(HEADERENDTOKEN)) != -1){
 				endPresented = true;
-				response += temp.substring(0, index + HeaderEndToken.length());
+				response += temp.substring(0, index + HEADERENDTOKEN.length());
 
-				for (int i = index + HeaderEndToken.length(); i < bytesRead; i++){
+				for (int i = index + HEADERENDTOKEN.length(); i < bytesRead; i++){
 					buffer.offer((Byte) b[i]);
 				}
 			}
@@ -102,7 +102,7 @@ public class JSpellCastClient {
 				response += temp;
 		}
 
-		musicBytes = bytesRead - (index + HeaderEndToken.length());
+		musicBytes = bytesRead - (index + HEADERENDTOKEN.length());
 
 		logger.info("Server responded");
 		return response;
@@ -299,5 +299,4 @@ public class JSpellCastClient {
 		
 		return -1;
 	}
-
 }
