@@ -42,12 +42,5 @@ public class Main {
 		
 			client.closeConnection();
 		}
-		
-		/* Does not work -> we still have some thread working on that socket 
-		finally {
-			client.closeConnection();
-		}
-		*/
-
 	}
 }
