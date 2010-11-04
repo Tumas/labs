@@ -35,7 +35,3 @@ public class Main {
 	}
 }
 
-/*
- * TODO:
- *  fun part!
- */
