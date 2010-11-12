@@ -1,5 +1,15 @@
 #!/usr/bin/ruby
 
+#
+# Author : Tumas Bajoras PS3 2010-11-12
+# 
+#  Line and its projection on Riemann's sphere
+#  ISSUES:
+#   1. Only two points are projected which results in obvious inaccuracy in some situations
+#   2. Limited and not the most intuitive mouse control 
+#   3. Projection calculations are not very accurate (some projection points do not belong to the sphere)
+#
+
 require 'opengl'
 
 include Gl
@@ -13,8 +23,8 @@ LEFT_POINT_ID = 21
 CENTER_POINT_ID = 22
 RIGHT_POINT_ID = 23
 
-$p1 = [1.4, 0, -0.9]
-$p2 = [0.9, 0, -1.4]
+$p1 = [1, 0, -0.7]
+$p2 = [0.7, 0, -1]
 
 # camera controls
 $x_camera_angle = -20 
@@ -27,6 +37,7 @@ $adjusted
 $mouse_x = 0
 $mouse_y = 0
 $x_direction = 1
+$y_direction = 1
 
 def init
   glEnable GL_DEPTH_TEST
@@ -117,10 +128,8 @@ def draw_scene(mode)
     glVertex3fv get_sphere_coords $p2.first, $p2.last 
   glEnd
 
-=begin
   test_coords get_sphere_coords($p1.first, $p1.last)
   test_coords get_sphere_coords($p2.first, $p2.last)
-=end
 end
 
 display = lambda do
@@ -161,36 +170,64 @@ keyboard = lambda do |key, x, y|
 end
 
 mouse_motion = lambda do |new_x, new_y|
+  temp = new_x - $mouse_x
+  temp2 = new_y - $mouse_y
+
+  if temp > 0
+    $x_direction = 1
+  elsif temp < 0
+    $x_direction = -1
+  end
+
   if $adjusted == CENTER_POINT_ID
-    temp = new_x - $mouse_x
+    if $x_direction < 0
+      # x coordinates
+      $p1[0] -= 0.01
+      $p2[0] -= 0.01
 
-    if temp > 0
-      $x_direction = 1
-    elsif temp < 0
-      $x_direction = -1
-    end
-
-    if $x_direction > 0
-      $p1[0] += 0.01
-      $p2[0] += 0.01
+      # z coordinates
       $p1[2] += 0.01
       $p2[2] += 0.01
     else
-      $p1[0] -= 0.01
-      $p2[0] -= 0.01
+      $p1[0] += 0.01
+      $p2[0] += 0.01
+
       $p1[2] -= 0.01
       $p2[2] -= 0.01
     end
   end
 
   if $adjusted == LEFT_POINT_ID
+    $p1 = rotate_y(0.02, [
+                   $p1.first - $p2.first,
+                   $p1.last - $p2.last
+    ])
+
+    $p1[0] += $p2.first
+    $p1[2] += $p2.last
   end
 
   if $adjusted == RIGHT_POINT_ID
+    $p2 = rotate_y(-0.02, [
+                   $p2.first - $p1.first,
+                   $p2.last - $p1.last
+    ])
+
+    $p2[0] += $p1.first
+    $p2[2] += $p1.last
   end
 
   $mouse_x = new_x
   $mouse_y = new_y
+end
+
+def rotate_y(angle, point)
+  cos, sin = Math.cos(angle), Math.sin(angle)
+  [
+    point.first * cos - point.last * sin,
+    0,
+    point.first * sin + point.last * cos
+  ]
 end
 
 pick_points = lambda do |button, state, x, y|
@@ -220,6 +257,8 @@ pick_points = lambda do |button, state, x, y|
     hits = glRenderMode GL_RENDER
     process_hits hits, select_buf, x, y
   end
+
+  $adjusted = nil if state == GLUT_UP
 end
 
 def process_hits(hits, buffer, x, y)
@@ -237,7 +276,7 @@ def process_hits(hits, buffer, x, y)
       elsif name == RIGHT_POINT_ID
         $adjusted = RIGHT_POINT_ID
       elsif name == LEFT_POINT_ID
-        $adjusted == LEFT_POINT_ID
+        $adjusted = LEFT_POINT_ID
       end
 
       p += 1 
