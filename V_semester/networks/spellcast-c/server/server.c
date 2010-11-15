@@ -229,7 +229,9 @@ spellcast_server_run(spellcast_server *srv)
 
                        free(client->c_point->mountpoint);
                        printf("removed old mountpoint\n");
+                       printf("trying to allocate: %s", src->c_point->mountpoint);
                        client->c_point->mountpoint = spellcast_allocate_string(src->c_point->mountpoint);
+                       printf("allocation ok");
                        printf("Random source selected: %p (%s) \n", src, client->c_point->mountpoint);
                      }
                      else {
@@ -400,6 +402,9 @@ spellcast_parse_header(spellcast_server *srv, connection_point* cnp, void* objec
         sprintf(mnt, "mount%d", cnp->sock_d);
         cnp->mountpoint = spellcast_allocate_string(mnt);
       }
+    }
+    else {
+      cnp->mountpoint = spellcast_allocate_string("/");
     }
   }
 
