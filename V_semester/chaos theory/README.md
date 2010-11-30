@@ -10,4 +10,8 @@
 
 ### 3D projections:
 
-* Line on XY-plane and its projection to a  Riemann sphere .
+* Line on XY-plane and its projection on a Riemann's sphere.
+
+### Fractal modelling 
+
+* Iterated function system examples (2 simple recursive algorithms and one implementing chaos game)
