@@ -15,3 +15,10 @@
 ### Fractal modelling 
 
 * Iterated function system examples (2 simple recursive algorithms and one implementing chaos game)
+
+### Dynamical Systems 
+
+* Y = c * x^2 ( 1 - x) 
+  *  Timeline
+  *  Cobweb plot (Verhuist diagram)
+  *  Bifurcation diagram

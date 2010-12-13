@@ -1,0 +1,115 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <title>Dynamical systems</title>
+
+    <script src="dynamical.js" type="text/javascript" charset="utf-8"></script>
+    <style type="text/css" media="screen">
+      body {
+        margin-top: 50px;
+        width: 1000px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      canvas {
+        border: 2px solid black
+      }
+
+      #task {
+        margin-left: auto;
+        margin-right: auto;
+        width: 700px;
+      }
+
+      #info {
+        margin-left: auto;
+        margin-right: auto;
+        width: 650px;
+      }
+
+      #info .buttons {
+        width: 310px;
+        margin-top: 10px;
+        float: right;
+      }
+
+      button {
+        width: 100px;
+      }
+
+      input {
+        width: 35px;
+        text-align: right;
+      }
+
+      label {
+        margin-left: 5px;
+        margin-right: 5px;
+      }
+
+      #info .data {
+      }
+
+      body {
+        background-color: #A1BBB7;
+      }
+
+      canvas {
+        background-color: white;
+      }
+
+      #header p {
+        text-align: center;
+        font-size: 14pt;
+        font-weight: bold;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="header">
+      <p>Y = C * x^2 (1 - x)</p>
+    </div>
+    <div id="task">
+      <canvas id="canvas" width="700" height="400">
+         <p>Your browser does not support the canvas element.</p>
+      </canvas>
+    </div>
+
+    <div id="info">
+      <form onsubmit="return false;" id="parameters">
+          <div class="buttons">
+            <button id="timeline-button" type="button"> Laiko eilutės grafikas</button>
+            <button id="iterate-button" type="button"> Iteracijos grafikas</button>
+            <button id="ftree-button" type="button"> Fregenbaumo medis</button>
+          </div>
+
+          <div class="data">
+            <label for="xzero">X0:</label>
+            <input type="text" name="xzero" id="xzero" value="0.2" />
+            <label for="paramc">C:</label>
+            <input type="text" name="paramc" id="paramc" value="6.5" />
+          </div>
+          <div class="data">
+            <label for="minx">X from</label>
+            <input type="text" name="minx" id="minx" value="0" />
+            <label for="maxx">to</label>
+            <input type="text" name="maxx" id="maxx" value="1" />
+            <label for="stepx">Step:</label>
+            <input type="text" name="stepx" id="stepx" value="0.1" />
+          </div>
+          <div class="data">
+            <label for="miny">Y from</label>
+            <input type="text" name="miny" id="miny" value="0" />
+            <label for="maxy">to</label>
+            <input type="text" name="maxy" id="maxy" value="1" />
+            <label for="stepy">Step:</label>
+            <input type="text" name="stepy" id="stepy" value="0.1" />
+          </div>
+
+      </form>
+    </div>
+  </body>
+</html>
