@@ -7,7 +7,7 @@ from robot import Robot
 class Bug2(Robot):
     ''' Bug2 algorithm '''
 
-    def __init__(self, map):
+    def __init__(self, map, logger):
         super(Bug2, self).__init__(map)
         self.goal_line = self.line_to_target(self.map.start_pos, self.map.finish_pos)
         self.min_distance = len(self.goal_line) 
@@ -15,6 +15,7 @@ class Bug2(Robot):
         self.mode = 'LINE'
         self.wall_x = 0 
         self.wall_y = 0
+        self.logger = logger
 
     def move(self):
         '''
@@ -72,10 +73,10 @@ class Bug2(Robot):
                 if self.current in self.goal_line and self.goal_line.index(self.current) > self.pos:
                     self.mode = 'LINE'
                     self.pos = self.goal_line.index(self.current)
-                    print "GOING BACK TO LINE MODE"
+                    self.logger.write("Found m-line, following it.")
 
         except WallException as e:
-            print "Bumped a wall.. {0} at {1}".format(e.msg, e.point)
+            self.logger.write("Bumped a wall.. {0} at {1}".format(e.msg, e.point))
             print self.current.x
             print self.current.y
 
@@ -86,16 +87,19 @@ class Bug2(Robot):
             print self.wall_y
             print self.wall_x
         except TargetReachedException:
-            print "Destination reached in {0} moves".format(self.moves)
+            self.logger.write("Destination reached in {0} moves".format(self.moves))
             return True
         except StartReachedException:
-            print "Am I lost?"
+            self.logger.write("Am I lost?")
             pass
         return False
 
 if __name__ == '__main__':
     from map import Map
-    b = Bug2(Map('maps/map2'))
+    from logger import Logger
+
+    #b = Bug2(Map('maps/map2'), Logger())
+    b = Bug2(Map('maps/map3', 20, 15), Logger())
 
     print b.map
     while True:

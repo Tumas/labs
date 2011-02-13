@@ -35,7 +35,7 @@ class Map:
                 l = len(line)
                 if l < self.width:
                     line = line + ((self.width - l) * self.tokens['empty'])
-                self.map.append(line[:10]) 
+                self.map.append(line[:self.width]) 
 
         if len(self.map) < self.height:
             warn("Current map height is lower than specified. Updating to an actual height")
