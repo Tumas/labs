@@ -1,0 +1,9 @@
+== Octave Code ==
+x = [0:3] 
+y = [0, 0.5, 2, 1.5]
+cub = interp(x, y, x, 'cubic')
+plot(x, cub, 's')
+
+== Direct spline spline(x, y, pt)
+x = [1.0, 2.0, 3.0, 4.0, 5.0, 6.0] 
+y = 
