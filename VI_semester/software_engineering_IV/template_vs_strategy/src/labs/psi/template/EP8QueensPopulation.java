@@ -1,4 +1,7 @@
-package labs.psi;
+package labs.psi.template;
+
+import labs.psi.EightQueensSolution;
+import labs.psi.Solution;
 
 public class EP8QueensPopulation extends EightQueensPopulation {
 	// temporary place to store indexes

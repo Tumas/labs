@@ -1,6 +1,9 @@
-package labs.psi;
+package labs.psi.template;
 
 import java.util.Arrays;
+
+import labs.psi.EightQueensSolution;
+import labs.psi.Solution;
 
 public class GA8QueensPopulation extends EightQueensPopulation {
 	public GA8QueensPopulation(int size, int offspringCount, boolean isMutated,

@@ -3,6 +3,7 @@ package labs.psi;
 import java.util.Arrays;
 import java.util.Random;
 
+
 public class EightQueensSolution implements Solution, Comparable<EightQueensSolution>, Cloneable {
 	private int[] genotype;
 	private int   henotype;

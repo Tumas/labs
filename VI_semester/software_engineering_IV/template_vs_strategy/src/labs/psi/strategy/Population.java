@@ -1,43 +1,56 @@
-package labs.psi;
+package labs.psi.strategy;
 
 import java.util.ArrayList;
+import java.util.Random;
+
+import labs.psi.Solution;
 
 public abstract class Population {
+	// configuration
 	private int size;
 	private int offspringCount;
-	protected int solutionsToFind = 1;
 	private boolean isMutated; 
-	private boolean isBred;
-	protected boolean recentlyFound = false;
-	
-	protected Solution[] population;
-	protected ArrayList<Solution> solutions = new ArrayList<Solution>();
-	
+	private boolean isRecombined;
+
+	// statistics
 	private double averageFitness = 0.0;
 	private long 	 minFitness = Long.MAX_VALUE;
 	private long 	 maxFitness = Long.MIN_VALUE;
 	private long   cost 		= 0;
+
+	protected int solutionsToFind = 1;
+	protected boolean recentlyFound = false;
+	protected Solution[] population;
+	protected ArrayList<Solution> solutions = new ArrayList<Solution>();
+	protected Random generator = new Random();
+
+	// strategy
+	protected EvolutionaryAlgorithm evo; 
 	
-	public Population(int size, int offspringCount, boolean isMutated, boolean isBred){
-		setBred(isBred);
+	public Population(EvolutionaryAlgorithm evo,
+			int size, int offspringCount, boolean isMutated, boolean isRecombined){
+		setEvo(evo);
+		setRecombined(isRecombined);
 		setMutated(isMutated);
 		setSize(size);
 		setOffspringCount(offspringCount);
 		setPopulation(new Solution[size]);
 	}
 	
-	protected abstract void		survive(Solution[] s1, Solution[] s2);
-	protected abstract Solution[] select();
 	protected abstract int 		fitness(Solution s);
 	protected abstract void 		init();
-	protected abstract Solution[] createOffsprings(Solution[] s) throws CloneNotSupportedException;
+	protected abstract void      mutate(Solution s);
 		
-	public void setBred(boolean isBred) {
-		this.isBred = isBred;
+	public void setRecombined(boolean isRecombined) {
+		this.isRecombined = isRecombined;
 	}
 	
 	public void setMutated(boolean isMutated) {
 		this.isMutated = isMutated;
+	}
+	
+	public void setEvo(EvolutionaryAlgorithm evo) {
+		this.evo = evo;
 	}
 	
 	public void setOffspringCount(int offspringCount) {
@@ -64,6 +77,9 @@ public abstract class Population {
 		return cost;
 	}
 	
+	public EvolutionaryAlgorithm getEvo() {
+		return evo;
+	}
 	public long getMaxFitness() {
 		return maxFitness;
 	}
@@ -72,8 +88,12 @@ public abstract class Population {
 		return minFitness;
 	}
 	
-	public boolean isBred() {
-		return isBred;
+	public Random getGenerator() {
+		return generator;
+	}
+	
+	public boolean isRecombined() {
+		return isRecombined;
 	}
 	
 	public boolean mutationOccurs() {
@@ -105,7 +125,7 @@ public abstract class Population {
 		averageFitness = ((double) cost) / getSize();
 	}
 	
-	public void Evolve(int maxIterations, int solutionsToFind) throws CloneNotSupportedException{
+	public void evolve(int maxIterations, int solutionsToFind) throws CloneNotSupportedException{
 		this.solutionsToFind = solutionsToFind;
 		int solutionsFound = 0;
 		int generation = 0;
@@ -148,5 +168,18 @@ public abstract class Population {
 			}
 		}
 		return count;
+	}
+	
+	// Delegating to strategy
+	protected void		survive(Solution[] s1, Solution[] s2){
+		getEvo().survive(this, s1, s2);
+	}
+	
+	protected Solution[] select(){
+		return getEvo().select(this);
+	}
+	
+	protected Solution[] createOffsprings(Solution[] parents) throws CloneNotSupportedException {
+		return getEvo().createOffsprings(this, parents);
 	}
 }

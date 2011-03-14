@@ -1,13 +1,12 @@
-package labs.psi;
+package labs.psi.strategy;
 
-import java.util.Random;
+import labs.psi.EightQueensSolution;
+import labs.psi.Solution;
 
-public abstract class EightQueensPopulation extends Population {
-	protected Random generator = new Random();
-
-	public EightQueensPopulation(int size, int offspringCount,
-			boolean isMutated, boolean isBred) {
-		super(size, offspringCount, isMutated, isBred);
+public class EightQueensPopulation extends Population {
+	public EightQueensPopulation(EvolutionaryAlgorithm evo, int size, int offspringCount,
+			boolean isMutated, boolean isRecombined) {
+		super(evo, size, offspringCount, isMutated, isRecombined);
 	}
 	
 	@Override
@@ -39,6 +38,7 @@ public abstract class EightQueensPopulation extends Population {
 		return conflictingPositions;
 	}
 	
+	@Override
 	protected void mutate(Solution s){	
 		int[] genome = s.getGenome();
 		int pos = generator.nextInt(s.size());
