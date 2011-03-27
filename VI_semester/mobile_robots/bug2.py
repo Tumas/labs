@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 
-# todo: consider refactoring to packages
 from robot_exceptions import *
 from robot import Robot
 
@@ -30,10 +29,6 @@ class Bug2(Robot):
 
                 diff_x = self.current.x - self.goal_line[self.pos].x 
                 diff_y = self.current.y - self.goal_line[self.pos].y
-
-                print self.goal_line[self.pos] 
-                print diff_x
-                print diff_y
 
                 if diff_x > 0:
                     self.move_left()

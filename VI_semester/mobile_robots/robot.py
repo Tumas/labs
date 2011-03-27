@@ -11,15 +11,16 @@ class Robot(object):
         self.moves = 0
         self.current = map.start_pos
 
-    def __move_to(self, x, y):
+    def __move_to(self, x, y, simulated = False):
         ''' Perform a simple move '''
-        print "*** moving to {0}***".format(Point(x, y))
+        #print "*** moving to {0}***".format(Point(x, y)) 
         if self.map.wall_at(x, y):
             raise WallException("BUMP!", Point(x, y))
 
-        self.current.x = x
-        self.current.y = y
-        self.moves += 1
+        if not simulated:
+            self.current.x = x
+            self.current.y = y
+            self.moves += 1
 
         if self.map.finish_at(x, y):
             raise TargetReachedException("Arrived at target location")
@@ -28,17 +29,17 @@ class Robot(object):
             raise StartReachedException("Walking in circles!")
         return self.current
 
-    def move_left(self):
-        self.__move_to(self.current.x - 1, self.current.y)
+    def move_left(self, simulated = False):
+        self.__move_to(self.current.x - 1, self.current.y, simulated)
 
-    def move_right(self):
-        self.__move_to(self.current.x + 1, self.current.y)
+    def move_right(self, simulated = False):
+        self.__move_to(self.current.x + 1, self.current.y, simulated)
 
-    def move_up(self):
-        self.__move_to(self.current.x, self.current.y - 1)
+    def move_up(self, simulated = False):
+        self.__move_to(self.current.x, self.current.y - 1, simulated)
 
-    def move_down(self):
-        self.__move_to(self.current.x, self.current.y + 1)
+    def move_down(self, simulated = False):
+        self.__move_to(self.current.x, self.current.y + 1, simulated)
 
     def move(self):
         ''' generic robot can't move '''

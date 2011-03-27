@@ -32,7 +32,7 @@ class MapCurses:
         found, x = None, False
         while x != ord('4'):
             screen.clear()
-            screen.addstr(7, 20, "Line:  {0}".format(self.robot.goal_line))
+            #screen.addstr(7, 20, "Line:  {0}".format(self.robot.goal_line))
             screen.addstr(8, 20, "Moves: {0}".format(self.robot.moves))
             screen.addstr(10, 20, self.__repr__())
             screen.addstr(0, 0, self.logger.show(4), curses.color_pair(1))

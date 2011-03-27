@@ -2,6 +2,7 @@
 
 from warnings import warn
 from point import Point
+from random import randint
 
 class Map:
     def __init__(self, filename, tokens = {}):
@@ -40,6 +41,16 @@ class Map:
         if self.__char_count(self.tokens['finish']) != 1:
             raise Exception("Map should contain only one finish position")
         self.finish_pos = self.__find_pos(self.tokens['finish'])
+
+    def random_pos(self, termination = True):
+        ''' Return random valid position in a map. If termination is True, 
+            termination position could be returned.
+        '''
+        while True:
+            x = randint(0, self.width-1)
+            y = randint(0, self.height-1)
+            if self.empty_at(x, y) or self.start_at(x, y) or (termination and self.finish_at(x, y)):
+                return Point(x, y) 
 
     def empty_at(self, x, y):
         ''' True if cell at given coordinates is empty '''
