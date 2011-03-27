@@ -4,11 +4,9 @@ from warnings import warn
 from point import Point
 
 class Map:
-    def __init__(self, filename, width = 10, height = 10, tokens = {}):
+    def __init__(self, filename, tokens = {}):
         ''' Initialize map :
               filename - path to a file with map 
-              width    - width of a map
-              height   - height of a map
               tokens   - dictionary of map characters
                 wall  : denotes wall in a map
                 empty : denotes empty space in map
@@ -20,26 +18,20 @@ class Map:
                 wall:   '*'
                 start:  'a'
                 finish: 'b'
-            '''
+        '''
         self.map = []
         self.tokens = { 'wall': '*', 'empty': ' ', 'start': 'a', 'finish': 'b' }
         self.tokens.update(tokens)
-        self.width = width
-        self.height = height
 
         with open(filename) as f:
             for line in f:
-                if len(self.map) == self.height:
-                    break
+                self.map.append(line.rstrip('\n\r'))
 
-                l = len(line)
-                if l < self.width:
-                    line = line + ((self.width - l) * self.tokens['empty'])
-                self.map.append(line[:self.width]) 
+        self.height = len(self.map)
+        if self.height == 0:
+            raise Exception("Given map is empty")
 
-        if len(self.map) < self.height:
-            warn("Current map height is lower than specified. Updating to an actual height")
-            self.height = len(self.map)
+        self.width = len(self.map[0])
 
         if self.__char_count(self.tokens['start']) != 1:
             raise Exception("Map should contain only one start position")
@@ -92,4 +84,9 @@ class Map:
         return horizontal_bar + "".join(['|' + s + '|\n' for s in self.map]) + horizontal_bar
 
 if __name__ == '__main__':
-    Map('maps/map1')
+    m = Map('maps/map2')
+    print m.map
+    print m.width
+    print m.height
+    print m
+

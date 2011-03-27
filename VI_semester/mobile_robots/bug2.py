@@ -95,14 +95,14 @@ class Bug2(Robot):
         return False
 
 if __name__ == '__main__':
+    import sys
+
     from map import Map
     from logger import Logger
+    from map_curses import MapCurses
 
-    #b = Bug2(Map('maps/map2'), Logger())
-    b = Bug2(Map('maps/map3', 20, 15), Logger())
+    l = Logger()
+    b = Bug2(Map(sys.argv[1]), l)
 
-    print b.map
-    while True:
-        if b.move():
-            break
-        x = raw_input()
+    cm = MapCurses(b, l)
+    cm.animate()
