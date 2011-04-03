@@ -102,6 +102,18 @@ public class EightQueensSolution implements Solution, Comparable<EightQueensSolu
 	public String toString(){
 		String repr = "";
 		for (int i = 0; i < size; i++) repr += getGenome()[i] + ",";
-		return repr.substring(0, repr.length() - 1) + " cost: " + getFitness();
+		repr = repr.substring(0, repr.length() - 1) + " cost: " + getFitness() + "\n";
+		
+		String[] board = new String[8];
+		Arrays.fill(board, "--------");
+		
+		for (int i = 0; i < size; i++) {
+			int pos = getGenome()[i];
+			board[pos] = board[pos].substring(0, i) + "*" + board[pos].substring(i+1); 
+		}
+		
+		String layout = "";
+		for (int i = 0; i < size; i++) { layout = layout + board[i] + "\n"; } 
+		return repr + layout;
 	}
 }
