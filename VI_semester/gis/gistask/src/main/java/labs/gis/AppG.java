@@ -70,6 +70,7 @@ import com.vividsolutions.jts.geom.Polygon;
  * [OUT-OF-THE-BOX]
  * 4. Grazinimas i pradini vaizda/pilnos duomenu apimties. (full extent)
  * 
+ * [IMPLEMENTED]
  * 5. Objektu pasirinkimo galimybe individualiai (ji pazymint) arba teriterijoje (pasirinktame staciakampyje)
  * 
  * 6. Parinktu (pazymetu) objektu parodymas stambiu planu (maksimaliai isdidinus pasirinktame vaizde) (zoom to extent)
@@ -107,15 +108,43 @@ public class AppG extends JFrame
     
 	
 	// Enable selection
-	public class ClickCursorTool extends CursorTool {
+	public class BoxSelectCursorTool extends CursorTool {
+		private Point p1;
+		
+		@Override
+		public boolean drawDragBox(){
+			return true;
+		}
+		
+		@Override
 		public void onMouseClicked(MapMouseEvent event){
-			selectedFeatures = selectFeatures(event);
+			if ((event.getModifiers() & ActionEvent.CTRL_MASK) > 0) 
+				for (FeatureId fid : selectFeatures(event.getPoint(), null))
+					selectedFeatures.add(fid);
+			else 
+				selectedFeatures = selectFeatures(event.getPoint(), null);
 	        
 			System.out.println(selectedFeatures);
 	        displayFeatures(selectedFeatures);
 		}
+		
+		@Override
+		public void onMousePressed(MapMouseEvent event){
+			p1 = event.getPoint();
+		}
+		
+		@Override
+		public void onMouseReleased(MapMouseEvent event){
+			Point p2 = event.getPoint();
+			
+			if (!(p1.x == p2.x && p1.y == p2.y)){
+				selectedFeatures = selectFeatures(p1, p2);
+				System.out.println(selectedFeatures);
+				displayFeatures(selectedFeatures);
+			}
+		}
 	}
-
+	
     public void start() throws Exception{
 	    map.setTitle("GIS task");
 
@@ -146,14 +175,14 @@ public class AppG extends JFrame
 
         JToolBar toolbar = frame.getToolBar();
         toolbar.addSeparator();
-        toolbar.add(new JButton(new SafeAction("Reset cursor") {
+        toolbar.add(new JButton(new SafeAction("select") {
 			@Override
 			public void action(ActionEvent arg0) throws Throwable {
-				frame.getMapPane().setCursorTool(new ClickCursorTool());
+				frame.getMapPane().setCursorTool(new BoxSelectCursorTool());
 			}
         }));
         
-        frame.getMapPane().setCursorTool(new ClickCursorTool());
+        frame.getMapPane().setCursorTool(new BoxSelectCursorTool());
         frame.setSize(800, 600);
         frame.setVisible(true);
 	}
@@ -167,8 +196,6 @@ public class AppG extends JFrame
     	Style style;
     	
     	for (MapLayer m : frame.getMapContext().getLayers()){
-    		// for each layer -> 
-    		// 	create rule for that layer for selected ids
     		style = createSelectedStyle(m, IDs);
     		m.setStyle(style);
     	}
@@ -238,7 +265,6 @@ public class AppG extends JFrame
 
          } else if (LineString.class.isAssignableFrom(clazz) ||
                  MultiLineString.class.isAssignableFrom(clazz)) {
-
              return GeomType.LINE;
 
          } else {
@@ -254,11 +280,19 @@ public class AppG extends JFrame
     	displayShapeFile(file);
     }
     
-    public Set<FeatureId> selectFeatures(MapMouseEvent event){
-        /* Construct a 5x5 pixel rectangle centered on the mouse click position */
-        Point screenPos = event.getPoint();
-        Rectangle screenRect = new Rectangle(screenPos.x-2, screenPos.y-2, 5, 5);
-        
+    public Set<FeatureId> selectFeatures(Point screenPos1, Point screenPos2){
+    	Rectangle screenRect;
+
+    	if (screenPos2 == null)
+    		screenRect = new Rectangle(screenPos1.x-2, screenPos1.y-2, 3, 3);
+    	else {
+    		int lx = Math.min(screenPos1.x, screenPos2.x);
+    		int ly = Math.min(screenPos1.y, screenPos2.y);
+    		
+    		screenRect = new Rectangle(lx, ly, Math.abs(screenPos2.x - screenPos1.x),
+    				Math.abs(screenPos2.y - screenPos1.y));
+    	}
+    	
         /*
          * Transform the screen rectangle into bounding box in the coordinate
          * reference system of our map context. Note: we are using a naive method
