@@ -8,6 +8,7 @@ import java.awt.event.ActionListener;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -73,6 +74,7 @@ import com.vividsolutions.jts.geom.Polygon;
  * [IMPLEMENTED]
  * 5. Objektu pasirinkimo galimybe individualiai (ji pazymint) arba teriterijoje (pasirinktame staciakampyje)
  * 
+ * [IMPLEMENTED]
  * 6. Parinktu (pazymetu) objektu parodymas stambiu planu (maksimaliai isdidinus pasirinktame vaizde) (zoom to extent)
  * 
  * [OUT-OF-THE-BOX]
@@ -90,7 +92,7 @@ public class AppG extends JFrame
 {
 	private MapContext map = new DefaultMapContext();
 	private JMapFrame frame;
-	private Set<FeatureId> selectedFeatures;
+	private Set<FeatureId> selectedFeatures = new HashSet<FeatureId>();
 	
     private FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
     private StyleFactory sf = CommonFactoryFinder.getStyleFactory(null);
@@ -175,10 +177,18 @@ public class AppG extends JFrame
 
         JToolBar toolbar = frame.getToolBar();
         toolbar.addSeparator();
-        toolbar.add(new JButton(new SafeAction("select") {
+        toolbar.add(new JButton(new SafeAction("Select") {
 			@Override
 			public void action(ActionEvent arg0) throws Throwable {
 				frame.getMapPane().setCursorTool(new BoxSelectCursorTool());
+			}
+        }));
+        
+        toolbar.addSeparator();
+        toolbar.add(new JButton(new SafeAction("Zoom To Extent") {
+			@Override
+			public void action(ActionEvent arg0) throws Throwable {
+				zoomToExtent();
 			}
         }));
         
@@ -280,6 +290,27 @@ public class AppG extends JFrame
     	displayShapeFile(file);
     }
     
+	
+	public void zoomToExtent() throws IOException{
+		ReferencedEnvelope box, maxBox = null;
+		
+		if (!selectedFeatures.isEmpty()){
+			for (MapLayer m : frame.getMapContext().getLayers()){
+				if (m.isSelected()){
+					box = m.getFeatureSource().getFeatures(ff.id(selectedFeatures)).getBounds();
+			
+					if (maxBox == null){
+						maxBox = box;
+					} else {
+					maxBox.expandToInclude(box);
+					}
+				}
+			}
+		}
+		
+		if (maxBox != null) frame.getMapPane().setDisplayArea(maxBox);
+	}
+	
     public Set<FeatureId> selectFeatures(Point screenPos1, Point screenPos2){
     	Rectangle screenRect;
 
