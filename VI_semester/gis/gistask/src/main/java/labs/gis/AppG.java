@@ -80,11 +80,16 @@ import com.vividsolutions.jts.geom.Polygon;
  * [OUT-OF-THE-BOX]
  * 7. Atitinkamu atributiniu duomenu parodymas pasirinkus (pasizymejus) grafinius
  * 
+ * [~IMPLEMENTED]
  * 7a grafiniu objektu parodymas pasirinkus atributinius (sarase).
  * 
+ * [~IMPLEMENTED]
  * 8. Informacijos sluoksnio objektu atributiniu duomenu perziurejimas dalimi arba pilnu sarasu
  * 
+ * [IMPLEMENTED]
  * 9. Objektu paieskos ir isrinkimo pagal atributinius duomenis funkcija.
+ * 
+ * TODO: bug with point selecting + testing
  */
 
 @SuppressWarnings("serial")
@@ -96,6 +101,7 @@ public class AppG extends JFrame
 	
     private FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
     private StyleFactory sf = CommonFactoryFinder.getStyleFactory(null);
+    private AppG appG = this;
     
     private enum GeomType { POINT, LINE, POLYGON };
     
@@ -107,7 +113,6 @@ public class AppG extends JFrame
     private static final float OPACITY = 1.0f;
     private static final float LINE_WIDTH = 1.0f;
     private static final float POINT_SIZE = 10.0f;
-    
 	
 	// Enable selection
 	public class BoxSelectCursorTool extends CursorTool {
@@ -164,8 +169,22 @@ public class AppG extends JFrame
 				}
 			}
 		});
+
+		JMenuItem addQueryMenuItem = new JMenuItem("Query");
+		addQueryMenuItem.addActionListener(new ActionListener(){
+			public void actionPerformed(ActionEvent e){
+				try {
+					QueryFrame qf = new QueryFrame(appG);
+					qf.updateLayers();
+					qf.setVisible(true);
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+			}
+		});
 		
 		menu.add(addLayerMenuItem);
+		menu.add(addQueryMenuItem);
 		jmenu.add(menu);
 
 		frame = new JMapFrame(map);
@@ -368,4 +387,12 @@ public class AppG extends JFrame
     	
     	map.addLayer(featureSource, null);
     }
+
+	public void setFrame(JMapFrame frame) {
+		this.frame = frame;
+	}
+
+	public JMapFrame getFrame() {
+		return frame;
+	}
 }
