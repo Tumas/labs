@@ -9,6 +9,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -17,6 +18,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JTable;
 import javax.swing.JToolBar;
 
 import org.geotools.data.CachingFeatureSource;
@@ -44,8 +46,10 @@ import org.geotools.swing.JMapFrame;
 import org.geotools.swing.action.SafeAction;
 import org.geotools.swing.data.JFileDataStoreChooser;
 import org.geotools.swing.event.MapMouseEvent;
+import org.geotools.swing.table.FeatureCollectionTableModel;
 import org.geotools.swing.tool.CursorTool;
 import org.opengis.feature.Feature;
+import org.opengis.feature.Property;
 import org.opengis.feature.type.FeatureType;
 import org.opengis.feature.type.GeometryDescriptor;
 import org.opengis.filter.Filter;
@@ -77,19 +81,20 @@ import com.vividsolutions.jts.geom.Polygon;
  * [IMPLEMENTED]
  * 6. Parinktu (pazymetu) objektu parodymas stambiu planu (maksimaliai isdidinus pasirinktame vaizde) (zoom to extent)
  * 
- * [OUT-OF-THE-BOX]
+ * [OUT-OF-THE-BOX|IMPLEMENTED]
  * 7. Atitinkamu atributiniu duomenu parodymas pasirinkus (pasizymejus) grafinius
  * 
- * [~IMPLEMENTED]
+ * [IMPLEMENTED]
  * 7a grafiniu objektu parodymas pasirinkus atributinius (sarase).
  * 
- * [~IMPLEMENTED]
+ * [IMPLEMENTED]
  * 8. Informacijos sluoksnio objektu atributiniu duomenu perziurejimas dalimi arba pilnu sarasu
  * 
  * [IMPLEMENTED]
  * 9. Objektu paieskos ir isrinkimo pagal atributinius duomenis funkcija.
  * 
- * TODO: bug with point selecting + testing
+ * TODO: bug with layers going on top of each other after selection	
+ * TODO: 7a
  */
 
 @SuppressWarnings("serial")
@@ -112,7 +117,7 @@ public class AppG extends JFrame
     
     private static final float OPACITY = 1.0f;
     private static final float LINE_WIDTH = 1.0f;
-    private static final float POINT_SIZE = 10.0f;
+    private static final float POINT_SIZE = 3.0f;
 	
 	// Enable selection
 	public class BoxSelectCursorTool extends CursorTool {
@@ -211,12 +216,45 @@ public class AppG extends JFrame
 			}
         }));
         
+        toolbar.addSeparator();
+        toolbar.add(new JButton(new SafeAction("Info about selected") {
+			@Override
+			public void action(ActionEvent arg0) throws Throwable {
+				selectedInfo();
+			}
+        }));
+        
         frame.getMapPane().setCursorTool(new BoxSelectCursorTool());
         frame.setSize(800, 600);
         frame.setVisible(true);
 	}
 	
-    public static void main( String[] args ) throws Exception
+    protected void selectedInfo() throws IOException {
+    	ArrayList<JTable> tables = new ArrayList<JTable>();
+		
+    	if (!selectedFeatures.isEmpty()){
+    		for (MapLayer m : frame.getMapContext().getLayers()){
+    			// create a table for each layer 
+    			// showing info about selected feature
+    			if (m.isSelected()){
+					try {
+	        			FeatureCollection features = m.getFeatureSource().getFeatures(ff.id(selectedFeatures));
+	        	        FeatureCollectionTableModel model = new FeatureCollectionTableModel(features);
+	        	        JTable table = new JTable();
+	        	        table.setModel(model);
+	        	        tables.add(table);
+	        		} catch (Exception ex) {}
+				}
+    		}
+    	
+    		for (JTable t : tables) new FeaturesFrame(t).setVisible(true);
+    	}
+    	else {
+    		throw new IOException("Nothing selected");
+    	}
+	}
+
+	public static void main( String[] args ) throws Exception
     {
     	new AppG().start();
     }
@@ -275,7 +313,7 @@ public class AppG extends JFrame
                 graphic.graphicalSymbols().clear();
                 graphic.graphicalSymbols().add(mark);
                 graphic.setSize(ff.literal(POINT_SIZE));
-
+                
                 symbolizer = sf.createPointSymbolizer(graphic, geometryAttributeName);
         }
 

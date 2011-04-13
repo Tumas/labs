@@ -129,23 +129,6 @@ public class QueryFrame extends JFrame {
 			throw new IOException("Invalid query");
 		}
 	}
-	
-	/*
-	private void queryFeatures() throws Exception {
-		String selectedName = (String) featureTypeCBox.getSelectedItem();
-		FeatureSource source = getSelectedFeatureSource(selectedName);
-		FeatureType schema = source.getSchema();
-		String name = schema.getGeometryDescriptor().getLocalName();
-
-		Filter filter = CQL.toFilter(text.getText());
-		Query query = new Query(selectedName, filter, new String[] { name });
-		
-		FeatureCollection features = source.getFeatures(query);
-		FeatureCollectionTableModel model = new FeatureCollectionTableModel(
-				features);
-		table.setModel(model);
-	}
-	*/
 
 	private FeatureSource getSelectedFeatureSource(String name) {
 		FeatureSource source = null;
