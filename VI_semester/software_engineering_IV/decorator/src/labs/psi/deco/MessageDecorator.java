@@ -18,4 +18,14 @@ public abstract class MessageDecorator implements Message {
 	public String getBody(){
 		return message.getBody();
 	}
+	
+	public static MessageDecorator getRole(MessageDecorator m, String className){
+		if (m.getClass().getSimpleName().equals(className)) 
+			return m;
+		
+		if (!(m.message instanceof MessageDecorator)) 
+			return null;
+		
+		return MessageDecorator.getRole((MessageDecorator) m.message, className);
+	}
 }
