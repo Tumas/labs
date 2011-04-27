@@ -28,4 +28,21 @@ public abstract class MessageDecorator implements Message {
 		
 		return MessageDecorator.getRole((MessageDecorator) m.message, className);
 	}
+	
+	public static Message removeRole(MessageDecorator m, String className){
+		if (m.getClass().getSimpleName().equals(className)) {
+			if (className == "EncryptedMessage") m.setBody(((EncryptedMessage)m).decrypt());
+			
+			if (!(m.message instanceof MessageDecorator)) 
+				return m.message;
+			else 
+				return MessageDecorator.removeRole((MessageDecorator) m.message, className);
+		}
+		
+		if (!(m.message instanceof MessageDecorator)) 
+			return m;
+
+		m.message = MessageDecorator.removeRole((MessageDecorator) m.message, className);
+		return m;
+	}
 }
