@@ -89,6 +89,7 @@ public class QueryFrame extends JFrame {
         					while (iter.hasNext()) {
         						Feature feature = iter.next();
         						IDs.add(feature.getIdentifier());
+        						parentApplication.getSelectedFeatures().add(feature.getIdentifier());
         					}
         				} finally {
         					iter.close();

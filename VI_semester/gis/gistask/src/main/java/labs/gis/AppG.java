@@ -93,8 +93,6 @@ import com.vividsolutions.jts.geom.Polygon;
  * [IMPLEMENTED]
  * 9. Objektu paieskos ir isrinkimo pagal atributinius duomenis funkcija.
  * 
- * TODO: bug with layers going on top of each other after selection	
- * TODO: 7a
  */
 
 @SuppressWarnings("serial")
@@ -209,7 +207,7 @@ public class AppG extends JFrame
         }));
         
         toolbar.addSeparator();
-        toolbar.add(new JButton(new SafeAction("Zoom To Extent") {
+        toolbar.add(new JButton(new SafeAction("Zoom To Select") {
 			@Override
 			public void action(ActionEvent arg0) throws Throwable {
 				zoomToExtent();
@@ -433,4 +431,9 @@ public class AppG extends JFrame
 	public JMapFrame getFrame() {
 		return frame;
 	}
+	
+	public Set<FeatureId> getSelectedFeatures(){
+		return selectedFeatures;
+	}
+	
 }
