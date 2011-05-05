@@ -156,11 +156,12 @@ public class JSpellCastSource implements Runnable {
 	 * @param JSpellCastClient client to register
 	 * @return boolean flag that determines if operation was successful
 	 */
-	public boolean registerClient(JSpellCastClient client) {
+	public synchronized boolean registerClient(JSpellCastClient client) {
 		if (!getClients().contains(client)){
 			System.out.println("CLIENT " + client.getUserAgent() + " associated with source: " + getName() + 
 					" ( " + getMountPoint() + " )");
 			
+			client.setMountPoint(getMountPoint());
 			return getClients().add(client);
 		}	
 
@@ -175,7 +176,7 @@ public class JSpellCastSource implements Runnable {
 	 *  If it is, then clients list is not modified and the caller is responsible for deleting elements from it. (in short, 
 	 *   attempting to modify collection when iterating over it leads to unspecified behavior)
 	 */
-	public void disconnectClient(JSpellCastClient client, boolean inClientsIteration){
+	public synchronized void disconnectClient(JSpellCastClient client, boolean inClientsIteration){
 		System.out.println("disconnecting client" + client.getUserAgent() + " on " + client.getMountPoint());
 		
 		srv.updateClientsCount(-1);
@@ -193,7 +194,7 @@ public class JSpellCastSource implements Runnable {
 	/** disconnect source
 	 *  First, disconnect all sources clients and only then the source itself
 	 */
-	public void disconnect() {
+	public synchronized void disconnect() {
 		System.out.println("disconnecting source clients");
 		
 		for (JSpellCastClient client : getClients()){
@@ -204,8 +205,8 @@ public class JSpellCastSource implements Runnable {
 		
 		System.out.println("disconnecting source " + getName() + " on " + getMountPoint());
 		srv.updateSourcesCount(-1);
-		srv.printServerStats();
 		srv.removeSource(this);
+		srv.printServerStats();
 		
 		try {
 			socket.close();

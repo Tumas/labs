@@ -98,6 +98,9 @@ public class JSpellCastServer {
 				Socket newClientSocket;
 				
 				while (true){
+					
+					printServerStats();
+					
 					try {
 						newClientSocket = clientSocket.accept();
 					
@@ -110,6 +113,7 @@ public class JSpellCastServer {
 							} catch (IOException e) {
 								e.printStackTrace();
 							}
+							
 						} else {
 							JSpellCastClient newClient = new JSpellCastClient(newClientSocket);
 							JSpellCastSource sourceForClient = null;

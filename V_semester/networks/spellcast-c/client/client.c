@@ -6,6 +6,9 @@
 #include <sys/socket.h>
 #include <string.h>
 
+#include "../fmod/api/inc/fmod.h"
+#include "../fmod/api/inc/fmod_errors.h"
+
 #include "client.h"
 #include "../protocol.h"
 #include "../helpers.h"
@@ -19,8 +22,8 @@
  *  -i    - specify if dont want to get metadata
  *
  *  TODO:
- *    recovery for small buffer
  *    playback
+ *
  *    data handling
  *
  *    testing with metadata on and off
@@ -226,57 +229,65 @@ spellcast_client_play(spellcast_con_info *c_info)
 
   int bytes_received;
   int meta_length, filled_meta_length, getting_meta = 0;
-  char l_byte;
   long bytes_to_meta = 0;
 
+  FILE *snd_file = fopen("snd.mp3", "a+");
+  //FILE *snd_file = tmpfile();
+
+  /*
+  FMOD_SYSTEM     *system;
+  FMOD_SOUND      *sound;
+  FMOD_CHANNEL    *channel = 0;
+  FMOD_RESULT      result;
+
+  result = FMOD_System_Create(&system);
+  result = FMOD_System_Init(system, 1, FMOD_INIT_NORMAL, NULL);
+  result = FMOD_System_CreateSound(system, "snd.mp3", FMOD_SOFTWARE | FMOD_2D | FMOD_CREATESTREAM, 0, &sound);
+  */
+
   while ((bytes_received = recv(c_info->sock_d, buffer, BUFFER_SIZE, 0)) > 0){
-    /*
-    printf("client received: %d\n", bytes_received);
-    printf("Bytes to meta %d\n", bytes_to_meta + bytes_received);
-    printf("getting_meta? %d\n", getting_meta);
-    */
 
     if (!getting_meta) {
-
       if (bytes_received + bytes_to_meta > c_info->metaint){
+        // position of metadata length byte in buffer
+        int len_pos = c_info->metaint - bytes_to_meta;
 
         /*
         printf("metaint %d\n", c_info->metaint);
         printf("bytes_received %d\n", bytes_received);
         printf("bytes_to_meta %ld\n", bytes_to_meta);
         printf("bytes_received + bytes_to_meta %ld\n", bytes_received + bytes_to_meta);
-        printf("meta starts at %d - %ld : %ld\n", c_info->metaint, bytes_to_meta, c_info->metaint - bytes_to_meta);
+        printf("meta starts at %d - %ld : %ld\n", c_info->metaint, bytes_to_meta, len_pos);
         */
 
-        // music bytes : c_info->metaint - bytes_to_meta
-        l_byte = buffer[c_info->metaint - bytes_to_meta];
+        fwrite(buffer, 1, len_pos, snd_file);
         meta_length = buffer[c_info->metaint - bytes_to_meta] * 16;
-        //printf("metalen %d\n", meta_length);
 
         if (meta_length != 0){
-          //int x, j;
-          //for (x = c_info->metaint - bytes_to_meta, j = 0; j < meta_length; x++, j++){ printf("%c - %d\n", buffer[x], x); }
-          //for (x = 0; x < bytes_received; x++){ printf("%c", buffer[x]); }
-
+          // check if all metadata is in buffer
           if (bytes_received - meta_length < 0){
-            memcpy(meta_info, buffer + c_info->metaint - bytes_to_meta + 1, bytes_received - (c_info->metaint - bytes_to_meta + 1));
+            memcpy(meta_info, buffer + len_pos + 1, bytes_received - (len_pos + 1));
 
-            filled_meta_length = bytes_received - (c_info->metaint - bytes_to_meta + 1);
+            filled_meta_length = bytes_received - (len_pos + 1);
             getting_meta = 1;
           }
           else {
-            // all meta is contained here in maybe have some music at the end
-            memcpy(meta_info, buffer + c_info->metaint - bytes_to_meta + 1, meta_length);
+            // all meta is contained within buffer, so we probably have some music at the end
+            memcpy(meta_info, buffer + len_pos + 1, meta_length);
             meta_info[meta_length] = '\0';
 
-            printf("\nMETADATA1: %s\n", meta_info);
+            printf("METADATA: %s\n", meta_info);
 
             // some music at the end
-            bytes_to_meta = bytes_received - (c_info->metaint - bytes_to_meta) - meta_length - 1;
+            // music at the end = buffer len - meta len - data up to meta - 1 (size of meta byte)
+            bytes_to_meta = bytes_received - len_pos - 1 - meta_length;
+            fwrite(buffer + len_pos + 1 + meta_length, 1, bytes_to_meta, snd_file);
           }
         } 
         else {
           // it's all music but we need to reset the counter since server provided no metadata
+          fwrite(buffer + len_pos + 1, 1, bytes_received - 1 - len_pos, snd_file);
+
           bytes_to_meta += bytes_received - 1;
           bytes_to_meta %= c_info->metaint;
         }
@@ -284,15 +295,11 @@ spellcast_client_play(spellcast_con_info *c_info)
       else {
         // it's all music
         bytes_to_meta += bytes_received;
+        fwrite(buffer, 1, bytes_received, snd_file);
       }
     }
     else {
       // getting rest of the meta
-      /*
-      printf("GETTING REST OF META \n");
-      printf("left meta %d bytes_received %d\n", meta_length - filled_meta_length, bytes_received);
-      */
-
       if (meta_length - filled_meta_length < bytes_received){
         // all the rest of metadata is inside received bytes
         memcpy(meta_info + filled_meta_length, buffer, meta_length - filled_meta_length);
@@ -301,16 +308,17 @@ spellcast_client_play(spellcast_con_info *c_info)
          
         // + a little bit of music at the end
         bytes_to_meta = bytes_received - meta_length + filled_meta_length;
+        fwrite(buffer + meta_length - filled_meta_length, 1, bytes_to_meta, snd_file);
         getting_meta = 0;
       }
       else {
-        printf("GETTING REST OF META2 \n");
         memcpy(meta_info + filled_meta_length, buffer, bytes_received);
         filled_meta_length += bytes_received;
       }
     }
   }
 
+  fclose(snd_file);
   printf("Disconnected from the server: (client received %d)\n", bytes_received);
 }
 
