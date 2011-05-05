@@ -19,11 +19,19 @@ public class EncryptedMessage extends MessageDecorator {
 	    encrypt();
  	}
 	
+	public String getBody(){
+		return decrypt();
+	}
+	
+	public void onRemove(){
+		setBody(decrypt());
+	}
+	
 	public String decrypt(){
 		return desEncrypter.decrypt(message.getBody());
 	}
 	
 	private void encrypt() {
-		message.setBody(desEncrypter.encrypt(message.preview()));
+		message.setBody(desEncrypter.encrypt(message.getBody()));
 	}
 }

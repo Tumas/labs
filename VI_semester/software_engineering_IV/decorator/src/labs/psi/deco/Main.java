@@ -13,15 +13,24 @@ public class Main {
 		Message m2 = createMessage("And some milk too", "Tumas", true, true);
 		System.out.println(m2.preview());
 		
-		System.out.println("Removing date:");
-		System.out.println(MessageDecorator.removeRole((MessageDecorator)m2, "EncryptedMessage").preview());
+		String role = "EncryptedMessage";
+		System.out.println("Removing" + role +  ":");
+		System.out.println(MessageDecorator.removeRole((MessageDecorator)m2, role).preview());
+		
+		System.out.println("PAID: ");
+		Message mp = new PaidMessage(m);
+
+		System.out.println(mp.preview());
+		System.out.println(((PaidMessage)mp).getPrice());
+		System.out.println(((PaidMessage)mp).getPrice());
+		System.out.println(mp.preview());
 	}
 	
 	public static Message createMessage(String message, String author, boolean dated, boolean encrypted){
 		Message m = new SimpleMessage(message);
 	
-		if (encrypted) 		 m = new EncryptedMessage(m);
 		if (author != null) m = new SignedMessage(m, author);
+		if (encrypted) 		 m = new EncryptedMessage(m);
 		if (dated) 			 m = new DatedMessage(m);
 		return m;
 	}

@@ -19,6 +19,9 @@ public abstract class MessageDecorator implements Message {
 		return message.getBody();
 	}
 	
+	public void onRemove(){
+	}
+	
 	public static MessageDecorator getRole(MessageDecorator m, String className){
 		if (m.getClass().getSimpleName().equals(className)) 
 			return m;
@@ -31,7 +34,8 @@ public abstract class MessageDecorator implements Message {
 	
 	public static Message removeRole(MessageDecorator m, String className){
 		if (m.getClass().getSimpleName().equals(className)) {
-			if (className == "EncryptedMessage") m.setBody(((EncryptedMessage)m).decrypt());
+			//if (className == "EncryptedMessage") m.setBody(((EncryptedMessage)m).decrypt());
+			m.onRemove();
 			
 			if (!(m.message instanceof MessageDecorator)) 
 				return m.message;
@@ -39,8 +43,9 @@ public abstract class MessageDecorator implements Message {
 				return MessageDecorator.removeRole((MessageDecorator) m.message, className);
 		}
 		
-		if (!(m.message instanceof MessageDecorator)) 
+		if (!(m.message instanceof MessageDecorator)){ 
 			return m;
+		}
 
 		m.message = MessageDecorator.removeRole((MessageDecorator) m.message, className);
 		return m;
