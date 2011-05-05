@@ -1,7 +1,6 @@
 package com.github.tumas.chaoslabs;
 
 import java.awt.AlphaComposite;
-import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -10,10 +9,12 @@ import java.awt.event.WindowEvent;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
 
+import javax.swing.JFrame;
+
 import com.github.tumas.chaoslabs.helper.ExtendedCanvas;
 
 @SuppressWarnings("serial")
-public class LinearTransformationsTask extends Frame {
+public class LinearTransformationsTask extends JFrame {
 	public LinearTransformationsTask(){
 		super("Sierpinsky Triangle");
 		
@@ -60,7 +61,7 @@ class BikeCanvas extends ExtendedCanvas {
 	public void paint(Graphics gg){
 		Graphics2D g = (Graphics2D)gg;
 		
-		g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.7f));
+		g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.9f));
 	    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
 	    g.drawLine(xLimit, 100, xLimit, 286);

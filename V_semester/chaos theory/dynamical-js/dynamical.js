@@ -1,8 +1,9 @@
 window.onload = function (){
 
+  /* 0.4 and 6 */
   var ffunk = function(c, x) { 
-    //return c * x*x* (1 - x); 
-    return c*x * (1-x);
+    return c * x*x* (1 - x); 
+    //return Math.sin(x) * c;
   };
 
   var plot = null;

@@ -151,7 +151,7 @@ class SierpinskyCanvas extends ExtendedCanvas {
 		ga.setColor(tempColor);
 	}
 	
-		public void resetStatistics(){
+	public void resetStatistics(){
 		for (int i = 0; i < iterations; i++) iterationPoints[i] = 0;
 	}
 

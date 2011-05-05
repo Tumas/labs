@@ -22,3 +22,6 @@
   *  Timeline
   *  Cobweb plot (Verhuist diagram)
   *  Bifurcation diagram
+
+### Mandelbrot set, Julia sets, Newton method
+* Y = z^5 - z^4 - z^2 + c

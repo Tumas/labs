@@ -7,6 +7,7 @@ var context2D = null;
 
 // Calculation data
 var rotateAngle = Math.PI / 4;
+
 var sin = Math.sin(rotateAngle);
 var cos = Math.cos(rotateAngle);
 
