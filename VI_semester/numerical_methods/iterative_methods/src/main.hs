@@ -1,5 +1,7 @@
 import Matrix
+import IterativeMethod
 import Zeidel
+import Data.List(zip4)
 
 epsilon = 0.0001
 iterations = 1000
@@ -12,23 +14,26 @@ bv = [-2.0, 45, 80]
 --av = [[1.362, 0.202, -0.599, 0.432], [0.202, 1.362, 0.202, -0.599], [-0.599, 0.202, 1.362, 0.202], [0.432, -0.599, 0.202, 1.362]]
 --bv = [ 1.941, -2.3, -1.941, 0.23 ]
 
+-- wikipedia test
+--av = [[10, -1, 2, 0], [-1, 11, -1, 3], [2, -1, 10, -1], [0, 3, -1, 8]] 
+--bv = [6, 25, -11, 15]
+
 x = take (length av) [0.0,0..]
 
--- TODO: zeidel convergence test
--- TODO: trace printing 
+-- TODO: netiktis + convergence condition
 -- TODO: implement conjugate gradient method
--- TODO: hspec testing, fix cabal 
 
 main :: IO()
 main = do
-  putStrLn " ZEIDEL METHOD: " 
-  showSolutionTrace $ solveWithZeidelMethod av x bv iterations epsilon
-  --showSolutionTrace solveWithConjugentGradient a x b iterations epsilon
+  putStrLn $ " Iterations:  " ++ (show iterations) ++ " Epsilon: " ++ (show epsilon)
+  putStrLn " ZEIDEL METHOD: "   
+  showSolutionTrace' zd
+  where zd = solveWithZeidelMethod av x bv iterations epsilon
 
-showSolutionTrace :: [Vector] -> IO()
-showSolutionTrace trace = do
+showSolutionTrace' :: ZeidelMethod -> IO()
+showSolutionTrace' z@(Zeidel a x b trace) = do
   putStrLn traceInfo
-  putStrLn $ " In " ++ show size ++ " iterations" 
-  where size   = length trace
-        traceInfo = foldr (\s acc -> (acc ++ "\n" ++ (show s))) "" $ zip [traceLen, traceLen-1 ..] trace
-        traceLen = length trace
+  putStrLn $ " In " ++ show (traceLen-1) ++ " iterations" 
+  where traceLen  = length trace
+        traceInfo = foldr (\(n, s, er, res) acc -> (acc ++ "\n" ++ (show n) ++ ": " ++ (show s) ++ " #Er: " ++ (show er) ++ "\tR: " ++ (show res))) "" info
+        info      = zip4 [traceLen-1, traceLen-2 ..] trace (traceErrors' trace) (traceResiduals' z)
