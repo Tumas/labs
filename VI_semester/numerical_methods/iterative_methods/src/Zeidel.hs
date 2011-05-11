@@ -9,19 +9,19 @@ data ZeidelMethod = Zeidel
     , trace    ::  Trace
     } deriving (Show, Eq)
 
-solveWithZeidelMethod :: Matrix -> Vector -> Vector -> Int -> Double -> ZeidelMethod
-solveWithZeidelMethod a x b maxIterations epsilon 
+solveWithZeidel :: ZeidelMethod -> Int -> Double -> ZeidelMethod
+solveWithZeidel z@(Zeidel a _ _ _) maxIterations epsilon 
   | convergenceTest z == False  = error $ "Convergence test failed: " ++ show a
   | otherwise                   = solveZ z maxIterations epsilon
-  where z = Zeidel a x b [x]
+--  where z = Zeidel a x b [x]
 
 convergenceTest :: ZeidelMethod -> Bool
 convergenceTest (Zeidel a _ _ _) = (dominantDiagonally a) || ((isSymmetric a) && (isPositive a))
 
 solveZ :: ZeidelMethod -> Int -> Double -> ZeidelMethod
-solveZ   (Zeidel a x b t) 0 _   = Zeidel a x b (x : t)
+solveZ   (Zeidel a x b t) 0 _   = Zeidel a x b (x:t)
 solveZ z@(Zeidel a x b t) i epsilon
-  | acc <= epsilon              = Zeidel a x b (x : t)
+  | acc <= epsilon              = Zeidel a x b (x:t)
   | otherwise                   = solveZ nextZeidel (i-1) epsilon 
   where nextZeidel = iterateZ z                        
         acc        = accurracy x $ solution nextZeidel 
@@ -38,3 +38,12 @@ getX (Zeidel a x b t) v i = (bi - line) / aii
         aii  = ai !! i
         xs   = x ++ (reverse $ take ((length b) - (length x)) (reverse v)) 
         line = (sum (zipWith (*) ai xs)) - (aii * (xs !! i))
+
+traceErrors :: ZeidelMethod -> Vector
+traceErrors z = collect' accurracy $ trace z
+
+--  collect values by diff:
+--      collect' (+) [1, 2, 3] -> [3, 5]
+--      TO: iteration method
+collect' :: (a -> a -> b) -> [a] -> [b]
+collect' f src = snd $ foldr (\e1 (e2, acc) -> (e1, (f e1 e2) : acc)) (last src, []) $ init src
