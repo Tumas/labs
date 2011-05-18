@@ -25,9 +25,6 @@ bv = [ 1.941, -2.3, -1.941, 0.23 ]
 
 x = take (length av) [0.0,0..]
 
--- TODO: eigen values and eigen vectors
--- TODO: part4
-
 main :: IO()
 main = do
   putStrLn $ " Max iterations:  " ++ (show iterations) ++ " Epsilon: " ++ (show epsilon)
