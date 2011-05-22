@@ -47,11 +47,10 @@ class QSmarterRobot(Robot):
 
     def move_by_code(self, num, simulated = False):
         """ Perfrom encoded move [whether simulated or real] and get reward """
-        reward = 0
         try:
             self.__encoded_move(num, simulated)
             self.empty_moves += 1
-            return reward
+            return 0
         except WallException as e:
             raise Exception("it should not happen")
         except TargetReachedException:
@@ -75,7 +74,8 @@ class QSmarterRobot(Robot):
             self.__encoded_move(num)
 
         except WallException as e:
-            raise Exception("It should not happen")
+            print "IT SHOULD NOT HAPPEN"
+            #raise Exception("It should not happen")
             #self.logger.write("Bumped a wall.. {0} at {1}".format(e.msg, e.point))
         except TargetReachedException:
             self.logger.write("Destination reached in {0} moves".format(self.moves))
@@ -97,16 +97,20 @@ class QSmarterRobot(Robot):
 
     def train(self):
         """ Train the robot """
+
+        """ Q:
+              q[x][y][0..3]
+        """
+        
         move = None
         for i in range(self.iterations):
+            # get random position in a map
             self.current = self.map.random_pos(False)
 
-            for j in range(self.map.width * self.map.height):
-            #for j in range(3):
+            for j in range(100):
                 # random action or best action?
                 if random() < self.rho:
-                    #move = choice([x for x in range(4) 
-                    #  if not self.map.wall_at(self.__decode_new_coordinates(x))])
+                    # collect valid moves and choose one randomly
                     test = []
                     for m in range(4):
                         x, y = self.__decode_new_coordinates(m)
@@ -114,29 +118,40 @@ class QSmarterRobot(Robot):
                             test.append(m) 
                     move = choice(test) 
                 else:
+                    # choose best move known so far
                     move = self.best_move()
 
                 previous = copy(self.current)
-                #print "Iteration: {0}, Current position: {1}".format(i, self.current)
                 reward = self.move_by_code(move)
-                #print "Moved: {0}, Got reward: {1}".format(move, reward)
-                #print "Current position: {0}, was: {1}".format(self.current, previous)
                 self.learn(reward, previous, move)
 
         # get back to start position
         self.current = self.map.start_pos
         self.moves = 0
 
+        print "Q TABLE: ********************************"
+        print self.q
+        print " ********************************"
+
+    def max_values(self):
+        val = []
+        for x in range(self.map.width):
+            for y in range(self.map.height):
+                val.append(max(self.q[x][y]))
+        return val
+
     def learn(self, reward, previous, action):
-        """  Q(s, a) = Q(s, a) + alpha * (reward + gama * Qmax)) """
+        """ 
+          reward - number of how good move was
+          previous - previous move code
+          move     - move code of current move
+
+          Q(s, a) = Q(s, a) + alpha * (reward + gama * Qmax)) 
+        
+        """
         q    = self.q[previous.x][previous.y][action]
         qmax = max(self.q[self.current.x][self.current.y])
-
-        new_val = (1 - self.alpha) * q + self.alpha * (reward + self.gama * qmax)
-        #print "q: {0}, New_val: {1}".format(q, new_val)
-        self.q[previous.x][previous.y][action] = new_val
-
-        #for x in range(self.map.width):  print self.q[x]
+        self.q[previous.x][previous.y][action] = (1 - self.alpha) * q + self.alpha * (reward + self.gama * qmax)
 
     def print_training_stats(self):
         """ """
@@ -171,38 +186,14 @@ class QSmarterRobot(Robot):
             raise Exception("Parameter {0} is not in valid range [0..1]".format(param))
         return param
 
-        """ *** ENABLING 3D PLOTING *** """
-
-    def get_z(self, state, action):
-        """ Helper transformation function to enable 3D plotting.
-        
-            State (from)
-            Action (to). Both expressed as numbers
-        """
-        sx, sy = self.__get_x_y(state)
-        ax, ay = self.__get_x_y(action)
-
-        if abs(sx - ax) + abs(sy - ay) > 1:
-            return 0
-
-        if sx - ax == 0:
-            if sy - ay > 0:
-                return self.q[sx][sy][0]
-            else:
-                return self.q[sx][sy][2]
-        else:
-            if sy - ax > 0:
-                return self.q[sx][sy][3]
-            else:
-                return self.q[sx][sy][1]
-
-    def plot(self):
-
-        X = np.arange(0, self.map.width * self.map.height, 1)
-        Y = np.arange(0, self.map.width * self.map.height, 1)
+    def plot3(self):
+        X = np.arange(0, self.map.width, 1)
+        Y = np.arange(0, self.map.height, 1)
         X, Y = np.meshgrid(X, Y)
-        size = self.map.width * self.map.height
-        Z = np.array([self.get_z(x, y) for x in X[0] for y in X[0]]).reshape(size, size)
+        Z = np.array([max(self.q[x][y]) for x in X[0] for y in X[0]]).reshape(self.map.width, self.map.height)
+        
+        print Z
+        # print [max(el) for el in Z]
 
         fig=p.figure()
         ax = p3.Axes3D(fig)
@@ -211,19 +202,6 @@ class QSmarterRobot(Robot):
         ax.set_ylabel('Y')
         ax.set_zlabel('Z')
         p.show()
-
-    def __get_number(self, x, y):
-        """ x,y -> number transformation """
-        return y * self.map.width + y
-
-    def __get_x_y(self, number):
-        """ 
-        number -> x,y transformation 
-          4 5 6 7
-          0 1 2 3 
-          h = 2, w = 4
-        """
-        return number % self.map.width, number / self.map.width
 
 if __name__ == '__main__':
     import sys
@@ -237,11 +215,15 @@ if __name__ == '__main__':
         exit()
 
     l = Logger()
-    r = QSmarterRobot(Map(sys.argv[1]), 1000, 0.7, 0.3, 0.7, l)
+    alpha = 0.7 # learning rate
+    gamma = 0.7 # discount rate -> how much current state depends on the state it leads to ~ [0,1].
+    rho = 0.5   # randomness of exploration -> choose random action or best action (on increase, random actions are taken)
+
+    r = QSmarterRobot(Map(sys.argv[1]), 1000, alpha, gamma, rho, l)
     r.train()
 
-    #for x in range(r.map.width): print r.q[x]
     r.print_training_stats()
-    r.plot()
+    r.plot3()
+
     cm = MapCurses(r, l)
     cm.animate()
