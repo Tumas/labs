@@ -49,7 +49,6 @@ import org.geotools.swing.event.MapMouseEvent;
 import org.geotools.swing.table.FeatureCollectionTableModel;
 import org.geotools.swing.tool.CursorTool;
 import org.opengis.feature.Feature;
-import org.opengis.feature.Property;
 import org.opengis.feature.type.FeatureType;
 import org.opengis.feature.type.GeometryDescriptor;
 import org.opengis.filter.Filter;
@@ -60,40 +59,6 @@ import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Polygon;
-
-/**
- * [IMPLEMENTED] 
- * 	1. Informacijos sluoksnio (vektorinio, rastrinio) idejimas/pasalinimas vaizde,
- * 		galimybe valdyti ju parodyma arba paslepima. (add/remove layer, show/hidden layer)
- * 
- * [OUT-OF-THE-BOX] 
- * 2. Informacijos sluoksnio artinimas/tolinimas objektu perziurai, stambesniu/smulkesniu planu. (zoom in/out) 
- * 
- * [OUT-OF-THE-BOX]
- * 3. Informacijos sluoksnio vaizdo postumis
- * 
- * [OUT-OF-THE-BOX]
- * 4. Grazinimas i pradini vaizda/pilnos duomenu apimties. (full extent)
- * 
- * [IMPLEMENTED]
- * 5. Objektu pasirinkimo galimybe individualiai (ji pazymint) arba teriterijoje (pasirinktame staciakampyje)
- * 
- * [IMPLEMENTED]
- * 6. Parinktu (pazymetu) objektu parodymas stambiu planu (maksimaliai isdidinus pasirinktame vaizde) (zoom to extent)
- * 
- * [OUT-OF-THE-BOX|IMPLEMENTED]
- * 7. Atitinkamu atributiniu duomenu parodymas pasirinkus (pasizymejus) grafinius
- * 
- * [IMPLEMENTED]
- * 7a grafiniu objektu parodymas pasirinkus atributinius (sarase).
- * 
- * [IMPLEMENTED]
- * 8. Informacijos sluoksnio objektu atributiniu duomenu perziurejimas dalimi arba pilnu sarasu
- * 
- * [IMPLEMENTED]
- * 9. Objektu paieskos ir isrinkimo pagal atributinius duomenis funkcija.
- * 
- */
 
 @SuppressWarnings("serial")
 public class AppG extends JFrame
@@ -106,7 +71,7 @@ public class AppG extends JFrame
     private StyleFactory sf = CommonFactoryFinder.getStyleFactory(null);
     private AppG appG = this;
     
-    private enum GeomType { POINT, LINE, POLYGON };
+    public enum GeomType { POINT, LINE, POLYGON };
     
 	private static final Color SELECTED_COLOUR = Color.YELLOW;
 	private static final Color LINE_COLOUR = Color.BLACK;
@@ -221,12 +186,57 @@ public class AppG extends JFrame
 				selectedInfo();
 			}
         }));
+       
+        toolbar.addSeparator();
+        toolbar.add(new JButton(new SafeAction("Plan a trip") {
+			@Override
+			public void action(ActionEvent arg0) throws Throwable {
+				new TripPlannerFrame(appG).setVisible(true);
+			}
+        }));
+        
         
         frame.getMapPane().setCursorTool(new BoxSelectCursorTool());
         frame.setSize(800, 600);
         frame.setVisible(true);
+        
+        preloadShapeFiles(new File[]{ 
+        							  //new File("resources/shp/apskrity.shp"),
+        							  new File("resources/shp/gyvenvie.shp"),
+        							  new File("resources/shp/virsukal.shp") });
 	}
-	
+    /*
+     * Get active layers by geometry type
+     */
+    public ArrayList<MapLayer> activeLayers(GeomType gType){
+    	ArrayList<MapLayer> mls = new ArrayList<MapLayer>();
+    	
+    	for (MapLayer m : frame.getMapContext().getLayers()){
+    		if (m.isSelected() && m.isVisible() && getGeomType(m) == gType)
+    			mls.add(m);
+    	}
+    	return mls;
+    }
+
+    @SuppressWarnings("unchecked")
+	public FeatureCollection getSelectedObjectsByGeometry(GeomType gType, String name) {
+    	FeatureCollection ft = null; 
+    	
+    	for (MapLayer m : activeLayers(gType)){
+    		FeatureSource fs = m.getFeatureSource();
+    		if (fs.getName().getLocalPart().equals(name)){
+    			try {
+					ft = fs.getFeatures(ff.id(selectedFeatures));
+					break;
+    			} catch (IOException e) {
+					e.printStackTrace();
+				}
+    		}
+    	}
+
+    	return ft;
+    }
+    
     protected void selectedInfo() throws IOException {
     	ArrayList<JTable> tables = new ArrayList<JTable>();
 		
@@ -234,7 +244,7 @@ public class AppG extends JFrame
     		for (MapLayer m : frame.getMapContext().getLayers()){
     			// create a table for each layer 
     			// showing info about selected feature
-    			if (m.isSelected()){
+    			if (m.isSelected() && m.isVisible()){
 					try {
 	        			FeatureCollection features = m.getFeatureSource().getFeatures(ff.id(selectedFeatures));
 	        	        FeatureCollectionTableModel model = new FeatureCollectionTableModel(features);
@@ -423,6 +433,10 @@ public class AppG extends JFrame
     	
     	map.addLayer(featureSource, null);
     }
+	
+	private void preloadShapeFiles(File[] filenames) throws Exception{
+		for (File f : filenames) displayShapeFile(f);
+	}
 
 	public void setFrame(JMapFrame frame) {
 		this.frame = frame;
@@ -435,5 +449,4 @@ public class AppG extends JFrame
 	public Set<FeatureId> getSelectedFeatures(){
 		return selectedFeatures;
 	}
-	
 }

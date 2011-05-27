@@ -8,9 +8,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
 
-import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JMenu;
@@ -20,7 +18,6 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.table.DefaultTableModel;
 
-import org.geotools.data.DataStore;
 import org.geotools.data.FeatureSource;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
@@ -28,13 +25,13 @@ import org.geotools.filter.text.cql2.CQL;
 import org.geotools.filter.text.cql2.CQLException;
 import org.geotools.map.MapContext;
 import org.geotools.map.MapLayer;
-import org.geotools.swing.JMapFrame;
 import org.geotools.swing.action.SafeAction;
 import org.geotools.swing.table.FeatureCollectionTableModel;
 import org.opengis.feature.Feature;
 import org.opengis.filter.Filter;
 import org.opengis.filter.identity.FeatureId;
 
+@SuppressWarnings("serial")
 public class QueryFrame extends JFrame {
 	private JComboBox featureTypeCBox;
 	private JTable table;
@@ -43,7 +40,6 @@ public class QueryFrame extends JFrame {
 	private AppG parentApplication;
 	private FeatureCollection featuresOnDisplay;
 	
-	@SuppressWarnings("serial")
 	public QueryFrame(AppG parentApp) {
 		this.parentApplication = parentApp;
 		this.mapContext = parentApplication.getFrame().getMapContext();
@@ -77,7 +73,8 @@ public class QueryFrame extends JFrame {
         });
 
         dataMenu.add(new SafeAction("Show selected") {
-        	@Override
+        	@SuppressWarnings("unchecked")
+			@Override
             public void action(ActionEvent e) throws Throwable {
         		if (table.getRowCount() > 0){
         			Set<FeatureId> IDs = new HashSet<FeatureId>();
@@ -112,6 +109,7 @@ public class QueryFrame extends JFrame {
 		featureTypeCBox.setModel(new DefaultComboBoxModel(vs));
 	}
 	
+	@SuppressWarnings("unchecked")
 	public void filterFeatures() throws IOException{
 		String name = (String) featureTypeCBox.getSelectedItem();
 		FeatureSource source = getSelectedFeatureSource(name);
@@ -131,6 +129,7 @@ public class QueryFrame extends JFrame {
 		}
 	}
 
+	@SuppressWarnings("unchecked")
 	private FeatureSource getSelectedFeatureSource(String name) {
 		FeatureSource source = null;
 		for (MapLayer ml : mapContext.getLayers()) {
