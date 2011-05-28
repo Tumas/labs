@@ -16,7 +16,7 @@ import com.vividsolutions.jts.geom.Point;
 /*
 	Strategy 1:
 	
-		1. Create graph from rodes with nodes as intersects 
+		1. Create graph from roads with nodes as intersects 
 		2. Find nodes in a graph nearest to points A, B
  		3. Find all paths within given graph, from A to B
  		4. Examine each path if it suites your search parameters

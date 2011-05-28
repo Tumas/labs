@@ -17,19 +17,19 @@ import javax.swing.JLabel;
 
 import labs.gis.AppG.GeomType;
 
+import org.geotools.feature.DefaultFeatureCollection;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.filter.text.cql2.CQLException;
-import org.geotools.graph.path.DijkstraShortestPathFinder;
+import org.geotools.graph.path.ExhaustivePathFinder;
 import org.geotools.graph.path.Path;
 import org.geotools.graph.structure.Edge;
 import org.geotools.graph.structure.basic.BasicNode;
-import org.geotools.graph.traverse.standard.DijkstraIterator;
-import org.geotools.graph.traverse.standard.DijkstraIterator.EdgeWeighter;
 import org.geotools.map.MapContext;
 import org.geotools.map.MapLayer;
 import org.geotools.swing.action.SafeAction;
 import org.opengis.feature.Feature;
+import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.filter.identity.FeatureId;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -40,6 +40,7 @@ import com.vividsolutions.jts.geom.Point;
 public class TripPlannerFrame extends JFrame {
 	private AppG parent;
 	private MapContext mapContext;
+	private TripPlannerFrame me;
 
 	// A and B points 
 	private JComboBox sourceObject = new JComboBox();
@@ -60,6 +61,7 @@ public class TripPlannerFrame extends JFrame {
 	public TripPlannerFrame(final AppG parent) throws CQLException, IOException{
 		this.parent = parent;
 		this.mapContext = parent.getFrame().getMapContext();
+		this.me = this;
 		
 		getContentPane().setLayout(new GridLayout(10, 2, 0, 5));
 		
@@ -115,67 +117,106 @@ public class TripPlannerFrame extends JFrame {
 				Feature a = parent.getSelectedFeatureByType(GeomType.POINT, "gyvenvie", "GYVVARDAS", sourceObject.getSelectedItem().toString());
 				Feature b = parent.getSelectedFeatureByType(GeomType.POINT, "gyvenvie", "GYVVARDAS", destObject.getSelectedItem().toString());
 				
-				System.out.println(a);
-				System.out.println(b);
-				
 				Coordinate ac = ((Point) a.getDefaultGeometryProperty().getValue()).getCoordinate();
 				Coordinate bc = ((Point) b.getDefaultGeometryProperty().getValue()).getCoordinate();
-				
+
 				BasicNode na = tp.nearestNode(ac);
 				BasicNode nb = tp.nearestNode(bc);
-				
-				// step 3:  Find all paths within given graph, from A to B
-				EdgeWeighter weighter = new DijkstraIterator.EdgeWeighter() {
-					@Override
-					public double getWeight(Edge e) {
-						return ((LineString) e.getObject()).getLength();
-					}
-				};
-				
-				//create the path finder
-				DijkstraShortestPathFinder pf = new DijkstraShortestPathFinder( tp.gg.getGraph(), na, weighter);
-				pf.calculate();
-				
-				// TODO: find all paths
-				
-				Path path = pf.getPath(nb);
-				System.out.println(path);
-				
-				FeatureCollection fc = parent.getSelectedObjectsByGeometry(GeomType.LINE, "keliai");
-				FeatureIterator fi = fc.features();
 
-				Set<FeatureId> pathFeatures = new HashSet<FeatureId>();
-				ArrayList<Edge> list = (ArrayList<Edge>) path.getEdges();
+				// step 3:  Find "all" paths within given graph, from A to B
 				
-				// collect ids of features in a path
-				while(fi.hasNext()){
-					Feature f = fi.next();
-					for (Edge e : list){
-						LineString ls = (LineString) e.getObject();
+				// Exhaustive strategy
+				ExhaustivePathFinder e = new ExhaustivePathFinder(1000, 100);
+				ArrayList<Path> paths = (ArrayList<Path>) e.getPaths(na, nb);
 
-						MultiLineString mls = (MultiLineString) f.getDefaultGeometryProperty().getValue();
-						
-						if (mls.equals(ls.getGeometryN(0))){
-							pathFeatures.add(f.getIdentifier());
-							break;
-						}
-					}
+				// Shortest-path strategy
+				Path path = new DijkstraPathFinder(tp.gg.getGraph()).path(na, nb); 
+				if ((path != null) && !(paths.contains(path))) {
+					System.out.println("Adding djkstra");
+					paths.add(path);
 				}
-
-				System.out.println(pathFeatures);
 				
-				fi.close();
-				MapLayer roadLayer = parent.getLayerByName("keliai");
-			    parent.displayFeatures(roadLayer, 
-			    		parent.createCustomStyle(roadLayer, parent.ff.id(pathFeatures), Color.BLUE, Color.BLUE));
+				// Stochastic strategy 
+				// TODO
 				
 				// step 4: Examine each path if it suites your search parameters
+				// TODO
+
+				// step 5: Result display:
+				if (paths.isEmpty())
+					throw new IOException("Could not find any path with given parameters. Try adjusting parameter values " +
+							"or selecting greater region.");
+				else {
+					Set<FeatureId> fset = new HashSet<FeatureId>();
+					fset.add(a.getIdentifier());
+					fset.add(b.getIdentifier());
+
+					// include all other objects : peaks and other streets
+					
+					MapLayer m = parent.getLayerByName("gyvenvie");
+					parent.displayFeatures(m, parent.createCustomStyle(m, parent.ff.id(fset), Color.RED, Color.RED));
+					new PathBrowserFrame(me, parent, paths).setVisible(true);
+				}
 			}
         }));
 		
 		pack();
 	}
+
+	public Vector<String> getObjectsList(){
+		Vector<String> v = new Vector<String>();
+		v.add("keliai");
+		v.add("gyvenvie");
+		
+		if (includePeaks.getSelectedItem().equals("Yes")) v.add("virsukalnes");
+		if (includeRivers.getSelectedItem().equals("Yes")) v.add("upes");
+		if (includeLakes.getSelectedItem().equals("Yes")) v.add("ezerai");
+			
+		return v;
+	}
 	
+	/*
+	 * O(N*N) -> SLOW!
+	 */
+	public static ArrayList<Feature> listFeaturesInPath(AppG app, Path path){
+		FeatureCollection fc = app.getSelectedObjectsByGeometry(GeomType.LINE, "keliai");
+		FeatureIterator fi = fc.features();
+
+		ArrayList<Feature> features = new ArrayList<Feature>(); 
+		ArrayList<Edge> list = (ArrayList<Edge>) path.getEdges();
+	
+		while(fi.hasNext()){
+			Feature f = fi.next();
+			for (Edge e : list){
+				LineString ls = (LineString) e.getObject();
+
+				MultiLineString mls = (MultiLineString) f.getDefaultGeometryProperty().getValue();
+				
+				if (mls.equals(ls.getGeometryN(0))){
+					features.add(f);
+					break;
+				}
+			}
+		}
+
+		fi.close();
+		return features;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static Set<FeatureId> featuresInPath(ArrayList<Feature> features){
+		Set<FeatureId> featIDs = new HashSet<FeatureId>();
+		for (Feature f : features) featIDs.add(f.getIdentifier());
+		return featIDs;
+	}
+
+	public static FeatureCollection subsetFeature(ArrayList<Feature> features, AppG app){
+		FeatureCollection fc = app.getSelectedObjectsByGeometry(GeomType.LINE, "keliai");
+		DefaultFeatureCollection newFc = new DefaultFeatureCollection(fc);
+		
+		for (Feature f : features) newFc.add((SimpleFeature) f);
+		return newFc;
+	}
 
 	private void validateOptions() throws IOException{
 		String test = null;
@@ -205,6 +246,7 @@ public class TripPlannerFrame extends JFrame {
 		return v;
 	}
 
+	@SuppressWarnings("unchecked")
 	private Vector<String> getSelectModelForObjects(GeomType type, String layerName, String id) throws IOException {
 		Vector<String> v = new Vector<String>();
 		FeatureCollection ft = parent.getSelectedObjectsByGeometry(type, layerName);
@@ -224,12 +266,4 @@ public class TripPlannerFrame extends JFrame {
 		
 		return v;
 	}
-
-//	public Vector<String> layersByType(GeomType gType) throws CQLException, IOException{
-//		Vector<String> vs = new Vector<String>();
-//
-//		for (MapLayer m : parent.activeLayers(gType))
-//			vs.add(m.getFeatureSource().getName().getLocalPart());
-//		return vs;
-//	}
 }
