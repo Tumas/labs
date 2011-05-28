@@ -38,6 +38,7 @@ public class QueryFrame extends JFrame {
 	private JTextField text;
 	private MapContext mapContext;
 	private AppG parentApplication;
+	@SuppressWarnings("unchecked")
 	private FeatureCollection featuresOnDisplay;
 	
 	public QueryFrame(AppG parentApp) {

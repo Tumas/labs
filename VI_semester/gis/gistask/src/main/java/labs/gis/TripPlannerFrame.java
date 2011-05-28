@@ -1,11 +1,12 @@
 package labs.gis;
 
-import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.Vector;
 
 import javax.swing.DefaultComboBoxModel;
@@ -13,19 +14,28 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JMenuBar;
 
 import labs.gis.AppG.GeomType;
 
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.filter.text.cql2.CQLException;
+import org.geotools.graph.path.DijkstraShortestPathFinder;
+import org.geotools.graph.path.Path;
+import org.geotools.graph.structure.Edge;
+import org.geotools.graph.structure.basic.BasicNode;
+import org.geotools.graph.traverse.standard.DijkstraIterator;
+import org.geotools.graph.traverse.standard.DijkstraIterator.EdgeWeighter;
 import org.geotools.map.MapContext;
 import org.geotools.map.MapLayer;
 import org.geotools.swing.action.SafeAction;
 import org.opengis.feature.Feature;
-import org.opengis.feature.type.PropertyDescriptor;
 import org.opengis.filter.identity.FeatureId;
+
+import com.vividsolutions.jts.geom.Coordinate;
+import com.vividsolutions.jts.geom.LineString;
+import com.vividsolutions.jts.geom.MultiLineString;
+import com.vividsolutions.jts.geom.Point;
 
 public class TripPlannerFrame extends JFrame {
 	private AppG parent;
@@ -47,7 +57,7 @@ public class TripPlannerFrame extends JFrame {
 	private JComboBox includeLakes = new JComboBox();
 	
 	@SuppressWarnings("serial")
-	public TripPlannerFrame(AppG parent) throws CQLException, IOException{
+	public TripPlannerFrame(final AppG parent) throws CQLException, IOException{
 		this.parent = parent;
 		this.mapContext = parent.getFrame().getMapContext();
 		
@@ -86,7 +96,7 @@ public class TripPlannerFrame extends JFrame {
 		getContentPane().add(new JLabel("Include peaks in a trip?"));
 		getContentPane().add(includePeaks);
 
-		getContentPane().add(new JLabel("Include rivesr in a trip?"));
+		getContentPane().add(new JLabel("Include rivers in a trip?"));
 		getContentPane().add(includeRivers);
 
 		getContentPane().add(new JLabel("Include lakes in a trip?"));
@@ -96,6 +106,70 @@ public class TripPlannerFrame extends JFrame {
 			@Override
 			public void action(ActionEvent arg0) throws Throwable {
 				validateOptions();
+				TripPlanner tp = new TripPlanner();
+				
+				// step 1 : create graph
+				tp.createGraph(parent.getSelectedObjectsByGeometry(GeomType.LINE, "keliai"));
+				
+				// step 2: find nearest nodes
+				Feature a = parent.getSelectedFeatureByType(GeomType.POINT, "gyvenvie", "GYVVARDAS", sourceObject.getSelectedItem().toString());
+				Feature b = parent.getSelectedFeatureByType(GeomType.POINT, "gyvenvie", "GYVVARDAS", destObject.getSelectedItem().toString());
+				
+				System.out.println(a);
+				System.out.println(b);
+				
+				Coordinate ac = ((Point) a.getDefaultGeometryProperty().getValue()).getCoordinate();
+				Coordinate bc = ((Point) b.getDefaultGeometryProperty().getValue()).getCoordinate();
+				
+				BasicNode na = tp.nearestNode(ac);
+				BasicNode nb = tp.nearestNode(bc);
+				
+				// step 3:  Find all paths within given graph, from A to B
+				EdgeWeighter weighter = new DijkstraIterator.EdgeWeighter() {
+					@Override
+					public double getWeight(Edge e) {
+						return ((LineString) e.getObject()).getLength();
+					}
+				};
+				
+				//create the path finder
+				DijkstraShortestPathFinder pf = new DijkstraShortestPathFinder( tp.gg.getGraph(), na, weighter);
+				pf.calculate();
+				
+				// TODO: find all paths
+				
+				Path path = pf.getPath(nb);
+				System.out.println(path);
+				
+				FeatureCollection fc = parent.getSelectedObjectsByGeometry(GeomType.LINE, "keliai");
+				FeatureIterator fi = fc.features();
+
+				Set<FeatureId> pathFeatures = new HashSet<FeatureId>();
+				ArrayList<Edge> list = (ArrayList<Edge>) path.getEdges();
+				
+				// collect ids of features in a path
+				while(fi.hasNext()){
+					Feature f = fi.next();
+					for (Edge e : list){
+						LineString ls = (LineString) e.getObject();
+
+						MultiLineString mls = (MultiLineString) f.getDefaultGeometryProperty().getValue();
+						
+						if (mls.equals(ls.getGeometryN(0))){
+							pathFeatures.add(f.getIdentifier());
+							break;
+						}
+					}
+				}
+
+				System.out.println(pathFeatures);
+				
+				fi.close();
+				MapLayer roadLayer = parent.getLayerByName("keliai");
+			    parent.displayFeatures(roadLayer, 
+			    		parent.createCustomStyle(roadLayer, parent.ff.id(pathFeatures), Color.BLUE, Color.BLUE));
+				
+				// step 4: Examine each path if it suites your search parameters
 			}
         }));
 		
@@ -140,9 +214,12 @@ public class TripPlannerFrame extends JFrame {
 			throw new IOException("Bad descriptor : " + id);
 		}
 		
-		while (iter.hasNext()) {
-			Feature feature = iter.next();
-			v.add(feature.getProperty(id).getValue().toString());
+		try {
+			while (iter.hasNext()) {
+				v.add(iter.next().getProperty(id).getValue().toString());
+			}
+		} finally {
+			iter.close();
 		}
 		
 		return v;

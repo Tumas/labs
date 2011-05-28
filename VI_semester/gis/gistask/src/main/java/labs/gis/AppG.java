@@ -28,6 +28,8 @@ import org.geotools.data.FileDataStoreFinder;
 import org.geotools.factory.CommonFactoryFinder;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
+import org.geotools.filter.text.cql2.CQL;
+import org.geotools.filter.text.cql2.CQLException;
 import org.geotools.geometry.jts.ReferencedEnvelope;
 import org.geotools.map.DefaultMapContext;
 import org.geotools.map.MapContext;
@@ -41,7 +43,6 @@ import org.geotools.styling.Stroke;
 import org.geotools.styling.Style;
 import org.geotools.styling.StyleFactory;
 import org.geotools.styling.Symbolizer;
-
 import org.geotools.swing.JMapFrame;
 import org.geotools.swing.action.SafeAction;
 import org.geotools.swing.data.JFileDataStoreChooser;
@@ -67,7 +68,7 @@ public class AppG extends JFrame
 	private JMapFrame frame;
 	private Set<FeatureId> selectedFeatures = new HashSet<FeatureId>();
 	
-    private FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
+    FilterFactory2 ff = CommonFactoryFinder.getFilterFactory2(null);
     private StyleFactory sf = CommonFactoryFinder.getStyleFactory(null);
     private AppG appG = this;
     
@@ -203,8 +204,12 @@ public class AppG extends JFrame
         preloadShapeFiles(new File[]{ 
         							  //new File("resources/shp/apskrity.shp"),
         							  new File("resources/shp/gyvenvie.shp"),
-        							  new File("resources/shp/virsukal.shp") });
-	}
+        							  //new File("resources/shp/virsukal.shp"),
+        							  new File("resources/shp/keliai.shp") 
+        							  });
+    }
+
+   
     /*
      * Get active layers by geometry type
      */
@@ -218,6 +223,21 @@ public class AppG extends JFrame
     	return mls;
     }
 
+    /*
+     * Get active layer by its name
+     */
+    public MapLayer getLayerByName(String name){
+    	for (MapLayer m : frame.getMapContext().getLayers()){
+    		if (m.isSelected() && m.isVisible() && m.getFeatureSource().getName().getLocalPart().equals(name))
+    			return m;
+    	}
+    	
+    	return null;
+    }
+    
+    /*
+     * Get selected objects by their geometry and name of a layer
+     */
     @SuppressWarnings("unchecked")
 	public FeatureCollection getSelectedObjectsByGeometry(GeomType gType, String name) {
     	FeatureCollection ft = null; 
@@ -237,7 +257,8 @@ public class AppG extends JFrame
     	return ft;
     }
     
-    protected void selectedInfo() throws IOException {
+    @SuppressWarnings("unchecked")
+	protected void selectedInfo() throws IOException {
     	ArrayList<JTable> tables = new ArrayList<JTable>();
 		
     	if (!selectedFeatures.isEmpty()){
@@ -277,21 +298,31 @@ public class AppG extends JFrame
     	
     	frame.getMapPane().repaint();
     }
+
+    // createCustomStyle(m, ff.id(IDs), Color.GREEN, Color.GREEN);
+    public void displayFeatures(MapLayer m, Style style){
+    	m.setStyle(style);
+    	frame.getMapPane().repaint();
+    }
     
-    private Style createSelectedStyle(MapLayer m, Set<FeatureId> IDs) {
-    	Rule selectedRule = createRule(m, SELECTED_LINE_COLOUR, SELECTED_COLOUR);
-    	selectedRule.setFilter(ff.id(IDs));
-    		
-        Rule otherRule = createRule(m, LINE_COLOUR, FILL_COLOUR);
+    public Style createCustomStyle(MapLayer m, Filter f, Color lineColor, Color color){
+    	Rule customRule = createRule(m, lineColor, color);
+    	customRule.setFilter(f);
+    	
+    	Rule otherRule = createRule(m, LINE_COLOUR, FILL_COLOUR);
         otherRule.setElseFilter(true);
-            
+        
         FeatureTypeStyle fts = sf.createFeatureTypeStyle();
-        fts.rules().add(selectedRule);
+        fts.rules().add(customRule);
         fts.rules().add(otherRule);
     	
         Style style = sf.createStyle();
         style.featureTypeStyles().add(fts);
         return style;
+    }
+    
+    private Style createSelectedStyle(MapLayer m, Set<FeatureId> IDs) {
+    	return createCustomStyle(m, ff.id(IDs), SELECTED_LINE_COLOUR, SELECTED_COLOUR);
     }
     
     private Rule createRule(MapLayer layer, Color outlineColor, Color fillColor) {
@@ -376,7 +407,8 @@ public class AppG extends JFrame
 		if (maxBox != null) frame.getMapPane().setDisplayArea(maxBox);
 	}
 	
-    public Set<FeatureId> selectFeatures(Point screenPos1, Point screenPos2){
+    @SuppressWarnings("unchecked")
+	public Set<FeatureId> selectFeatures(Point screenPos1, Point screenPos2){
     	Rectangle screenRect;
 
     	if (screenPos2 == null)
@@ -426,10 +458,13 @@ public class AppG extends JFrame
         return IDs;
     }
     
+	@SuppressWarnings("unchecked")
 	public void displayShapeFile(File file) throws Exception {
     	FileDataStore store = FileDataStoreFinder.getDataStore(file);
     	FeatureSource featureSource = store.getFeatureSource();
-    	CachingFeatureSource cache = new CachingFeatureSource(featureSource);
+		
+    	// TODO: 
+    	//CachingFeatureSource cache = new CachingFeatureSource(featureSource);
     	
     	map.addLayer(featureSource, null);
     }
@@ -448,5 +483,25 @@ public class AppG extends JFrame
 	
 	public Set<FeatureId> getSelectedFeatures(){
 		return selectedFeatures;
+	}
+
+	@SuppressWarnings("unchecked")
+	public Feature getSelectedFeatureByType(GeomType gType, String layerName, String key, String value) throws CQLException, IOException {
+		Feature ft = null;
+		
+    	for (MapLayer m : activeLayers(gType)){
+    		FeatureSource fs = m.getFeatureSource();
+    		if (fs.getName().getLocalPart().equals(layerName)){
+    			String query = "" + key + " = '" + value + "'";
+    			System.out.println(query);
+    			
+    			FeatureCollection fc = fs.getFeatures(CQL.toFilter(query));
+    			FeatureIterator fi = fc.features();
+    			
+    			if (fi.hasNext()) ft = fi.next();
+    			fi.close();
+    		}
+    	}
+    	return ft;
 	}
 }
