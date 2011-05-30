@@ -5,6 +5,8 @@ import Image
 import ImageFilter
 import sys
 
+from collections import deque
+
 # pritaikyti vidurkinimo, sobelio operatorius. 
 # Atlikti histogramos normalizavima
 # Atlikti atspindziu (oclusion) panaikinima.
@@ -69,12 +71,48 @@ def equalize_test(im):
     plt.show()
     im.show()
 
+def flood_fill_iterative(image_data, x, y, target_range, rep_value, max_x, max_y):
+    queue = deque()
+
+    if not within(image_data[x, y], target_range): return
+    queue.append((x, y))
+
+    while True:
+      if len(queue) == 0: break
+        
+      posx, posy = queue.popleft()
+      if within(image_data[posx, posy], target_range): 
+          wx = posx
+          ex = posx
+
+          while wx > 0 and within(image_data[wx, posy], target_range): wx -= 1
+          while ex < max_x and within(image_data[ex, posy], target_range): ex += 1
+
+          for nx in range(wx, ex): 
+              image_data[nx, posy] = rep_value
+              if posy > 0 and within(image_data[nx, posy-1], target_range): queue.append((nx, posy-1))
+              if posy < max_y-1 and within(image_data[nx, posy+1], target_range): queue.append((nx, posy+1))
+
+def within(val, ranges):
+    return val >= min(ranges) and val <= max(ranges)
+
 if __name__ == '__main__':
     im = Image.open(sys.argv[1])
+    im.show()
 
     #im = im.filter(_AVERAGE)
     #im = im.filter(_SOBELX)
-    #im = im.filter(_SOBELX)
+    #im = im.filter(_SOBELY)
 
+    #equalize_test(im)
+
+    im_data = im.load()
+
+    x = 120
+    y = 120
+
+    #x = 291
+    #y = 252
+
+    flood_fill_iterative(im.load(), x, y, [245, 255], 0, im.size[0], im.size[1]) 
     im.show()
-    equalize_test(im)
