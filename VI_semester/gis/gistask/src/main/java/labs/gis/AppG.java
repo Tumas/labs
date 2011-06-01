@@ -305,16 +305,16 @@ public class AppG extends JFrame
     	frame.getMapPane().repaint();
     }
     
-    public Style createCustomStyle(MapLayer m, Filter f, Color lineColor, Color color){
+    public Style createCustomStyle(MapLayer m, Filter f, Color lineColor, Color color, boolean specific){
     	Rule customRule = createRule(m, lineColor, color);
     	customRule.setFilter(f);
     	
     	Rule otherRule = createRule(m, LINE_COLOUR, FILL_COLOUR);
-        otherRule.setElseFilter(true);
+        if (!specific) otherRule.setElseFilter(true);
         
         FeatureTypeStyle fts = sf.createFeatureTypeStyle();
         fts.rules().add(customRule);
-        fts.rules().add(otherRule);
+        if (!specific) fts.rules().add(otherRule);
     	
         Style style = sf.createStyle();
         style.featureTypeStyles().add(fts);
@@ -322,7 +322,7 @@ public class AppG extends JFrame
     }
     
     private Style createSelectedStyle(MapLayer m, Set<FeatureId> IDs) {
-    	return createCustomStyle(m, ff.id(IDs), SELECTED_LINE_COLOUR, SELECTED_COLOUR);
+    	return createCustomStyle(m, ff.id(IDs), SELECTED_LINE_COLOUR, SELECTED_COLOUR, false);
     }
     
     private Rule createRule(MapLayer layer, Color outlineColor, Color fillColor) {

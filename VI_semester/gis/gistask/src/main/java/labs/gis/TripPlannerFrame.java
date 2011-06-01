@@ -5,6 +5,7 @@ import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
@@ -17,11 +18,9 @@ import javax.swing.JLabel;
 
 import labs.gis.AppG.GeomType;
 
-import org.geotools.feature.DefaultFeatureCollection;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.filter.text.cql2.CQLException;
-import org.geotools.graph.path.ExhaustivePathFinder;
 import org.geotools.graph.path.Path;
 import org.geotools.graph.structure.Edge;
 import org.geotools.graph.structure.basic.BasicNode;
@@ -29,7 +28,6 @@ import org.geotools.map.MapContext;
 import org.geotools.map.MapLayer;
 import org.geotools.swing.action.SafeAction;
 import org.opengis.feature.Feature;
-import org.opengis.feature.simple.SimpleFeature;
 import org.opengis.filter.identity.FeatureId;
 
 import com.vividsolutions.jts.geom.Coordinate;
@@ -57,6 +55,10 @@ public class TripPlannerFrame extends JFrame {
 	private JComboBox includeRivers = new JComboBox();
 	private JComboBox includeLakes = new JComboBox();
 	
+	//deltas
+	private int tripLengthDelta = 20;
+	private int tripBetweenDelta = 10;
+	
 	@SuppressWarnings("serial")
 	public TripPlannerFrame(final AppG parent) throws CQLException, IOException{
 		this.parent = parent;
@@ -67,10 +69,10 @@ public class TripPlannerFrame extends JFrame {
 		
 		sourceObject.setModel(new DefaultComboBoxModel(getSelectModelForObjects(GeomType.POINT, "gyvenvie", "GYVVARDAS")));
 		destObject.setModel(new DefaultComboBoxModel(getSelectModelForObjects(GeomType.POINT, "gyvenvie", "GYVVARDAS")));
-
-		tripLength.setModel(new DefaultComboBoxModel(getTripLengths(5, 1000, 20)));
-		minDayTrip.setModel(new DefaultComboBoxModel(getTripLengths(5, 100, 10)));
-		maxDayTrip.setModel(new DefaultComboBoxModel(getTripLengths(5, 100, 10)));
+		
+		tripLength.setModel(new DefaultComboBoxModel(getTripLengths(5, 1000, tripLengthDelta)));
+		minDayTrip.setModel(new DefaultComboBoxModel(getTripLengths(5, 100, tripBetweenDelta)));
+		maxDayTrip.setModel(new DefaultComboBoxModel(getTripLengths(5, 100, tripBetweenDelta)));
 		
 		sameRoute.setModel(new DefaultComboBoxModel(new Object[]{"Yes", "No"}));
 		includePeaks.setModel(new DefaultComboBoxModel(new Object[]{"Yes", "No"}));
@@ -110,6 +112,13 @@ public class TripPlannerFrame extends JFrame {
 				validateOptions();
 				TripPlanner tp = new TripPlanner();
 				
+				// TODO:
+				//	 1. scale search on exhaustive search : TODO : test on large scale
+				//   2. stochastic search implementation
+				//	 3. proper styling
+				//	 6. path length filtering against stops
+				//   7. Simple path find all without restrictions
+				
 				// step 1 : create graph
 				tp.createGraph(parent.getSelectedObjectsByGeometry(GeomType.LINE, "keliai"));
 				
@@ -124,38 +133,72 @@ public class TripPlannerFrame extends JFrame {
 				BasicNode nb = tp.nearestNode(bc);
 
 				// step 3:  Find "all" paths within given graph, from A to B
+				ArrayList<PathInfo> pathsWithInfo = null;
+				
+				// Shortest-path strategy
+				PathInfo shortest = new DijkstraPathFinder(tp.gg.getGraph()).path(na, nb);
+				
+				int requestedTotalLength = Integer.parseInt((String) tripLength.getSelectedItem());
+				Path pathToInspect = shortest.getPath();
+				
+				// IF shortest path does not exist or shortest path is too long 
+				// do not attempt any other strategies
+				if (pathToInspect == null){
+					System.out.println("Path between nodes does not exists. Try selecting wider area.");
+					throw new Exception();
+				}
+				
+				if ((shortest.getLength() / 1000) - tripLengthDelta > requestedTotalLength){
+					System.out.println("Shortest path is already to long for your journey:\n\t Shortest path: " +
+							shortest.getLength() + "\n\t You requested: " + requestedTotalLength);
+					throw new Exception();
+				} 
 				
 				// Exhaustive strategy
-				ExhaustivePathFinder e = new ExhaustivePathFinder(1000, 100);
-				ArrayList<Path> paths = (ArrayList<Path>) e.getPaths(na, nb);
-
-				// Shortest-path strategy
-				Path path = new DijkstraPathFinder(tp.gg.getGraph()).path(na, nb); 
-				if ((path != null) && !(paths.contains(path))) {
-					System.out.println("Adding djkstra");
-					paths.add(path);
-				}
+				int scale = 100;
+				if (shortest != null) scale = (int) shortest.getLength();
+				pathsWithInfo = new ExhaustivePathFinder().paths(na, nb, scale);
+				pathsWithInfo.add(shortest);
 				
 				// Stochastic strategy 
 				// TODO
 				
 				// step 4: Examine each path if it suites your search parameters
-				// TODO
-
-				// step 5: Result display:
-				if (paths.isEmpty())
-					throw new IOException("Could not find any path with given parameters. Try adjusting parameter values " +
-							"or selecting greater region.");
-				else {
-					Set<FeatureId> fset = new HashSet<FeatureId>();
-					fset.add(a.getIdentifier());
-					fset.add(b.getIdentifier());
-
-					// include all other objects : peaks and other streets
+				ArrayList<PathInfo> selectedPaths = new ArrayList<PathInfo>();
+				FeatureCollection fc = parent.getSelectedObjectsByGeometry(GeomType.POINT, "gyvenvie");
+				
+				for (PathInfo p : pathsWithInfo){
+						
+					// Total length filter
+					double actualTripLength = p.getLengthKM();
+					if ((actualTripLength < requestedTotalLength - tripLengthDelta) || (actualTripLength > requestedTotalLength + tripLengthDelta)){
+						System.out.println("path : " + p.getTitle() + " REJECTED : trip length " + p.getLength());
+						continue;
+					}
+	
+					// Filter between stops 
+					int requestedInnerMin = Integer.parseInt((String) minDayTrip.getSelectedItem());
+					int requestedInnerMax = Integer.parseInt((String) maxDayTrip.getSelectedItem());
 					
-					MapLayer m = parent.getLayerByName("gyvenvie");
-					parent.displayFeatures(m, parent.createCustomStyle(m, parent.ff.id(fset), Color.RED, Color.RED));
-					new PathBrowserFrame(me, parent, paths).setVisible(true);
+					p.updateStopsInfo(fc, 1000);
+					if (!tp.validByInnerTrips(p, requestedInnerMin, requestedInnerMax)) {
+						System.out.println("path : " + p.getTitle() + " REJECTED : because of inner trip length ");
+						continue;
+					}
+						
+					selectedPaths.add(p);
+				}
+				
+				// step 5: Result display:
+				if (pathsWithInfo == null || pathsWithInfo.isEmpty()){
+					System.out.println("Could not find any path with given parameters. Try adjusting parameter values " +
+							"or selecting greater region.");
+					throw new IOException();
+				}
+				else {
+					// include all other objects : peaks and other streets
+
+					new PathBrowserFrame(me, parent, selectedPaths, a, b).setVisible(true);
 				}
 			}
         }));
@@ -176,46 +219,50 @@ public class TripPlannerFrame extends JFrame {
 	}
 	
 	/*
-	 * O(N*N) -> SLOW!
+	 * O(N*N) 
 	 */
-	public static ArrayList<Feature> listFeaturesInPath(AppG app, Path path){
-		FeatureCollection fc = app.getSelectedObjectsByGeometry(GeomType.LINE, "keliai");
+	@SuppressWarnings("unchecked")
+	public static ArrayList<Feature> listFeaturesInPath(AppG app, PathInfo path, GeomType gType, String name){
+		FeatureCollection fc = app.getSelectedObjectsByGeometry(gType, name);
 		FeatureIterator fi = fc.features();
 
 		ArrayList<Feature> features = new ArrayList<Feature>(); 
-		ArrayList<Edge> list = (ArrayList<Edge>) path.getEdges();
-	
-		while(fi.hasNext()){
-			Feature f = fi.next();
-			for (Edge e : list){
-				LineString ls = (LineString) e.getObject();
 
-				MultiLineString mls = (MultiLineString) f.getDefaultGeometryProperty().getValue();
-				
-				if (mls.equals(ls.getGeometryN(0))){
-					features.add(f);
-					break;
+		// TODO: refactor me -> branching and hard-coded layer names >_<
+		
+		if (name.equals("keliai")){
+			// find all roads that make up the path
+			ArrayList<Edge> list = (ArrayList<Edge>) path.getPath().getEdges();
+		
+			while(fi.hasNext()){
+				Feature f = fi.next();
+				for (Edge e : list){
+					LineString ls = (LineString) e.getObject();
+					MultiLineString mls = (MultiLineString) f.getDefaultGeometryProperty().getValue();
+					if (mls.equals(ls.getGeometryN(0))){
+						features.add(f);
+						break;
+					}
 				}
 			}
+		} else if (name.equals("gyvenvie")) {
+			Collection c = path.getStopsInfo().values();
+			for (Object item : c) {
+				features.add((Feature) item);
+			}
 		}
-
+		
 		fi.close();
 		return features;
 	}
 	
-	@SuppressWarnings("unchecked")
+	/* 
+	 * remove duplicates from feature list
+	 */
 	public static Set<FeatureId> featuresInPath(ArrayList<Feature> features){
 		Set<FeatureId> featIDs = new HashSet<FeatureId>();
 		for (Feature f : features) featIDs.add(f.getIdentifier());
 		return featIDs;
-	}
-
-	public static FeatureCollection subsetFeature(ArrayList<Feature> features, AppG app){
-		FeatureCollection fc = app.getSelectedObjectsByGeometry(GeomType.LINE, "keliai");
-		DefaultFeatureCollection newFc = new DefaultFeatureCollection(fc);
-		
-		for (Feature f : features) newFc.add((SimpleFeature) f);
-		return newFc;
 	}
 
 	private void validateOptions() throws IOException{
@@ -225,8 +272,8 @@ public class TripPlannerFrame extends JFrame {
 		test = (String) sourceObject.getSelectedItem();
 		test2 = (String) destObject.getSelectedItem();
 
-		//if (test.equals(test2))
-		//	throw new IOException("Need to ");
+		if (test.equals(test2))
+			throw new IOException("Not yet supported");
 		
 		if (test.isEmpty() || test2.isEmpty())
 			throw new IOException("Empty start and/or finish points");
