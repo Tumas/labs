@@ -58,8 +58,16 @@ public class TripPlanner {
 			
 			if (ft != null){
 				int costSoFarKM = (int) (costSoFar / 1000);
-				if (costSoFarKM < min || costSoFarKM > max){
+				
+				if (costSoFarKM > max){
+					System.out.println(p.getTitle() + " : " + costSoFar);
 					return false;
+				}
+				
+				// Remove node if its too near
+				if (costSoFarKM < min){
+					p.getStopsInfo().remove(ee.getNodeB());
+					continue;
 				}
 
 				p.getStopsLengths().put(ft, costSoFar);

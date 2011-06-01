@@ -1,6 +1,5 @@
 package labs.gis;
 
-import java.awt.Color;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.io.IOException;
@@ -25,7 +24,6 @@ import org.geotools.graph.path.Path;
 import org.geotools.graph.structure.Edge;
 import org.geotools.graph.structure.basic.BasicNode;
 import org.geotools.map.MapContext;
-import org.geotools.map.MapLayer;
 import org.geotools.swing.action.SafeAction;
 import org.opengis.feature.Feature;
 import org.opengis.filter.identity.FeatureId;
@@ -94,8 +92,10 @@ public class TripPlannerFrame extends JFrame {
 		getContentPane().add(new JLabel("Maximum trip length between stops: "));
 		getContentPane().add(maxDayTrip);
 	
-		getContentPane().add(new JLabel("Take same route twice? "));
+		/*
+		getContentPane().add(new JLabel("Take the same route twice? "));
 		getContentPane().add(sameRoute);
+		*/
 		
 		getContentPane().add(new JLabel("Include peaks in a trip?"));
 		getContentPane().add(includePeaks);
@@ -113,11 +113,19 @@ public class TripPlannerFrame extends JFrame {
 				TripPlanner tp = new TripPlanner();
 				
 				// TODO:
-				//	 1. scale search on exhaustive search : TODO : test on large scale
+				// Would be NICE to have: 
 				//   2. stochastic search implementation
 				//	 3. proper styling
-				//	 6. path length filtering against stops
-				//   7. Simple path find all without restrictions
+				//	 4. caching
+
+				// CRITICAL:
+				//	 * Include Peaks, Rivers, Lakes in your journey
+				//	 * Formatting of PathBrowserFrame 
+				
+				// NEEDED:
+				//   7. Simple path find all without restrictions options
+				//	 8. Customizable Deltas for searchable objects
+				// 	 9. More accurrate FROM and TO points binding
 				
 				// step 1 : create graph
 				tp.createGraph(parent.getSelectedObjectsByGeometry(GeomType.LINE, "keliai"));
@@ -190,14 +198,12 @@ public class TripPlannerFrame extends JFrame {
 				}
 				
 				// step 5: Result display:
-				if (pathsWithInfo == null || pathsWithInfo.isEmpty()){
+				if (selectedPaths == null || selectedPaths.isEmpty()){
 					System.out.println("Could not find any path with given parameters. Try adjusting parameter values " +
 							"or selecting greater region.");
 					throw new IOException();
 				}
 				else {
-					// include all other objects : peaks and other streets
-
 					new PathBrowserFrame(me, parent, selectedPaths, a, b).setVisible(true);
 				}
 			}

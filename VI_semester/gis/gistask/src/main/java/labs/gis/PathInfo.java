@@ -83,7 +83,7 @@ public class PathInfo {
 			for (Edge e : list){
 				LineString ls = (LineString) e.getObject();
 
-				if (ls.distance(pt.getEnvelope()) < delta){
+				if (ls.distance(pt) < delta){
 					Node a = e.getNodeA();
 					Node b = e.getNodeB();
 

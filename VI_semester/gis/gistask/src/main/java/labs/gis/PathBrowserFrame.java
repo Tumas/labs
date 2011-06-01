@@ -9,10 +9,14 @@ import java.util.ArrayList;
 import java.util.Set;
 import java.util.Vector;
 
+import javax.swing.BoxLayout;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.table.DefaultTableModel;
 
 import labs.gis.AppG.GeomType;
 
@@ -30,6 +34,8 @@ public class PathBrowserFrame extends JFrame {
 	JComboBox pathChooser;
 	JComboBox objectsChooser;
 	JTable objectsTable; 
+	JTable stopsTable;
+	JLabel length;
 	
 	AppG app;
 	TripPlannerFrame parent;
@@ -57,24 +63,30 @@ public class PathBrowserFrame extends JFrame {
 		this.pathChooser = new JComboBox(vs);
 		this.objectsChooser = new JComboBox(parent1.getObjectsList());
 		this.objectsTable = new JTable(); 
+		this.stopsTable = new JTable();
+		this.length = new JLabel();
 		
 		if (vs.size() != 0) selectedPath(pathChooser.getSelectedIndex());
 
 		JScrollPane scrollPane = new JScrollPane(objectsTable);
+		JScrollPane scrollPane1 = new JScrollPane(stopsTable);
 
-		getContentPane().setLayout(new GridLayout(3, 1));
-		getContentPane().setPreferredSize(new Dimension(100, 50));
-
+		getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
+		getContentPane().setPreferredSize(new Dimension(200, 100));
+		
 		getContentPane().add(pathChooser);
+		getContentPane().add(length);
 		getContentPane().add(objectsChooser);
+		
 		getContentPane().add(scrollPane);
+		getContentPane().add(scrollPane1);
 
 		pathChooser.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				selectedPath = selectedPath(pathChooser.getSelectedIndex());
-				System.out.println("SELECTED PATH is now " + selectedPath.getTitle());
-				// set table to roads
+				updateTableWithRoads();
+				updateTableWithStopsInfo();
 			}
 		});
 		
@@ -85,34 +97,58 @@ public class PathBrowserFrame extends JFrame {
 				MapLayer objectsLayer = app.getLayerByName(selectedType);
 
 				if (selectedPath != null){
-
 					if (selectedType.equals("gyvenvie")){
-						ArrayList<Feature> feats = TripPlannerFrame.listFeaturesInPath(app, selectedPath, GeomType.POINT, "gyvenvie");
-						Set<FeatureId> pathFeatures = TripPlannerFrame.featuresInPath(feats);
-
-						feats.add(0, from);
-						feats.add(to);
-
-						pathFeatures.add(from.getIdentifier());
-						pathFeatures.add(to.getIdentifier());
-						
-						app.displayFeatures(objectsLayer, 
-					    		app.createCustomStyle(objectsLayer, app.ff.id(pathFeatures), Color.RED, Color.RED, false));
-
-						updateFeaturesTable("stoteles", feats);
-						
+						updateTableWithStops(objectsLayer);
 					} else if (selectedType.equals("keliai")) {
-						ArrayList<Feature> feats = TripPlannerFrame.listFeaturesInPath(app, selectedPath, GeomType.LINE, "keliai");
-						
-						updateFeaturesTable("keliai", feats);
+						updateTableWithRoads();
 					}
 				}
 			}
 		});
 		
+		updateTableWithRoads();
+		updateTableWithStopsInfo();
 		pack();
 	}
 	
+	private void updateTableWithStopsInfo() {
+		String[][] data = new String[selectedPath.getStopsLengths().size()][2];
+		
+		int index = 0;
+		for (Object key : selectedPath.getStopsLengths().keySet()){
+			data[index][0] = ((Feature) key).getProperty("GYVVARDAS").getValue().toString();
+			data[index++][1] = selectedPath.getStopsLengths().get(key).toString();
+		}
+		
+		stopsTable.setModel(new DefaultTableModel(data, new String[]{"GYVVARDAS", "Atstumas"}));
+		this.length.setText("Trip length: " + selectedPath.getLength() + " ( " + selectedPath.getLengthKM() + " Km)");
+	}
+
+	/* Update table with specifc layer information */
+	private void updateTableWithStops(MapLayer objectsLayer){
+		ArrayList<Feature> feats = TripPlannerFrame.listFeaturesInPath(app, selectedPath, GeomType.POINT, "gyvenvie");
+		Set<FeatureId> pathFeatures = TripPlannerFrame.featuresInPath(feats);
+
+		feats.add(0, from);
+		feats.add(to);
+
+		pathFeatures.add(from.getIdentifier());
+		pathFeatures.add(to.getIdentifier());
+		
+		app.displayFeatures(objectsLayer, 
+	    		app.createCustomStyle(objectsLayer, app.ff.id(pathFeatures), Color.RED, Color.RED, false));
+
+		updateFeaturesTable("stoteles", feats);
+	}
+	
+	private void updateTableWithRoads(){
+		ArrayList<Feature> feats = TripPlannerFrame.listFeaturesInPath(app, selectedPath, GeomType.LINE, "keliai");
+		updateFeaturesTable("keliai", feats);
+	}
+	
+	/*
+	 * Update table with feature information from features collection
+	 */
 	@SuppressWarnings("unchecked")
 	private void updateFeaturesTable(String title, ArrayList<Feature> feats){
 		if (feats.isEmpty()) return; 
@@ -122,7 +158,10 @@ public class PathBrowserFrame extends JFrame {
 
 		setFeatureCollectionTableModel(objectsTable, fc);
 	}
-	
+
+	/*
+	 * Action to perform on selecting pathInfo object. 
+	 */
 	public PathInfo selectedPath(int index){
 		PathInfo path = paths.get(index);
 		ArrayList<Feature> feats = TripPlannerFrame.listFeaturesInPath(app, path, GeomType.LINE, "keliai");
