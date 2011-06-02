@@ -101,6 +101,10 @@ public class PathBrowserFrame extends JFrame {
 						updateTableWithStops(objectsLayer);
 					} else if (selectedType.equals("keliai")) {
 						updateTableWithRoads();
+					} else if (selectedType.equals("virsukal")){
+						updateTableWithPeaks(objectsLayer);
+					} else if (selectedType.equals("ezerai")){
+						updateTableWithLakes(objectsLayer);
 					}
 				}
 			}
@@ -112,9 +116,6 @@ public class PathBrowserFrame extends JFrame {
 	}
 	
 	private void updateTableWithStopsInfo() {
-		System.out.println(selectedPath.getStops().size());
-		System.out.println(selectedPath.getStopsInfo().size());
-		
 		String[][] data = new String[selectedPath.getStops().size()][3];
 		
 		int index = 0;
@@ -150,6 +151,26 @@ public class PathBrowserFrame extends JFrame {
 		updateFeaturesTable("keliai", feats);
 	}
 	
+	private void updateTableWithPeaks(MapLayer objectsLayer){
+		ArrayList<Feature> feats = TripPlannerFrame.listFeaturesInPath(app, selectedPath, GeomType.POINT, "virsukal");
+		Set<FeatureId> pathFeatures = TripPlannerFrame.featuresInPath(feats);
+
+		app.displayFeatures(objectsLayer, 
+	    		app.createCustomStyle(objectsLayer, app.ff.id(pathFeatures), Color.GREEN, Color.GREEN, false));
+
+		updateFeaturesTable("virsukal", feats);
+	}
+	
+	private void updateTableWithLakes(MapLayer objectsLayer){
+		ArrayList<Feature> feats = TripPlannerFrame.listFeaturesInPath(app, selectedPath, GeomType.POLYGON, "ezerai");
+		Set<FeatureId> pathFeatures = TripPlannerFrame.featuresInPath(feats);
+
+		app.displayFeatures(objectsLayer, 
+	    		app.createCustomStyle(objectsLayer, app.ff.id(pathFeatures), Color.BLUE, Color.BLUE, false));
+
+		updateFeaturesTable("ezerai", feats);
+	}
+	
 	/*
 	 * Update table with feature information from features collection
 	 */
@@ -157,7 +178,7 @@ public class PathBrowserFrame extends JFrame {
 	private void updateFeaturesTable(String title, ArrayList<Feature> feats){
 		if (feats.isEmpty()) return; 
 		
-		FeatureCollection fc = new DefaultFeatureCollection("keliai", (SimpleFeatureType) feats.get(0).getType());
+		FeatureCollection fc = new DefaultFeatureCollection(title, (SimpleFeatureType) feats.get(0).getType());
 		fc.addAll(feats);
 
 		setFeatureCollectionTableModel(objectsTable, fc);

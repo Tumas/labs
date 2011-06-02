@@ -31,7 +31,9 @@ import org.opengis.filter.identity.FeatureId;
 import com.vividsolutions.jts.geom.Coordinate;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
+import com.vividsolutions.jts.geom.MultiPolygon;
 import com.vividsolutions.jts.geom.Point;
+import com.vividsolutions.jts.geom.Polygon;
 
 public class TripPlannerFrame extends JFrame {
 	private AppG parent;
@@ -57,7 +59,12 @@ public class TripPlannerFrame extends JFrame {
 	private int tripLengthDelta = 20;
 	private int tripBetweenDelta = 10;
 	
+	public static int peaksDelta = 1000;
+	public static int lakesDelta = 1000;
+	
+	// no Constraint
 	private String noConstraints = "All";
+	
 	
 	@SuppressWarnings("serial")
 	public TripPlannerFrame(final AppG parent) throws CQLException, IOException{
@@ -125,7 +132,6 @@ public class TripPlannerFrame extends JFrame {
 
 				// CRITICAL:
 				//	 * Include Peaks, Rivers, Lakes in your journey
-				//	 * Stops info should include both A and B points
 				
 				// NEEDED:
 				//	 8. Customizable Deltas for searchable objects
@@ -230,14 +236,15 @@ public class TripPlannerFrame extends JFrame {
 		v.add("keliai");
 		v.add("gyvenvie");
 		
-		if (includePeaks.getSelectedItem().equals("Yes")) v.add("virsukalnes");
-		if (includeRivers.getSelectedItem().equals("Yes")) v.add("upes");
+		if (includePeaks.getSelectedItem().equals("Yes")) v.add("virsukal");
+		//if (includeRivers.getSelectedItem().equals("Yes")) v.add("upes");
 		if (includeLakes.getSelectedItem().equals("Yes")) v.add("ezerai");
 			
 		return v;
 	}
 	
 	/*
+	 * Find features interesting features near the path : Features "factory"
 	 * O(N*N) 
 	 */
 	@SuppressWarnings("unchecked")
@@ -268,6 +275,42 @@ public class TripPlannerFrame extends JFrame {
 			Collection c = path.getStopsInfo().values();
 			for (Object item : c) {
 				features.add((Feature) item);
+			}
+		} else if (name.equals("virsukal")){
+		
+			ArrayList<Edge> list = (ArrayList<Edge>) path.getPath().getEdges();
+			
+			while(fi.hasNext()){
+				Feature f = fi.next();
+				for (Edge e : list){
+					// Edge line
+					LineString ls = (LineString) e.getObject();
+					// Point of the peak
+					Point mls = (Point) f.getDefaultGeometryProperty().getValue();
+					
+					if (ls.distance(mls) < peaksDelta){
+						features.add(f);
+						break;
+					}
+				}
+			}
+		
+		} else if (name.equals("ezerai")){
+		
+			ArrayList<Edge> list = (ArrayList<Edge>) path.getPath().getEdges();
+			
+			while(fi.hasNext()){
+				Feature f = fi.next();
+				for (Edge e : list){
+					// Edge line
+					LineString ls = (LineString) e.getObject();
+					MultiPolygon mls = (MultiPolygon) f.getDefaultGeometryProperty().getValue();
+					
+					if (ls.distance(mls) < lakesDelta){
+						features.add(f);
+						break;
+					}
+				}
 			}
 		}
 		

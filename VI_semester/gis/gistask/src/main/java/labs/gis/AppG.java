@@ -202,9 +202,9 @@ public class AppG extends JFrame
         frame.setVisible(true);
         
         preloadShapeFiles(new File[]{ 
-        							  //new File("resources/shp/apskrity.shp"),
+        							  new File("resources/shp/ezerai.shp"),
         							  new File("resources/shp/gyvenvie.shp"),
-        							  //new File("resources/shp/virsukal.shp"),
+        							  new File("resources/shp/virsukal.shp"),
         							  new File("resources/shp/keliai.shp") 
         							  });
     }
