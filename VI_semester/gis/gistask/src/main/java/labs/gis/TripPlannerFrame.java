@@ -107,7 +107,6 @@ public class TripPlannerFrame extends JFrame {
 		/*
 		getContentPane().add(new JLabel("Take the same route twice? "));
 		getContentPane().add(sameRoute);
-		*/
 		
 		getContentPane().add(new JLabel("Include peaks in a trip?"));
 		getContentPane().add(includePeaks);
@@ -117,6 +116,8 @@ public class TripPlannerFrame extends JFrame {
 
 		getContentPane().add(new JLabel("Include lakes in a trip?"));
 		getContentPane().add(includeLakes);
+
+		*/
 		
 		getContentPane().add(new JButton(new SafeAction("Find Trips") {
 			@Override
@@ -131,11 +132,13 @@ public class TripPlannerFrame extends JFrame {
 				//	 4. caching
 
 				// CRITICAL:
-				//	 * Include Peaks, Rivers, Lakes in your journey
+				//	 * Include Rivers in your journey
 				
 				// NEEDED:
 				//	 8. Customizable Deltas for searchable objects
 				// 	 9. More accurrate FROM and TO points binding
+				//   * Refactoring not use hardoced shape file names 
+				//   * Refactor to method findLines(), findPolygons()
 				
 				// step 1 : create graph
 				tp.createGraph(parent.getSelectedObjectsByGeometry(GeomType.LINE, "keliai"));
@@ -235,11 +238,9 @@ public class TripPlannerFrame extends JFrame {
 		Vector<String> v = new Vector<String>();
 		v.add("keliai");
 		v.add("gyvenvie");
-		
-		if (includePeaks.getSelectedItem().equals("Yes")) v.add("virsukal");
-		//if (includeRivers.getSelectedItem().equals("Yes")) v.add("upes");
-		if (includeLakes.getSelectedItem().equals("Yes")) v.add("ezerai");
-			
+		v.add("virsukal");
+		v.add("ezerai");
+
 		return v;
 	}
 	

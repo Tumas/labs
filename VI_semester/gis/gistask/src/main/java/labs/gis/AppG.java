@@ -115,7 +115,6 @@ public class AppG extends JFrame
 			
 			if (!(p1.x == p2.x && p1.y == p2.y)){
 				selectedFeatures = selectFeatures(p1, p2);
-				System.out.println(selectedFeatures);
 				displayFeatures(selectedFeatures);
 			}
 		}
@@ -493,7 +492,6 @@ public class AppG extends JFrame
     		FeatureSource fs = m.getFeatureSource();
     		if (fs.getName().getLocalPart().equals(layerName)){
     			String query = "" + key + " = '" + value + "'";
-    			System.out.println(query);
     			
     			FeatureCollection fc = fs.getFeatures(CQL.toFilter(query));
     			FeatureIterator fi = fc.features();
