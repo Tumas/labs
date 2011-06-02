@@ -13,8 +13,8 @@ public class CommandProcessor {
 	}
 	
 	public void execute(Command cmd) {
-		commandStack.push(cmd);
 		cmd.execute();
+		commandStack.push(cmd);
 		
 		if (currentDepth == stackDepth)
 			commandStack.removeLast();
