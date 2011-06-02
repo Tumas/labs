@@ -112,15 +112,19 @@ public class PathBrowserFrame extends JFrame {
 	}
 	
 	private void updateTableWithStopsInfo() {
-		String[][] data = new String[selectedPath.getStopsLengths().size()][2];
+		System.out.println(selectedPath.getStops().size());
+		System.out.println(selectedPath.getStopsInfo().size());
+		
+		String[][] data = new String[selectedPath.getStops().size()][3];
 		
 		int index = 0;
-		for (Object key : selectedPath.getStopsLengths().keySet()){
-			data[index][0] = ((Feature) key).getProperty("GYVVARDAS").getValue().toString();
-			data[index++][1] = selectedPath.getStopsLengths().get(key).toString();
+		for (StopInformation st : selectedPath.getStops()){
+			data[index][0] = ((Feature) st.getFrom()).getProperty("GYVVARDAS").getValue().toString();
+			data[index][1] = ((Feature) st.getDestination()).getProperty("GYVVARDAS").getValue().toString();
+			data[index++][2] = st.getDistance().toString();
 		}
 		
-		stopsTable.setModel(new DefaultTableModel(data, new String[]{"GYVVARDAS", "Atstumas"}));
+		stopsTable.setModel(new DefaultTableModel(data, new String[]{"GYVVARDAS", "GYVVARDAS", "Atstumas"}));
 		this.length.setText("Trip length: " + selectedPath.getLength() + " ( " + selectedPath.getLengthKM() + " Km)");
 	}
 

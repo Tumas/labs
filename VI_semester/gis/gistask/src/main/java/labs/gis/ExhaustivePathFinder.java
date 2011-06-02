@@ -10,7 +10,7 @@ import com.vividsolutions.jts.geom.LineString;
 
 public class ExhaustivePathFinder {
 	public ArrayList<PathInfo> paths(BasicNode source, BasicNode dest, int scale){
-		org.geotools.graph.path.ExhaustivePathFinder ep = new org.geotools.graph.path.ExhaustivePathFinder(scale * 30, scale * 10);
+		org.geotools.graph.path.ExhaustivePathFinder ep = new org.geotools.graph.path.ExhaustivePathFinder(1000, 100);
 
 		ArrayList<PathInfo> pathsWithInfo = new ArrayList<PathInfo>();
 		int index = 0;

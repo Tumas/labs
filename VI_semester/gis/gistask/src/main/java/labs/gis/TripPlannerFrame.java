@@ -148,7 +148,7 @@ public class TripPlannerFrame extends JFrame {
 				ArrayList<PathInfo> pathsWithInfo = null;
 				
 				// Shortest-path strategy
-				PathInfo shortest = new DijkstraPathFinder(tp.gg.getGraph()).path(na, nb);
+				PathInfo shortest = new DijkstraPathFinder(tp.gg.getGraph()).path(nb, na);
 				
 				String val = (String) tripLength.getSelectedItem();
 				int requestedTotalLength = val.equals(noConstraints) ? -1 : Integer.parseInt(val);
@@ -186,8 +186,6 @@ public class TripPlannerFrame extends JFrame {
 						
 					// Total length filter
 					double actualTripLength = p.getLengthKM();
-					System.out.println(requestedTotalLength);
-					
 					if ((requestedTotalLength != -1) && ((actualTripLength < requestedTotalLength - tripLengthDelta) 
 							|| (actualTripLength > requestedTotalLength + tripLengthDelta))){
 						System.out.println("path : " + p.getTitle() + " REJECTED : trip length " + p.getLength());
@@ -201,10 +199,10 @@ public class TripPlannerFrame extends JFrame {
 					p.updateStopsInfo(fc, 1000);
 					if (requestedTotalLength == -1) {
 						requestedInnerMax = Integer.MAX_VALUE;
-						requestedInnerMin = 0;
+						requestedInnerMin = Integer.MIN_VALUE;
 					}
 					
-					if (!tp.validByInnerTrips(p, requestedInnerMin, requestedInnerMax)) {
+					if (!tp.validByInnerTrips(p, requestedInnerMin, requestedInnerMax, a, b)) {
 						System.out.println("path : " + p.getTitle() + " REJECTED : because of inner trip length ");
 						continue;
 					}

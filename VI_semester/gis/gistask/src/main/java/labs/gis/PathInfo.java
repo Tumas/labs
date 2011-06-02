@@ -19,7 +19,7 @@ public class PathInfo {
 	private double length;
 	private String title = "";
 	private Map stopsInfo = new Hashtable<Node, Feature>();
-	private Map stopsLengths = new Hashtable<Feature, Double>();
+	private ArrayList<StopInformation> stops = new ArrayList<StopInformation>();
 	
 	public PathInfo(Path p, double length, String title){
 		this(p, length);
@@ -87,6 +87,7 @@ public class PathInfo {
 					Node a = e.getNodeA();
 					Node b = e.getNodeB();
 
+					// distance from city to each of the nodes
 					double dista = pt.getCoordinate().distance( ((Point) a.getObject()).getCoordinate()); 
 					double distb = pt.getCoordinate().distance( ((Point) b.getObject()).getCoordinate());
 					
@@ -101,8 +102,10 @@ public class PathInfo {
 						dist = distb;
 					}
 
-					getStopsInfo().put(shortest, f);
-					break;
+					if (getStopsInfo().get(shortest) == null) {
+						getStopsInfo().put(shortest, f);
+						break;
+					}
 				}
 			}
 		}
@@ -110,11 +113,11 @@ public class PathInfo {
 		fi.close();
 	}
 
-	public void setStopsLengths(Map stopsLengths) {
-		this.stopsLengths = stopsLengths;
+	public void setStops(ArrayList<StopInformation> stops) {
+		this.stops = stops;
 	}
 
-	public Map getStopsLengths() {
-		return stopsLengths;
+	public ArrayList<StopInformation> getStops() {
+		return stops;
 	}
 }

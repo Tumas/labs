@@ -1,19 +1,17 @@
 package labs.gis;
 
-import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
-import org.geotools.graph.build.feature.FeatureGraphGenerator;
 import org.geotools.graph.build.line.LineStringGraphGenerator;
 import org.geotools.graph.structure.Edge;
 import org.geotools.graph.structure.Node;
-import org.geotools.graph.structure.basic.BasicEdge;
 import org.geotools.graph.structure.basic.BasicNode;
 import org.opengis.feature.Feature;
 
 import com.vividsolutions.jts.geom.Coordinate;
-import com.vividsolutions.jts.geom.CoordinateFilter;
 import com.vividsolutions.jts.geom.LineString;
 import com.vividsolutions.jts.geom.MultiLineString;
 import com.vividsolutions.jts.geom.Point;
@@ -47,36 +45,41 @@ public class TripPlanner {
 	}
 
 	@SuppressWarnings("unchecked")
-	public boolean validByInnerTrips(PathInfo p, int min, int max){
+	public boolean validByInnerTrips(PathInfo p, int min, int max, Feature from, Feature to){
 		double costSoFar = 0;
+		
+		Feature prev = from;
 		
 		for (Object e : p.getPath().getEdges()){
 			Edge ee = (Edge) e;
 			
-			Feature ft = (Feature) p.getStopsInfo().get(ee.getNodeB());
+			Node node = ee.getNodeB();
+			Feature ft = (Feature) p.getStopsInfo().get(node);
 			costSoFar += ((LineString) ee.getObject()).getLength();
 			
 			if (ft != null){
 				int costSoFarKM = (int) (costSoFar / 1000);
 				
 				if (costSoFarKM > max){
-					System.out.println(p.getTitle() + " : " + costSoFar);
 					return false;
 				}
 				
 				// Remove node if its too near
 				if (costSoFarKM < min){
-					p.getStopsInfo().remove(ee.getNodeB());
+					p.getStopsInfo().remove(node);
 					continue;
 				}
 
-				p.getStopsLengths().put(ft, costSoFar);
+				p.getStops().add(new StopInformation(prev, ft, costSoFar));
+				prev = ft;
 				costSoFar = 0;
 			}
 		}
 		
+		p.getStops().add(new StopInformation(prev, to, costSoFar));
 		return true;
 	}
+
 	
 	/*
 	 *  Find node nearest to the given coordinate.
