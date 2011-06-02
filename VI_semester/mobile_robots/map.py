@@ -42,6 +42,7 @@ class Map:
             raise Exception("Map should contain only one finish position")
         self.finish_pos = self.__find_pos(self.tokens['finish'])
 
+
     def random_pos(self, termination = True):
         ''' Return random valid position in a map. If termination is True, 
             termination position could be returned.

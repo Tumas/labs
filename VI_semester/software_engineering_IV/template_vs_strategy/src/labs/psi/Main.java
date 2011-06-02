@@ -1,6 +1,6 @@
 package labs.psi;
 
-import labs.psi.strategy.EP;
+import labs.psi.strategy.EV;
 import labs.psi.strategy.GA;
 import labs.psi.template.EP8QueensPopulation;
 import labs.psi.template.GA8QueensPopulation;
@@ -18,17 +18,17 @@ public class Main {
 		
 		/* Template variant */
 
-		labs.psi.template.Population pop;
-		pop = new GA8QueensPopulation(population_size, children, isMutated, isRecombined);
+		//labs.psi.template.Population pop;
+		//pop = new GA8QueensPopulation(population_size, children, isMutated, isRecombined);
 		//pop = new EP8QueensPopulation(population_size, children, isMutated, isRecombined);
-		pop.evolve(max_generations, solutionsCount);
+		//pop.evolve(max_generations, solutionsCount);
 
 		/* Strategy variant */
 
 		labs.psi.strategy.Population pop2;
 		pop2 = new labs.psi.strategy.EightQueensPopulation(new GA(), population_size, children, isMutated, isRecombined);
-		pop2 = new labs.psi.strategy.EightQueensPopulation(new EP(), population_size, children, isMutated, isRecombined);
+		//pop2 = new labs.psi.strategy.EightQueensPopulation(new EV(), population_size, children, isMutated, isRecombined);
 		
-		//pop2.evolve(max_generations, solutionsCount);
+		pop2.evolve(max_generations, solutionsCount);
 	}
 }

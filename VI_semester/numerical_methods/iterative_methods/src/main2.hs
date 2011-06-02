@@ -23,7 +23,7 @@ main = do
   putStrLn $ reprM Main.av
   a <- getLine
   b <- getLine
-  putStrLn $ formatEigenTrace $ solveE Main.av [1, 1, 1, 1] (read a) (read b) iterations epsilon
+  putStrLn $ formatEigenTrace $ solveE Main.av [1, 0, 0, 0] (read a) (read b) iterations epsilon
   return ()
 
 plotPolys l sc from to = G.plotFuncs options (G.linearScale sc (from, to)) $ fyx : funks

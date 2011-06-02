@@ -4,7 +4,7 @@ import Zeidel
 import ConjugentGradient
 import Data.List(zip4)
 
-epsilon = 0.0001
+epsilon = 0.0000001
 iterations = 1000
 
 -- simple test suite
@@ -43,4 +43,3 @@ showSolutionTrace' i = do
         traceInfo = foldr (\(n, s, er, res) acc -> (acc ++ "\n" ++ (show n) ++ ": " ++ (show s) ++ " #Er: " ++ (show er) ++ "\tR: " ++ (show res))) "" info
         info      = zip4 [traceLen-1, traceLen-2 ..] trace' (IterativeMethod.traceErrors i) (traceResiduals' i)
         trace' = IterativeMethod.trace i
-

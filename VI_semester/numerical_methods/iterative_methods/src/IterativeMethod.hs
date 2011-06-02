@@ -32,4 +32,3 @@ instance IterativeMethod C.CGradient where
 traceResiduals' :: IterativeMethod i => i -> Vector
 traceResiduals' im = foldr (\v acc -> (residual v) : acc) [] $ trace im
     where residual xx = maximum $ subtract' (multiply' (a im) xx) (b im) 
-

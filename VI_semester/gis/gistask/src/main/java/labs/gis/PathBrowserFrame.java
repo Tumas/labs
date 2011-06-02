@@ -72,7 +72,7 @@ public class PathBrowserFrame extends JFrame {
 		JScrollPane scrollPane1 = new JScrollPane(stopsTable);
 
 		getContentPane().setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
-		getContentPane().setPreferredSize(new Dimension(200, 100));
+		//getContentPane().setPreferredSize(new Dimension(200, 100));
 		
 		getContentPane().add(pathChooser);
 		getContentPane().add(length);

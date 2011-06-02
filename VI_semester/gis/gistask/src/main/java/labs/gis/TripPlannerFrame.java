@@ -57,6 +57,8 @@ public class TripPlannerFrame extends JFrame {
 	private int tripLengthDelta = 20;
 	private int tripBetweenDelta = 10;
 	
+	private String noConstraints = "All";
+	
 	@SuppressWarnings("serial")
 	public TripPlannerFrame(final AppG parent) throws CQLException, IOException{
 		this.parent = parent;
@@ -67,8 +69,11 @@ public class TripPlannerFrame extends JFrame {
 		
 		sourceObject.setModel(new DefaultComboBoxModel(getSelectModelForObjects(GeomType.POINT, "gyvenvie", "GYVVARDAS")));
 		destObject.setModel(new DefaultComboBoxModel(getSelectModelForObjects(GeomType.POINT, "gyvenvie", "GYVVARDAS")));
+	
+		Vector<String> vs = getTripLengths(5, 1000, tripLengthDelta);
+		vs.add(0,  noConstraints);
 		
-		tripLength.setModel(new DefaultComboBoxModel(getTripLengths(5, 1000, tripLengthDelta)));
+		tripLength.setModel(new DefaultComboBoxModel(vs));
 		minDayTrip.setModel(new DefaultComboBoxModel(getTripLengths(5, 100, tripBetweenDelta)));
 		maxDayTrip.setModel(new DefaultComboBoxModel(getTripLengths(5, 100, tripBetweenDelta)));
 		
@@ -120,10 +125,9 @@ public class TripPlannerFrame extends JFrame {
 
 				// CRITICAL:
 				//	 * Include Peaks, Rivers, Lakes in your journey
-				//	 * Formatting of PathBrowserFrame 
+				//	 * Stops info should include both A and B points
 				
 				// NEEDED:
-				//   7. Simple path find all without restrictions options
 				//	 8. Customizable Deltas for searchable objects
 				// 	 9. More accurrate FROM and TO points binding
 				
@@ -146,22 +150,25 @@ public class TripPlannerFrame extends JFrame {
 				// Shortest-path strategy
 				PathInfo shortest = new DijkstraPathFinder(tp.gg.getGraph()).path(na, nb);
 				
-				int requestedTotalLength = Integer.parseInt((String) tripLength.getSelectedItem());
+				String val = (String) tripLength.getSelectedItem();
+				int requestedTotalLength = val.equals(noConstraints) ? -1 : Integer.parseInt(val);
 				Path pathToInspect = shortest.getPath();
 				
-				// IF shortest path does not exist or shortest path is too long 
-				// do not attempt any other strategies
-				if (pathToInspect == null){
-					System.out.println("Path between nodes does not exists. Try selecting wider area.");
-					throw new Exception();
+				if (requestedTotalLength != -1){
+					// IF shortest path does not exist or shortest path is too long 
+					// do not attempt any other strategies
+					if (pathToInspect == null){
+						System.out.println("Path between nodes does not exists. Try selecting wider area.");
+						throw new Exception();
+					}
+
+					if ((shortest.getLength() / 1000) - tripLengthDelta > requestedTotalLength){
+						System.out.println("Shortest path is already to long for your journey:\n\t Shortest path: " +
+								shortest.getLength() + "\n\t You requested: " + requestedTotalLength);
+						throw new Exception();
+					} 
 				}
-				
-				if ((shortest.getLength() / 1000) - tripLengthDelta > requestedTotalLength){
-					System.out.println("Shortest path is already to long for your journey:\n\t Shortest path: " +
-							shortest.getLength() + "\n\t You requested: " + requestedTotalLength);
-					throw new Exception();
-				} 
-				
+
 				// Exhaustive strategy
 				int scale = 100;
 				if (shortest != null) scale = (int) shortest.getLength();
@@ -179,7 +186,10 @@ public class TripPlannerFrame extends JFrame {
 						
 					// Total length filter
 					double actualTripLength = p.getLengthKM();
-					if ((actualTripLength < requestedTotalLength - tripLengthDelta) || (actualTripLength > requestedTotalLength + tripLengthDelta)){
+					System.out.println(requestedTotalLength);
+					
+					if ((requestedTotalLength != -1) && ((actualTripLength < requestedTotalLength - tripLengthDelta) 
+							|| (actualTripLength > requestedTotalLength + tripLengthDelta))){
 						System.out.println("path : " + p.getTitle() + " REJECTED : trip length " + p.getLength());
 						continue;
 					}
@@ -189,6 +199,11 @@ public class TripPlannerFrame extends JFrame {
 					int requestedInnerMax = Integer.parseInt((String) maxDayTrip.getSelectedItem());
 					
 					p.updateStopsInfo(fc, 1000);
+					if (requestedTotalLength == -1) {
+						requestedInnerMax = Integer.MAX_VALUE;
+						requestedInnerMin = 0;
+					}
+					
 					if (!tp.validByInnerTrips(p, requestedInnerMin, requestedInnerMax)) {
 						System.out.println("path : " + p.getTitle() + " REJECTED : because of inner trip length ");
 						continue;
