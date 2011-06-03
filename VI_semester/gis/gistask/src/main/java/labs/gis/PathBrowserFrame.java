@@ -85,6 +85,12 @@ public class PathBrowserFrame extends JFrame {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				selectedPath = selectedPath(pathChooser.getSelectedIndex());
+				
+				// redisplay: path data
+				//updateTableWithPeaks(app.getLayerByName("virsukal"));
+				//updateTableWithLakes(app.getLayerByName("ezerai"));
+				//updateTableWithStops(app.getLayerByName("gyvenvie"));
+				
 				updateTableWithRoads();
 				updateTableWithStopsInfo();
 			}

@@ -76,7 +76,7 @@ public class TripPlanner {
 			}
 		}
 		
-		p.getStops().add(new StopInformation(prev, to, costSoFar));
+		if (costSoFar != 0) p.getStops().add(new StopInformation(prev, to, costSoFar));
 		return true;
 	}
 
