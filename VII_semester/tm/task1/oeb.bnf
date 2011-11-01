@@ -1,0 +1,57 @@
+<Dokumentas> ::= <XMLVersija> <DOCTYPE> <PaketoAprašas>
+<XMLVersija> ::= '<?xml version=' <AR> '?>'
+<DOCTYPE>    ::= '<!DOCTYPE package PUBLIC' <AR> '>'
+
+<PaketoAprašas> ::= '<package unique-identifier=' <AR> '>' <MetaAprašas> <ManifestAprašas> <SpineAprašas> <GuideAprašas> '</package>'
+
+<ManifestAprašas> ::= <ManifestPradžia> <ItemAprašas> <ManifestPabaiga>
+<ManifestPradžia> ::= '<manifest>'
+<ManifestPabaiga> ::= '</manifest>' | <ItemAprašas> <ManifestPabaiga>
+<ItemAprašas>     ::= <ItemPradžia> <ItemAtr> <ItemPabaiga> 
+<ItemPradžia>     ::= '<item'
+<ItemPabaiga>     ::= '/>' | <ItemAtr> <ItemPabaiga> 
+<ItemAtr>         ::= <ItemAtributas> '=' <AR>
+<ItemAtributas>   ::= 'id' | 'href' | 'media-type' 
+
+<SpineAprašas> ::= <SpinePradžia> <ItemRefAprašas> <SpinePabaiga>
+<SpinePradžia> ::= '<spine>'
+<SpinePabaiga> ::= '</spine>' | <ItemRefAprašas> <SpinePabaiga>
+<ItemRefAprašas> ::= '<itemref idref=' <AR> '/>' 
+
+<GuideAprašas> ::= <GuidePradžia> <RefAprašas> <GuidePabaiga>
+<GuidePradžia> ::= '<guide>'
+<GuidePabaiga> ::= '</guide>' | <RefAprašas> <GuidePabaiga>
+<RefAprašas> ::= '<reference type=' <AR> 'title=' <AR> 'href=' <AR> '/>'
+<RefPradžia> ::= '<refrence'
+<RefPabaiga> ::= '/>' | <RefAtr> <RefPabaiga>
+<RefAtr>     ::= <RefAtributas> '=' <AR>
+<RefAtributas> ::= 'type' | 'title' | 'href'
+
+<MetaAprašas> ::= <MetaPradzia> <DCPradžia> <MetaInformacija> <DCPabaiga> <MetaPabaiga>
+<MetaPradzia> ::= '<metadata>'
+<MetaPabaiga> ::= '</metadata>'
+<DCZymesPradzia> ::= '<dc:' 
+<DCPradžia> ::= <dc-metadata>
+<DCPabaiga> ::= '</dc-metadata>'
+<DCZyme> ::= <DCS> | <DCIdentifier> | <DCCreator>
+
+<MetaInformacija> ::= <DCZyme> | <MetaInfoPabaiga>
+<MetaInfoPabaiga> ::= '' | <DCZyme> <MetaInfoPabaiga>
+
+# elements
+<DCS> ::= <DCZymesPradzia> <DCSElement> '>' <Tekstas> <DCZymesPabaiga>
+<DCIdentifier> ::= <DCZymesPradzia> 'Identifier id=' <AR> '>' <Textas> '</dc:Identifier>'
+
+<DCCreator> ::= <DCZymesPradzia> 'Creator' <DCEND> <Textas> '</dc:Creator>'
+<DCEND> ::= '>' | <DCCAtr> '>' | <DCCAtr> <DCCAtr> '>'
+<DCCAtr> ::= <DCCAtributas> '=' <AR>
+<DCCAtributas> ::= 'role' | 'file-as'
+
+<DCSElement> ::= 'Title' | 'Type' | 'Contributor' | 'Subject' | 'Description' | 'Publisher' | 'Type' | 'Format' | 'Source' | 'Language' | 'Relation' | 'Coverage' | 'Rights'
+<DCElement> ::= 'Identifier' |  'Creator' | 'Date' 
+
+# Atributo reiškmė
+<AR> ::= '"' <Tekstas> '"'
+
+<Tekstas> ::= <Simbolis> | <Simbolis> <Tekstas>
+<Simbolis> ::= {bet koks simbolis}
