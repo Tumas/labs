@@ -10,7 +10,7 @@
 <ItemAprašas>     ::= <ItemPradžia> <ItemAtr> <ItemPabaiga> 
 <ItemPradžia>     ::= '<item'
 <ItemPabaiga>     ::= '/>' | <ItemAtr> <ItemPabaiga> 
-<ItemAtr>         ::= <ItemAtributas> '=' <AR>
+<ItemAtr>         ::= <ItemAtributas> '=' <AR> 
 <ItemAtributas>   ::= 'id' | 'href' | 'media-type' 
 
 <SpineAprašas> ::= <SpinePradžia> <ItemRefAprašas> <SpinePabaiga>
