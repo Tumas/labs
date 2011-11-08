@@ -1,57 +1,48 @@
-<Dokumentas> ::= <XMLVersija> <DOCTYPE> <PaketoAprašas>
-<XMLVersija> ::= '<?xml version=' <AR> '?>'
-<DOCTYPE>    ::= '<!DOCTYPE package PUBLIC' <AR> '>'
+<OEB> ::= <XMLVerion> <DOCTYPE> <Package>
+<XMLVersion> ::= '<?xml version=' <AttributeVal> '?>'
+<DOCTYPE>    ::= '<!DOCTYPE package PUBLIC' <AttributeVal> '>'
 
-<PaketoAprašas> ::= '<package unique-identifier=' <AR> '>' <MetaAprašas> <ManifestAprašas> <SpineAprašas> <GuideAprašas> '</package>'
+# package : order?
+<Package>          ::= '<package' <PackageAttribute> '>' <MetaData> <ManifestTag> <SpineTag> <GuideTag> '</package>'
+<PackageAttribute> ::= 'unique-identifier=' <AttributeVal>
 
-<ManifestAprašas> ::= <ManifestPradžia> <ItemAprašas> <ManifestPabaiga>
-<ManifestPradžia> ::= '<manifest>'
-<ManifestPabaiga> ::= '</manifest>' | <ItemAprašas> <ManifestPabaiga>
-<ItemAprašas>     ::= <ItemPradžia> <ItemAtr> <ItemPabaiga> 
-<ItemPradžia>     ::= '<item'
-<ItemPabaiga>     ::= '/>' | <ItemAtr> <ItemPabaiga> 
-<ItemAtr>         ::= <ItemAtributas> '=' <AR> 
-<ItemAtributas>   ::= 'id' | 'href' | 'media-type' 
+# MetaData
+<MetaData>        ::= '<metadata>' <DCMetaTag> '</metadata>'
+<DCMetaTag>       ::= '<dc-metadata' <DCMetaAttribute> '>' <DC> '</dc-metadata>'
+<DCMetaAttribute> ::= (xmls:dc|xmlns:oebpackage) '=' <AttributeVal> | <DCMetaAttribute> 
+<DC>              ::= <DCIdTag> | <DCCreatorTag> | <DCContributorTag> | <DCTag> | <DCDateTag> | <DC> |
 
-<SpineAprašas> ::= <SpinePradžia> <ItemRefAprašas> <SpinePabaiga>
-<SpinePradžia> ::= '<spine>'
-<SpinePabaiga> ::= '</spine>' | <ItemRefAprašas> <SpinePabaiga>
-<ItemRefAprašas> ::= '<itemref idref=' <AR> '/>' 
+# DC Tags 
+<DCIdTag>       ::= '<dc:Identifier' <DCIdAttribute> '>' <Text> '</dc:Identifier>'
+<DCIdAttribute> ::= (id|scheme) '=' <AttributeVal> <DCIdAttribute> |  
 
-<GuideAprašas> ::= <GuidePradžia> <RefAprašas> <GuidePabaiga>
-<GuidePradžia> ::= '<guide>'
-<GuidePabaiga> ::= '</guide>' | <RefAprašas> <GuidePabaiga>
-<RefAprašas> ::= '<reference type=' <AR> 'title=' <AR> 'href=' <AR> '/>'
-<RefPradžia> ::= '<refrence'
-<RefPabaiga> ::= '/>' | <RefAtr> <RefPabaiga>
-<RefAtr>     ::= <RefAtributas> '=' <AR>
-<RefAtributas> ::= 'type' | 'title' | 'href'
+<DCCreatorTag>       ::= '<dc:Creator' <DCCreatorAttribute> '>' <Text> '</dc:Creator>'
+<DCContributorTag>   ::= '<dc:Contributor' <DCCreatorAttribute> '>' <Text> '</dc:Contributor>'
+<DCCreatorAttribute> ::=  (role|file-as) '=' <AttributeVal> <DCCreatorAttribute> | 
 
-<MetaAprašas> ::= <MetaPradzia> <DCPradžia> <MetaInformacija> <DCPabaiga> <MetaPabaiga>
-<MetaPradzia> ::= '<metadata>'
-<MetaPabaiga> ::= '</metadata>'
-<DCZymesPradzia> ::= '<dc:' 
-<DCPradžia> ::= <dc-metadata>
-<DCPabaiga> ::= '</dc-metadata>'
-<DCZyme> ::= <DCS> | <DCIdentifier> | <DCCreator>
+<DCTag>   ::= '<dc:' <DCTitle>  '>' <Text> '</dc:' <DCTitle> '>'
+<DCTitle> ::= Subject | Description | Publisher | Type | Format | Source | Coverage | Rights | Language | Relation
 
-<MetaInformacija> ::= <DCZyme> | <MetaInfoPabaiga>
-<MetaInfoPabaiga> ::= '' | <DCZyme> <MetaInfoPabaiga>
+<DCDateTag>       ::= '<dc:Date' <DCDateAttribute> '>' <Text> '</dc:Date>'
+<DCDateAttribute> ::= 'event=' <AttributeVal> |  
 
-# elements
-<DCS> ::= <DCZymesPradzia> <DCSElement> '>' <Tekstas> <DCZymesPabaiga>
-<DCIdentifier> ::= <DCZymesPradzia> 'Identifier id=' <AR> '>' <Textas> '</dc:Identifier>'
+# Manifest
+<ManifestTag>   ::= '<manifest>' <ItemTag> '</manifest>'
+<ItemTag>       ::= '<item' <ItemAttribute> '/>' 
+<ItemAttribute> ::= (id|href|media-type) '=' <AttributeVal> <ItemAttribute> |  
 
-<DCCreator> ::= <DCZymesPradzia> 'Creator' <DCEND> <Textas> '</dc:Creator>'
-<DCEND> ::= '>' | <DCCAtr> '>' | <DCCAtr> <DCCAtr> '>'
-<DCCAtr> ::= <DCCAtributas> '=' <AR>
-<DCCAtributas> ::= 'role' | 'file-as'
+# Spine
+<SpineTag>         ::= '<spine>' <ItemRefTag> '</spine>'
+<ItemRefTag>       ::= '<itemref' <ItemRefAttribute> '/>' <ItemRefTag> | 
+<ItemRefAttribute> ::=  'idref=' <AttributeVal>
 
-<DCSElement> ::= 'Title' | 'Type' | 'Contributor' | 'Subject' | 'Description' | 'Publisher' | 'Type' | 'Format' | 'Source' | 'Language' | 'Relation' | 'Coverage' | 'Rights'
-<DCElement> ::= 'Identifier' |  'Creator' | 'Date' 
+# Guide
+<GuideTag>           ::= '<guide>' <ReferenceTag> '</guide>'
+<ReferenceTag>       ::= '<reference' <ReferenceAttribute> '/>' <ReferenceTag> | 
+<ReferenceAttribute> ::= (type|title|href) '=' <AttributeVal> <ReferenceAttribute> |
 
-# Atributo reiškmė
-<AR> ::= '"' <Tekstas> '"'
+<AttributeVal> ::= '"' <AttributeText> '"'
+<AttributeText> ::= <Text> - '"'
 
-<Tekstas> ::= <Simbolis> | <Simbolis> <Tekstas>
-<Simbolis> ::= {bet koks simbolis}
+<Text> ::= <Printable> | <Printable> <Text>
+<Printable> ::= {Bet koks spausdinamas simbolis}
