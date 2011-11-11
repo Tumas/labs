@@ -1,0 +1,58 @@
+<?xml version="1.0" ?>
+<!DOCTYPE package PUBLIC "+//ISBN 0-9673008-1-9//DTD OEB 1.0 Package//EN" "oebpkg1.dtd">
+<package unique-identifier="uid">
+	<metadata>
+		<dc-metadata xmlns:dc="http://purl.org/dc/elements/1.0/" xmlns:oebpackage="http://openebook.org/namespaces/oeb-package/1.0/">
+			<dc:Identifier id="uid">261F1B8C-6C81-11D3-8BFC-0050E4009B2F</dc:Identifier>
+			<dc:Title>Open eBook Publication Structure 1.0</dc:Title>
+			<dc:Type>text</dc:Type>
+			<dc:Creator file-as="Open eBook Authoring Group, The">The Open eBook Authoring Group</dc:Creator>
+			<dc:Creator role="aut">Victor McCrary</dc:Creator>
+			<dc:Creator role="aut">Jeff Alger</dc:Creator>
+			<dc:Creator role="aut">Garth Conboy</dc:Creator>
+			<dc:Creator role="aut">Horace Dediu</dc:Creator>
+			<dc:Creator role="aut">Steve DeRose</dc:Creator>
+			<dc:Creator role="aut">Brady Duga</dc:Creator>
+			<dc:Creator role="aut">Jerry Dunietz</dc:Creator>
+			<dc:Creator role="aut">David Goldstein</dc:Creator>
+			<dc:Creator role="aut">Gene Golovchinsky</dc:Creator>
+			<dc:Creator role="aut">Markku Hakkinen</dc:Creator>
+			<dc:Creator role="aut">Gunter Hille</dc:Creator>
+			<dc:Creator role="aut">Kate Hughes</dc:Creator>
+			<dc:Creator role="aut">George Kerscher</dc:Creator>
+			<dc:Creator role="aut">Steve Kotrch</dc:Creator>
+			<dc:Creator role="aut">Brian Lambert</dc:Creator>
+			<dc:Creator role="aut">Jon Noring</dc:Creator>
+			<dc:Creator role="aut">Aleksey Novicov</dc:Creator>
+			<dc:Creator role="aut">David Ornstein</dc:Creator>
+			<dc:Creator role="aut">Dhiren Patel</dc:Creator>
+			<dc:Creator role="aut">Steve Potash</dc:Creator>
+			<dc:Creator role="aut">Allen Renear</dc:Creator>
+			<dc:Creator role="aut">Mike Riley</dc:Creator>
+			<dc:Creator role="aut">Ben Trafford</dc:Creator>
+			<dc:Creator role="aut">John Voiklis</dc:Creator>
+			<dc:Creator role="aut">Garret Wilson</dc:Creator>
+
+			<dc:Contributor>Adobe</dc:Contributor>
+			<dc:Contributor>EAST Co., Ltd</dc:Contributor>
+			<dc:Contributor>IBM</dc:Contributor>
+			<dc:Contributor>Librius</dc:Contributor>
+                        <dc:Contributor>Vadem</dc:Contributor>
+
+		</dc-metadata>
+	</metadata>
+	
+	<manifest>
+		<item id="spec" href="oeb1.html" media-type="text/x-oeb1-document" />
+	</manifest>
+	
+	<spine>
+		<itemref idref="spec" />
+	</spine>
+	
+	<guide>
+		<reference type="toc" title="Table of Contents" href="oeb1.html#toc" />
+		<reference type="glossary" title="Definitions" href="oeb1.html#glos" />
+	</guide>
+</package>
+

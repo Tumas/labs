@@ -1,3 +1,6 @@
+LEX=flex
+CC=gcc
+
 lex.yy.c: oeb.l
 	lex oeb.l
 
