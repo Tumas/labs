@@ -1,3 +1,4 @@
+/* Tumas Bajoras, PS3. Transliavimo metodai 2011 m. rudens semestras */
 %{
 
 #include <stdio.h>

@@ -713,14 +713,15 @@ int yy_flex_debug = 0;
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
 #line 1 "oeb.l"
-#line 2 "oeb.l"
+/* Tumas Bajoras, PS3. Transliavimo metodai 2011 m. rudens semestras */
+#line 3 "oeb.l"
 
 #include <stdio.h>
 
 
 /* general tags */
 /* metadata info */
-#line 724 "lex.yy.c"
+#line 725 "lex.yy.c"
 
 #define INITIAL 0
 #define ATTRIBUTES 1
@@ -910,10 +911,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
     
-#line 23 "oeb.l"
+#line 24 "oeb.l"
 
 
-#line 917 "lex.yy.c"
+#line 918 "lex.yy.c"
 
 	if ( !(yy_init) )
 		{
@@ -998,119 +999,119 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 26 "oeb.l"
+#line 27 "oeb.l"
 { printf("LESS\n"); }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 27 "oeb.l"
+#line 28 "oeb.l"
 { printf("MORE\n"); }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 29 "oeb.l"
+#line 30 "oeb.l"
 { printf("XML opening: %s\n", yytext); BEGIN ATTRIBUTES ; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 30 "oeb.l"
+#line 31 "oeb.l"
 { printf("DOCTYPE declaration: %s\n", yytext); BEGIN ATTRIBUTES ; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 32 "oeb.l"
+#line 33 "oeb.l"
 { printf("DC tag: %s\n", yytext); BEGIN ATTRIBUTES ; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 33 "oeb.l"
+#line 34 "oeb.l"
 { printf("Tag: %s\n", yytext); BEGIN ATTRIBUTES ; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 35 "oeb.l"
+#line 36 "oeb.l"
 { printf("DC closing tag: %s\n", yytext); }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 36 "oeb.l"
+#line 37 "oeb.l"
 { printf("Closing tag: %s\n", yytext); }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 37 "oeb.l"
+#line 38 "oeb.l"
 
 	YY_BREAK
 
 
 case 10:
 YY_RULE_SETUP
-#line 41 "oeb.l"
+#line 42 "oeb.l"
 { printf("LESS\n"); BEGIN INITIAL ; }
 	YY_BREAK
 case 11:
 /* rule 11 can match eol */
 YY_RULE_SETUP
-#line 42 "oeb.l"
+#line 43 "oeb.l"
 { printf("Tag value: %s\n", yytext); }
 	YY_BREAK
 
 
 case 12:
 YY_RULE_SETUP
-#line 46 "oeb.l"
+#line 47 "oeb.l"
 { printf("Equality: %s\n", yytext); }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 47 "oeb.l"
+#line 48 "oeb.l"
 { printf("Quote: %s\n", yytext); BEGIN ATTRVAL ; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 49 "oeb.l"
+#line 50 "oeb.l"
 { printf("Attribute: %s\n", yytext); }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 50 "oeb.l"
+#line 51 "oeb.l"
 { printf("DC attribute: %s\n", yytext); }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 52 "oeb.l"
+#line 53 "oeb.l"
 { printf("Inline closing tag: %s\n", yytext); BEGIN INITIAL ; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 53 "oeb.l"
+#line 54 "oeb.l"
 { printf("MORE\n"); BEGIN TAGVAL ; } 
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 54 "oeb.l"
+#line 55 "oeb.l"
 
 	YY_BREAK
 
 
 case 19:
 YY_RULE_SETUP
-#line 58 "oeb.l"
+#line 59 "oeb.l"
 { printf("Quote: %s\n", yytext); BEGIN ATTRIBUTES ; }
 	YY_BREAK
 case 20:
 /* rule 20 can match eol */
 YY_RULE_SETUP
-#line 59 "oeb.l"
+#line 60 "oeb.l"
 { printf("Attribute value: %s\n", yytext); }
 	YY_BREAK
 
 case 21:
 YY_RULE_SETUP
-#line 62 "oeb.l"
+#line 63 "oeb.l"
 ECHO;
 	YY_BREAK
-#line 1114 "lex.yy.c"
+#line 1115 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(ATTRIBUTES):
 case YY_STATE_EOF(ATTRVAL):
@@ -2111,7 +2112,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 62 "oeb.l"
+#line 63 "oeb.l"
 
 
 

@@ -1,9 +1,10 @@
+/* Tumas Bajoras, PS3. Transliavimo metodai 2011 m. rudens semestras */
+
 <OEB> ::= <XMLVerion> <DOCTYPE> <Package>
 <XMLVersion> ::= '<?xml version=' <AttributeVal> '?>'
 <DOCTYPE>    ::= '<!DOCTYPE package PUBLIC' <AttributeVal> '>'
 
-# package : order?
-<Package>          ::= '<package' <PackageAttribute> '>' <MetaData> <ManifestTag> <SpineTag> <GuideTag> '</package>'
+<Package>          ::= '<package' <PackageAttribute> '>' <MetaData> <ManifestTag> <SpineTag> <GuideTag> <ToursTag> '</package>'
 <PackageAttribute> ::= 'unique-identifier=' <AttributeVal>
 
 # MetaData
@@ -40,6 +41,13 @@
 <GuideTag>           ::= '<guide>' <ReferenceTag> '</guide>'
 <ReferenceTag>       ::= '<reference' <ReferenceAttribute> '/>' <ReferenceTag> | 
 <ReferenceAttribute> ::= (type|title|href) '=' <AttributeVal> <ReferenceAttribute> |
+
+# Tours : optional
+<ToursTag> ::= '<tours>' <TourTag> '</tours>' | 
+<TourTag> ::= '<tour' <TourAttribute> '>' <SiteTag> '</tour>'
+<TourAttribute> ::= (title|id) '=' <AttributeVal> <TourAttribute> |
+<SiteTag>       ::= '<site' <SiteAttribute> '/>' <SiteTag> | 
+<SiteAttribute> ::= (href|title) '=' <AttributeVal> <SiteAttribute> |
 
 <AttributeVal> ::= '"' <AttributeText> '"'
 <AttributeText> ::= <Text> - '"'

@@ -1,3 +1,4 @@
 #!/bin/sh
+# Tumas Bajoras, PS3. Transliavimo metodai 2011 m. rudens semestras
 
-cat $1 | ./skan 
+./skan > result < Sample25.trm

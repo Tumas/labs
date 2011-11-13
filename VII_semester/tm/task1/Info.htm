@@ -9,42 +9,55 @@
     <h1>Pirmas praktinis darbas</h1>
     <p>"Transliavimo metodai" 2011 m. rudens (7) semestras. </p>
     <table>
-      <tr><td>Atliko:</td><td>Tumas Bajoras, PS 3 grupÄ—</td></tr>
+      <tr><td>Atliko:</td><td>Tumas Bajoras, PS 3 grupë</td></tr>
       <tr><td>Variantas:</td><td>102 - eBook Publication Structure</td></tr>
     </table>
 
-    <h2>UÅ¾davinys</h2>
+    <h2>Uþdavinys</h2>
     <h2>Darbo rezultatai</h2>
 
     <h3>Kalbos semantika laisva forma</h3>
     <p>
-      Open eBook Publication Structure (OEBPS) specifikacija skirta apraÅ¡yti informacijai apie elektronines knygas.
+      Open eBook Publication Structure (OEBPS) specifikacija skirta apraðyti informacijai apie elektronines knygas.
     </p>
     <p>
-      OEBS dokumentas yra atvaizduojamas XML formatu. PagrindinÄ—s sudedamosios dokumento dalys:
+    OEBS dokumentas yra atvaizduojamas XML formatu. Vienas dokumentas turi turëti tik vienà <strong>package</strong> þymæ, kurioje apraðomi dokumentai sudarantys publikacijà.  
+    </p>
+    <p>
+    <strong>Package</strong> þymæ sudaro:
+    <dl>
+      <dt>metadata þymë</dt>
+      <dd>apraðomi publikacijos meta duomenys</dd>
+
+      <dt>manifest þymë</dt>
+      <dd>apraðomas sàraðas dokumentø, sudaranèiø publikacijà</dd>
+
+      <dt>spine þymë</dt>
+      <dd>apraðoma publikacijà sudaranèiø dokumentø skaitymo tvarka</dd>
+
+      <dt>tours þymë</dt>
+      <dd>apraðomos publikacijà sudaranèiø dokumentø alternatyvios skaitymo tvarkos</dd>
+
+      <dt>guide þymë</dt>
+      <dd>apraðomos nuorodos á elementus, tokius kaip turinys, bibliografija ir pan.</dd>
+    </dl>
     </p>
 
-    <dl>
-      <dt>Package Å¾ymÄ—<dt>
-      <dd>OEBS dokumentas turi Ä¯traukti vienÄ… package Å¾ymÄ™, kuri apraÅ¡o elektroninÄ¯ leidinÄ¯.</dd>
-      <dt>Metadata Å¾ymÄ—</dt>
-      <dd>yada yada yada</dd>
-    </dl>
 
     <h3>Atlikto darbo palyginimas</h3>
     <p>
-     <!-- TODO -->
+    File <a href="oeb.bnf">oeb.bnf</a> pateiktas sintaksës apraðymas yra daug konkretesnis nei pateiktame pavyzdyje. Pavyzdyje sintaksei nëra priskiriamos þymës, kurios yra naudojamos dokumente. Taip pat, pavyzdyje trûkstà kai kuriø kairës reikðmës apibreþimø. Pvz trûktsa <em>Parametrø þodþiai</em> apibrëþimo.
     </p>
 
-    <h3>Su uÅ¾duotimi pateiktÅ³ failÅ³ sÄ…raÅ¡as</h3>
+    <h3>Su uþduotimi pateiktø failø sàraðas</h3>
     <dl>
-      <dt>Kalbos sintaksÄ— BNF forma.</dt>
+      <dt>Kalbos sintaksë BNF forma.</dt>
       <dd><a href="oeb.bnf">oeb.bnf</a></dd>
-      <dt>Kalbos vienetÅ³ apibrÄ—Å¾imas lex stiliumi</dt>
+      <dt>Kalbos vienetø apibrëþimas lex stiliumi</dt>
       <dd><a href="oeb.l">oeb.l</a></dd>
       <dt>Kalbos pavyzdys</dt>
       <dd><a href="Sample25.trm">Sample25.trm</a></dd>
-      <dt>Skanerio iÅ¡eities tesktas</dt>
+      <dt>Skanerio iðeities tesktas</dt>
       <dd><a href="lex.yy.c">lex.yy.c</a></dd>
       <dt>Makefile</dt>
       <dd><a href="Makefile">Makefile</a></dd>
@@ -55,4 +68,3 @@
     </dl>
   </body>
 </html>
-
