@@ -6,7 +6,6 @@
 extern char* yytext;
 extern int   yylineno;
 
-int  yylex(void);
 void yyerror(char*);
 
 %}
@@ -42,7 +41,7 @@ header: xml_dec DOCTYPE package
 xml_dec: XMLDEC xml_attr INLINE_CLOSE ;
 
 /* package */
-package: package_start metadata properties package_end
+package: package_start metadata properties package_end { printf("Sintaksë teisinga.\n"); } 
        ;
 
 package_start:      LESS PACKAGE_TAG package_attributes MORE ;
@@ -130,7 +129,7 @@ tag_value: MORE TAG_VALUE LESS
 %%
 
 void yyerror(char* error) {
-    printf("Error: %s; Data: %s\n", error, yytext);
+    printf("Error {%d}: %s; Data: %s\n", yylineno, error, yytext);
 }
 
 int main() {

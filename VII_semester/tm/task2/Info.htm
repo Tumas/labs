@@ -14,12 +14,45 @@
     </table>
 
     <h2>Darbo rezultatai</h2>
-    <h3>Objektin¿s kalbos analiz¿</h3>
     <p>
-      Kadangi Open eBook Publication Structure (OEBPS) formatas yra skirtas apra¿yti elektroninio leidinio strukt¿r¿, tod¿l objektine kalba yra pasirinktas kitas, elektroninius leidinius apra¿antis formatas - PDF (Portable Document Format).
+      Atliekant antrà darbà patikslintas skaneris (leksiniø vienetø apibrëþimas lex stiliumi, skanerio iðeities kodas). Dabar daugumai þymiø yra iðskiriamas atskirtas leksinis vienetas tikslesniam kalbos sintaksës tikrinimui.
     </p>
+
+    <h3>Objektinës kalbos analizë</h3>
     <p>
-    Kadangi OEBPS apra¿o tik leidinio strukt¿r¿, tod¿l transliavimo rezultatas bus PDF dokumentas su apra¿yta leidinio strukt¿ra ir tu¿¿iu turiniu. 
+      Kadangi Open eBook Publication Structure (OEBPS) formatas yra skirtas apraðyti elektroninio leidinio struktûrà, todël objektine kalba yra pasirinktas kitas, elektroninius leidinius apraðantis formatas - FictionBook. Ðis formatas taip pat yra paremtas XML.
     </p>
+
+    <h3>Yacc resultatas tinkamas panaudoti analizatoriuje</h3>
+    <p>
+      Yacc rezultatas yra tinkamas, nes jis patikrina OEB XML dokumento formatà ir sugeba surasti klaidas, egzistuojanèias klaidingai apraðytame dokumente. 
+    </p>
+
+    <h3>Atlikto darbo palyginimas</h3>
+    <p>
+      Palyginimui skirtas darbas yra labai bendras. Darbe nëra detaliai apibrëþiami leksiniai vienetai, nëra tikrinami konkretûs reikalavimai tam tikroms þymëms.
+    </p>
+
+    <h3>Su uþduotimi pateiktø failø sàraðas</h3>
+    <dl>
+      <dt>Kalbos sintaksë BNF forma.</dt>
+      <dd><a href="oeb.bnf">oeb.bnf</a></dd>
+      <dt>Kalbos vienetø apibrëþimas lex stiliumi</dt>
+      <dd><a href="oeb.l">oeb.l</a></dd>
+      <dt>Pradinæs kalbos apibrëëimas yacc stiliumi</dt>
+      <dd><a href="oeb.y">oeb.y</a></dd>
+      <dt>Kalbos pavyzdys</dt>
+      <dd><a href="Sample25.trm">Sample25.trm</a></dd>
+      <dt>Kalbos pavyzdys su klaida 10 eilutëje: neuþdaryta dc:Creator þymë</dt>
+      <dd><a href="Samplebad25.trm">Samplebad25.trm</a></dd>
+      <dt>Analizatoriaus iðeities tesktas</dt>
+      <dd><a href="y.tab.c">y.tab.c</a></dd>
+      <dt>Makefile</dt>
+      <dd><a href="Makefile">Makefile</a></dd>
+      <dt>Bash skriptas skanerio paleidimui UNIX aplinkoje</dt>
+      <dd><a href="run.sh">run.sh</a></dd>
+      <dt>Batch skriptas skanerio paleidimui DOS aplinkoje</dt>
+      <dd><a href="run.bat">run.bat</a></dd>
+    </dl>
   </body>
 </html>
